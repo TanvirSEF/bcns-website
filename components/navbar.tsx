@@ -3,7 +3,17 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, Phone, Mail, Search, ChevronDown } from "lucide-react";
+import {
+  Menu,
+  Phone,
+  Mail,
+  Search,
+  ChevronDown,
+  X,
+  MapPin,
+  Clock,
+  Globe,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +32,10 @@ import {
 
 export function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [isTopBarVisible, setIsTopBarVisible] = React.useState(true);
+  const [lastScrollY, setLastScrollY] = React.useState(0);
 
   const navigationItems = [
     { name: "Home", href: "/", isActive: true },
@@ -47,53 +61,204 @@ export function Navbar() {
         { name: "Past Presidents", href: "/committee/past-presidents" },
       ],
     },
-    { name: "Activities", href: "/activities" },
-    { name: "Research Publications", href: "/publications" },
-    { name: "Conference", href: "/conference" },
-    { name: "Gallery", href: "/gallery" },
+    {
+      name: "Activities",
+      href: "/activities",
+      hasDropdown: true,
+      dropdownItems: [
+        { name: "Research", href: "/activities/research" },
+        { name: "Conference", href: "/activities/conference" },
+        { name: "Gallery", href: "/activities/gallery" },
+      ],
+    },
     { name: "Contact us", href: "/contact" },
   ];
 
+  // Handle scroll behavior
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Show top bar when at the very top
+      if (currentScrollY <= 50) {
+        setIsTopBarVisible(true);
+        setLastScrollY(currentScrollY);
+        return;
+      }
+
+      // Hide top bar when scrolling down (after 100px)
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsTopBarVisible(false);
+      }
+      // Show top bar when scrolling up
+      else if (currentScrollY < lastScrollY) {
+        setIsTopBarVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle search functionality here
+    console.log("Searching for:", searchQuery);
+    setIsSearchOpen(false);
+    setSearchQuery("");
+  };
+
+  const handlePhoneClick = () => {
+    window.location.href = "tel:+8801711261736";
+  };
+
+  const handleEmailClick = () => {
+    window.location.href = "mailto:office@bcns.org.bd";
+  };
+
   return (
     <div className="w-full">
-      {/* Top Bar - Contact Information */}
-      <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-2 text-blue-800 hover:text-blue-900 transition-colors">
-                <Phone className="h-4 w-4" />
-                <span className="font-medium">+880 1711261736</span>
+      {/* Modern Top Bar - Contact Information & Search */}
+      <div
+        className={`bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white transition-all duration-300 ${
+          isTopBarVisible
+            ? "opacity-100 transform translate-y-0"
+            : "opacity-0 transform -translate-y-full"
+        }`}
+      >
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            {/* Contact Information */}
+            <div className="flex items-center space-x-6 lg:space-x-8">
+              {/* Phone */}
+              <button
+                onClick={handlePhoneClick}
+                className="flex items-center space-x-2 text-blue-100 hover:text-white transition-all duration-300 group"
+              >
+                <div className="p-1.5 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
+                  <Phone className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-sm font-medium hidden sm:block">
+                  +880 1711261736
+                </span>
+              </button>
+
+              {/* Email */}
+              <button
+                onClick={handleEmailClick}
+                className="flex items-center space-x-2 text-blue-100 hover:text-white transition-all duration-300 group"
+              >
+                <div className="p-1.5 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
+                  <Mail className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-sm font-medium hidden md:block">
+                  office@bcns.org.bd
+                </span>
+              </button>
+
+              {/* Location */}
+              <div className="flex items-center space-x-2 text-blue-100">
+                <div className="p-1.5 bg-blue-600/20 rounded-full">
+                  <MapPin className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-sm font-medium hidden lg:block">
+                  Dhaka, Bangladesh
+                </span>
               </div>
-              <div className="flex items-center space-x-2 text-blue-800 hover:text-blue-900 transition-colors">
-                <Mail className="h-4 w-4" />
-                <span className="font-medium">office@bcns.org.bd</span>
+
+              {/* Working Hours */}
+              <div className="flex items-center space-x-2 text-blue-100">
+                <div className="p-1.5 bg-blue-600/20 rounded-full">
+                  <Clock className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-sm font-medium hidden xl:block">
+                  Mon-Fri: 9AM-5PM
+                </span>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-blue-600 hover:text-blue-800 hover:bg-blue-200"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
+
+            {/* Search Bar */}
+            <div className="flex items-center space-x-3">
+              {isSearchOpen ? (
+                <form
+                  onSubmit={handleSearch}
+                  className="flex items-center space-x-2"
+                >
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search BCNS website..."
+                      className="w-64 lg:w-80 pl-10 pr-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full transition-all duration-300"
+                  >
+                    Search
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className="text-white hover:bg-white/10 p-2 rounded-full transition-all duration-300"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </form>
+              ) : (
+                <Button
+                  onClick={() => setIsSearchOpen(true)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-blue-100 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all duration-300"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Language Selector */}
+              <div className="flex items-center space-x-2 text-blue-100">
+                <Globe className="h-4 w-4" />
+                <select className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer">
+                  <option value="en" className="bg-slate-800 text-white">
+                    EN
+                  </option>
+                  <option value="bn" className="bg-slate-800 text-white">
+                    বাং
+                  </option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Navigation Bar */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
+      <div
+        className={`bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 w-full left-0 right-0 transition-all duration-300 ${
+          !isTopBarVisible ? "shadow-lg" : "shadow-sm"
+        }`}
+      >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-16">
             {/* Logo Section */}
             <Link href="/" className="flex items-center space-x-4 group">
               <Image
                 src="/images/logo.png"
                 alt="BCNS Logo"
-                width={100}
-                height={100}
+                width={80}
+                height={80}
                 className="group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
@@ -107,7 +272,7 @@ export function Navbar() {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className={`h-12 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 ${
+                          className={`h-10 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 ${
                             item.isActive ? "text-blue-600 bg-blue-50" : ""
                           }`}
                         >
@@ -137,7 +302,7 @@ export function Navbar() {
                   ) : (
                     <Link
                       href={item.href}
-                      className={`h-12 px-4 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 rounded-md ${
+                      className={`h-10 px-4 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 rounded-md ${
                         item.isActive ? "text-blue-600 bg-blue-50" : ""
                       }`}
                     >
@@ -147,10 +312,13 @@ export function Navbar() {
                 </div>
               ))}
 
-              {/* Membership Button */}
-              <div className="ml-6">
-                <Button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2.5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                  Membership Form
+              {/* Action Buttons */}
+              <div className="ml-6 flex items-center space-x-3">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                  Login
+                </Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                  Membership
                 </Button>
               </div>
             </nav>
@@ -239,11 +407,16 @@ export function Navbar() {
                     </div>
                   ))}
 
-                  {/* Mobile Membership Button */}
+                  {/* Mobile Action Buttons */}
                   <div className="pt-6 border-t border-gray-200">
-                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 shadow-lg">
-                      Membership Form
-                    </Button>
+                    <div className="space-y-3">
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg transition-all duration-300">
+                        Login
+                      </Button>
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg transition-all duration-300">
+                        Membership
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </SheetContent>
