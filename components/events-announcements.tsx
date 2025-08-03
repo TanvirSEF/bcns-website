@@ -9,7 +9,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 
@@ -36,72 +36,83 @@ export function EventsAnnouncements() {
     "events"
   );
 
-  // Sample data - replace with real data
+  // Sample data - replace with your actual data from a CMS or API
   const events: Event[] = [
     {
       id: "1",
       title: "Annual Pediatric Neurology Conference",
       description:
-        "Join leading experts in pediatric neurology for our annual conference featuring cutting-edge research and clinical advances.",
-      date: "2024-03-15",
+        "Join leading experts for our annual conference on cutting-edge research and clinical advances in pediatric neurology.",
+      date: "2025-09-15",
       time: "09:00 AM",
       location: "Dhaka Medical College",
       category: "Conference",
-      image: "/images/event1.png",
+      image: "/images/event1.png", // Replace with your image path
     },
     {
       id: "2",
       title: "Neurodevelopmental Disorders Workshop",
       description:
-        "Comprehensive workshop on diagnosis and treatment of neurodevelopmental disorders in children.",
-      date: "2024-03-22",
+        "A comprehensive workshop on the diagnosis and management of neurodevelopmental disorders in children.",
+      date: "2025-10-22",
       time: "02:00 PM",
       location: "BCNS Training Center",
       category: "Workshop",
-      image: "/images/event2.png",
+      image: "/images/event2.png", // Replace with your image path
     },
     {
       id: "3",
-      title: "Research Methodology Webinar",
+      title: "Advanced Research Methodology Webinar",
       description:
-        "Learn advanced research methodologies in pediatric neurology from international experts.",
-      date: "2024-03-30",
+        "Learn advanced research methodologies from international experts in this exclusive online webinar.",
+      date: "2025-11-10",
       time: "11:00 AM",
       location: "Online",
       category: "Webinar",
-      image: "/images/event3.png",
+      image: "/images/event3.png", // Replace with your image path
+    },
+    {
+      id: "4",
+      title: "Epilepsy Management Seminar",
+      description:
+        "A focused seminar on the latest treatment strategies and breakthroughs in pediatric epilepsy.",
+      date: "2025-11-28",
+      time: "10:00 AM",
+      location: "BSMMU, Dhaka",
+      category: "Seminar",
+      image: "/images/event1.png", // Replace with your image path
     },
   ];
 
   const announcements: Announcement[] = [
     {
       id: "1",
-      title: "New Research Grant Opportunities Available",
-      date: "2024-03-10",
+      title: "New Research Grant Opportunities Available for 2026",
+      date: "2025-08-01",
       link: "/announcements/research-grants",
     },
     {
       id: "2",
       title: "Updated Clinical Guidelines for Autism Spectrum Disorders",
-      date: "2024-03-08",
+      date: "2025-07-25",
       link: "/announcements/clinical-guidelines",
     },
     {
       id: "3",
-      title: "Call for Papers: Annual Journal Publication",
-      date: "2024-03-05",
+      title: "Call for Papers: Annual Journal of Pediatric Neurology",
+      date: "2025-07-18",
       link: "/announcements/call-for-papers",
     },
     {
       id: "4",
-      title: "Membership Renewal Reminder",
-      date: "2024-03-03",
+      title: "Membership Renewal for 2026 is Now Open",
+      date: "2025-07-10",
       link: "/announcements/membership-renewal",
     },
     {
       id: "5",
-      title: "International Collaboration Opportunities",
-      date: "2024-03-01",
+      title: "International Collaboration with Global Neurologists",
+      date: "2025-07-02",
       link: "/announcements/collaboration-opportunities",
     },
   ];
@@ -122,38 +133,38 @@ export function EventsAnnouncements() {
   };
 
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="container mx-auto px-4">
+    <section className="py-12 sm:py-16 bg-gray-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
             Stay Updated With Us
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
             Discover upcoming events and stay informed with our latest
-            announcements
+            announcements.
           </p>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-8 sm:mb-12">
           <div className="flex bg-white rounded-lg p-1 shadow-sm border">
             <button
               onClick={() => setActiveTab("events")}
-              className={`px-8 py-3 rounded-md font-semibold transition-all duration-300 ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-300 text-sm sm:text-base ${
                 activeTab === "events"
                   ? "bg-blue-600 text-white shadow-md"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  : "text-gray-600 hover:bg-gray-100"
               }`}
             >
               Upcoming Events
             </button>
             <button
               onClick={() => setActiveTab("announcements")}
-              className={`px-8 py-3 rounded-md font-semibold transition-all duration-300 ${
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-300 text-sm sm:text-base ${
                 activeTab === "announcements"
                   ? "bg-blue-600 text-white shadow-md"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  : "text-gray-600 hover:bg-gray-100"
               }`}
             >
               Latest Announcements
@@ -161,130 +172,120 @@ export function EventsAnnouncements() {
           </div>
         </div>
 
-        {/* Content with Fade Transition */}
+        {/* Content Area */}
         <div className="relative">
+          {/* Events View */}
           <div
-            className={`transition-all duration-500 ease-in-out ${
+            className={`transition-opacity duration-500 ease-in-out ${
               activeTab === "events"
                 ? "opacity-100"
-                : "opacity-0 absolute inset-0"
+                : "opacity-0 absolute inset-0 pointer-events-none"
             }`}
           >
-            {/* Events Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {events.map((event) => {
                 const { day, month } = formatDate(event.date);
                 return (
                   <Card
                     key={event.id}
-                    className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-white overflow-hidden flex flex-col h-full cursor-pointer"
+                    className="group bg-white overflow-hidden flex flex-col h-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer p-0"
                   >
-                    {/* Event Image */}
-                    <div className="h-48 relative overflow-hidden flex-shrink-0">
+                    {/* Event Image - No padding, image fills the top */}
+                    <div className="relative h-44 w-full">
                       <Image
                         src={event.image}
                         alt={event.title}
                         fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                       />
-                      {/* Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-
-                      {/* Date Badge */}
-                      <div className="absolute top-4 left-4 bg-white rounded-lg p-2 text-center shadow-lg backdrop-blur-sm">
-                        <div className="text-lg font-bold text-blue-600">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute top-3 left-3 bg-white rounded-md p-2 text-center shadow-lg">
+                        <div className="text-sm font-bold text-blue-600">
                           {day}
                         </div>
                         <div className="text-xs font-medium text-gray-600">
                           {month}
                         </div>
                       </div>
-
-                      {/* Category Badge */}
-                      <div className="absolute top-4 right-4">
-                        <Badge
-                          variant="secondary"
-                          className="bg-white/95 text-gray-800 font-medium px-3 py-1 backdrop-blur-sm"
-                        >
-                          {event.category}
-                        </Badge>
-                      </div>
-
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <Badge
+                        variant="secondary"
+                        className="absolute top-3 right-3 bg-white/90 text-gray-800"
+                      >
+                        {event.category}
+                      </Badge>
                     </div>
 
-                    <CardContent className="p-6 flex-1 flex flex-col">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                    {/* Card Content */}
+                    <div className="p-4 flex flex-col flex-grow">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 transition-colors group-hover:text-blue-600">
                         {event.title}
                       </h3>
-                      <p className="text-gray-600 mb-4 line-clamp-3 flex-1">
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow">
                         {event.description}
                       </p>
-
-                      {/* Event Details */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-sm text-gray-500 group-hover:text-gray-700 transition-colors">
+                      <div className="space-y-2 mb-4 text-sm text-gray-500">
+                        <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span className="truncate">{event.time}</span>
+                          <span>{event.time}</span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-500 group-hover:text-gray-700 transition-colors">
+                        <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span className="truncate">{event.location}</span>
+                          <span>{event.location}</span>
                         </div>
                       </div>
-                    </CardContent>
-
-                    <CardFooter className="p-6 pt-0 flex-shrink-0">
                       <Button
                         variant="outline"
-                        className="w-full group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300 border-gray-300 hover:border-blue-600 group-hover:shadow-md"
+                        size="sm"
+                        className="w-full mt-auto transition-all duration-300 border-gray-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600"
                       >
                         View Details
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-all duration-300" />
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                       </Button>
-                    </CardFooter>
+                    </div>
                   </Card>
                 );
               })}
             </div>
           </div>
 
+          {/* Announcements View */}
           <div
-            className={`transition-all duration-500 ease-in-out ${
+            className={`transition-opacity duration-500 ease-in-out ${
               activeTab === "announcements"
                 ? "opacity-100"
-                : "opacity-0 absolute inset-0"
+                : "opacity-0 absolute inset-0 pointer-events-none"
             }`}
           >
-            {/* Announcements List */}
             <div className="max-w-4xl mx-auto">
-              <div className="bg-white rounded-xl shadow-sm border">
+              <div className="bg-white rounded-lg shadow-sm border">
                 {announcements.map((announcement, index) => (
-                  <div
+                  <a
                     key={announcement.id}
-                    className={`p-6 hover:bg-gray-50 transition-all duration-300 cursor-pointer group ${
+                    href={announcement.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block p-4 sm:p-5 transition-colors duration-300 group hover:bg-gray-50 ${
                       index !== announcements.length - 1
-                        ? "border-b border-gray-100"
+                        ? "border-b border-gray-200"
                         : ""
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600">
                           {announcement.title}
                         </h3>
-                        <p className="text-sm text-gray-500 flex items-center group-hover:text-gray-700 transition-colors">
+                        <p className="text-xs sm:text-sm text-gray-500 flex items-center">
                           <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span className="truncate">
+                          <span>
                             {formatAnnouncementDate(announcement.date)}
                           </span>
                         </p>
                       </div>
-                      <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-blue-600 ml-4 flex-shrink-0 group-hover:scale-110 transition-all duration-300" />
+                      <ExternalLink className="h-5 w-5 text-gray-400 flex-shrink-0 transition-all duration-300 group-hover:text-blue-600 group-hover:scale-110" />
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>

@@ -51,7 +51,7 @@ export function CoreActivities() {
   ];
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-10 lg:py-20 overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
         <div
@@ -67,11 +67,11 @@ export function CoreActivities() {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+        <div className="text-center mb-10 md:mb-16">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
             Our Core Pillars
           </h2>
-          <p className="text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
             Advancing pediatric neurology through comprehensive guidelines,
             research, education, and peer-reviewed publications
           </p>
@@ -82,21 +82,21 @@ export function CoreActivities() {
           {coreActivities.map((activity) => (
             <div key={activity.id} className="group relative">
               {/* Glassmorphism Panel */}
-              <div className="relative h-full p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-500 hover:bg-white/20 hover:border-white/40 hover:scale-105">
+              <div className="relative h-full p-5 md:p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-500 hover:bg-white/20 hover:border-white/40 hover:scale-105">
                 {/* Icon */}
-                <div className="flex justify-center mb-6">
-                  <div className="p-4 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 md:p-4 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
                     <div className="text-white">{activity.icon}</div>
                   </div>
                 </div>
 
                 {/* Title */}
-                <h3 className="text-2xl font-bold text-white text-center mb-4 group-hover:text-white transition-colors duration-300">
+                <h3 className="text-xl sm:text-2xl font-bold text-white text-center mb-3">
                   {activity.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-gray-200 text-center mb-6 leading-relaxed">
+                <p className="text-base text-gray-200 text-center mb-5 leading-relaxed">
                   {activity.description}
                 </p>
 
@@ -119,13 +119,13 @@ export function CoreActivities() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-16">
-          <p className="text-gray-300 text-lg mb-4">
-            Discover how we're shaping the future of pediatric neurology
+        <div className="text-center mt-10 md:mt-16">
+          <p className="text-base md:text-lg text-gray-300 mb-4">
+            Discover how we&apos;re shaping the future of pediatric neurology
           </p>
           <a
             href="/about"
-            className="inline-flex items-center px-8 py-4 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-white font-semibold hover:bg-white/30 hover:border-white/50 transition-all duration-300 group"
+            className="inline-flex items-center px-6 py-3 md:px-8 md:py-4 text-sm sm:text-base bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-white font-semibold hover:bg-white/30 hover:border-white/50 transition-all duration-300 group"
           >
             Learn More About Our Mission
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />

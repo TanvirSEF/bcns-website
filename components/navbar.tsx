@@ -128,118 +128,116 @@ export function Navbar() {
             : "opacity-0 transform -translate-y-full"
         }`}
       >
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Contact Information */}
-            <div className="flex items-center space-x-6 lg:space-x-8">
-              {/* Phone */}
-              <button
-                onClick={handlePhoneClick}
-                className="flex items-center space-x-2 text-blue-100 hover:text-white transition-all duration-300 group"
+        <div className="container mx-auto px-4 py-1.5 sm:py-2">
+          <div className="flex items-center justify-between h-8 sm:h-10">
+            {isSearchOpen ? (
+              // If search is open, render ONLY the full-width form
+              <form
+                onSubmit={handleSearch}
+                className="flex items-center space-x-2 animate-in slide-in-from-top-2 duration-300 w-full"
               >
-                <div className="p-1.5 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
-                  <Phone className="h-3.5 w-3.5" />
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search BCNS website..."
+                    className="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-1 sm:py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 text-xs sm:text-sm"
+                    autoFocus
+                  />
                 </div>
-                <span className="text-sm font-medium hidden sm:block">
-                  +880 1711261736
-                </span>
-              </button>
-
-              {/* Email */}
-              <button
-                onClick={handleEmailClick}
-                className="flex items-center space-x-2 text-blue-100 hover:text-white transition-all duration-300 group"
-              >
-                <div className="p-1.5 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
-                  <Mail className="h-3.5 w-3.5" />
-                </div>
-                <span className="text-sm font-medium hidden md:block">
-                  office@bcns.org.bd
-                </span>
-              </button>
-
-              {/* Location */}
-              <div className="flex items-center space-x-2 text-blue-100">
-                <div className="p-1.5 bg-blue-600/20 rounded-full">
-                  <MapPin className="h-3.5 w-3.5" />
-                </div>
-                <span className="text-sm font-medium hidden lg:block">
-                  Dhaka, Bangladesh
-                </span>
-              </div>
-
-              {/* Working Hours */}
-              <div className="flex items-center space-x-2 text-blue-100">
-                <div className="p-1.5 bg-blue-600/20 rounded-full">
-                  <Clock className="h-3.5 w-3.5" />
-                </div>
-                <span className="text-sm font-medium hidden xl:block">
-                  Mon-Fri: 9AM-5PM
-                </span>
-              </div>
-            </div>
-
-            {/* Search Bar */}
-            <div className="flex items-center space-x-3">
-              {isSearchOpen ? (
-                <form
-                  onSubmit={handleSearch}
-                  className="flex items-center space-x-2"
-                >
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search BCNS website..."
-                      className="w-64 lg:w-80 pl-10 pr-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full transition-all duration-300"
-                  >
-                    Search
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      setSearchQuery("");
-                    }}
-                    className="text-white hover:bg-white/10 p-2 rounded-full transition-all duration-300"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </form>
-              ) : (
                 <Button
-                  onClick={() => setIsSearchOpen(true)}
+                  type="submit"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full transition-all duration-300 text-xs"
+                >
+                  Search
+                </Button>
+                <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
-                  className="text-blue-100 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all duration-300"
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setSearchQuery("");
+                  }}
+                  className="text-white hover:bg-white/10 p-1 sm:p-1.5 rounded-full transition-all duration-300"
                 >
-                  <Search className="h-4 w-4" />
+                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Button>
-              )}
+              </form>
+            ) : (
+              // If search is closed, render the original layout
+              <>
+                {/* Contact Information */}
+                <div className="flex items-center space-x-3 sm:space-x-4 lg:space-x-6">
+                  {/* Phone */}
+                  <button
+                    onClick={handlePhoneClick}
+                    className="flex items-center space-x-1.5 sm:space-x-2 text-blue-100 hover:text-white transition-all duration-300 group"
+                  >
+                    <div className="p-0.5 sm:p-1 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
+                      <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                    </div>
+                    <span className="text-xs font-medium">+880 1711261736</span>
+                  </button>
 
-              {/* Language Selector */}
-              <div className="flex items-center space-x-2 text-blue-100">
-                <Globe className="h-4 w-4" />
-                <select className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer">
-                  <option value="en" className="bg-slate-800 text-white">
-                    EN
-                  </option>
-                  <option value="bn" className="bg-slate-800 text-white">
-                    বাং
-                  </option>
-                </select>
-              </div>
-            </div>
+                  {/* Email */}
+                  <button
+                    onClick={handleEmailClick}
+                    className="flex items-center space-x-1.5 sm:space-x-2 text-blue-100 hover:text-white transition-all duration-300 group"
+                  >
+                    <div className="p-0.5 sm:p-1 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
+                      <Mail className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                    </div>
+                    <span className="text-xs font-medium">
+                      office@bcns.org.bd
+                    </span>
+                  </button>
+
+                  {/* Location - Hidden on small screens */}
+                  <div className="hidden md:flex items-center space-x-2 text-blue-100">
+                    <div className="p-1 bg-blue-600/20 rounded-full">
+                      <MapPin className="h-3 w-3" />
+                    </div>
+                    <span className="text-xs font-medium">Dhaka, Bangladesh</span>
+                  </div>
+
+                  {/* Working Hours - Hidden on medium screens */}
+                  <div className="hidden lg:flex items-center space-x-2 text-blue-100">
+                    <div className="p-1 bg-blue-600/20 rounded-full">
+                      <Clock className="h-3 w-3" />
+                    </div>
+                    <span className="text-xs font-medium">Mon-Fri: 9AM-5PM</span>
+                  </div>
+                </div>
+
+                {/* Right side items: Search Icon + Language */}
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <Button
+                    onClick={() => setIsSearchOpen(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-blue-100 hover:text-white hover:bg-white/10 p-1 sm:p-1.5 rounded-full transition-all duration-300"
+                  >
+                    <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </Button>
+
+                  <div className="hidden sm:flex items-center space-x-2 text-blue-100">
+                    <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <select className="bg-transparent text-xs font-medium focus:outline-none cursor-pointer">
+                      <option value="en" className="bg-slate-800 text-white">
+                        EN
+                      </option>
+                      <option value="bn" className="bg-slate-800 text-white">
+                        বাং
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -251,9 +249,12 @@ export function Navbar() {
         }`}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo Section */}
-            <Link href="/" className="flex items-center space-x-4 group">
+            <Link
+              href="/"
+              className="flex items-center space-x-2 sm:space-x-4 group"
+            >
               <Image
                 src="/images/logo.png"
                 alt="BCNS Logo"
@@ -314,10 +315,10 @@ export function Navbar() {
 
               {/* Action Buttons */}
               <div className="ml-6 flex items-center space-x-3">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 sm:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm">
                   Login
                 </Button>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 sm:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm">
                   Membership
                 </Button>
               </div>

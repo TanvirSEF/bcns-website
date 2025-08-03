@@ -3,10 +3,7 @@ import {
   Phone,
   Mail,
   MapPin,
-  Globe,
   Facebook,
-  Youtube,
-  ExternalLink,
   Linkedin,
   Twitter,
   Instagram,
@@ -15,7 +12,6 @@ import {
   Calendar,
   FileText,
   Award,
-  Heart,
 } from "lucide-react";
 import Image from "next/image";
 
