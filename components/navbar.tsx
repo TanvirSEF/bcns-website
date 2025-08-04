@@ -72,6 +72,7 @@ export function Navbar() {
       ],
     },
     { name: "Contact us", href: "/contact" },
+    { name: "Our Members", href: "/members" },
   ];
 
   // Handle scroll behavior
@@ -122,11 +123,10 @@ export function Navbar() {
     <div className="w-full overflow-hidden">
       {/* Modern Top Bar - Contact Information & Search */}
       <div
-        className={`bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white transition-all duration-300 ${
-          isTopBarVisible
+        className={`bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white transition-all duration-300 ${isTopBarVisible
             ? "opacity-100 transform translate-y-0"
             : "opacity-0 transform -translate-y-full"
-        }`}
+          }`}
       >
         <div className="container mx-auto px-4 py-1.5 sm:py-2">
           <div className="flex items-center justify-between h-8 sm:h-10">
@@ -244,9 +244,8 @@ export function Navbar() {
 
       {/* Main Navigation Bar */}
       <div
-        className={`bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 w-full transition-all duration-300 ${
-          !isTopBarVisible ? "shadow-lg" : "shadow-sm"
-        }`}
+        className={`bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 w-full transition-all duration-300 ${!isTopBarVisible ? "shadow-lg" : "shadow-sm"
+          }`}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14 sm:h-16">
@@ -273,9 +272,8 @@ export function Navbar() {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className={`h-10 px-3 lg:px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 text-sm lg:text-base ${
-                            item.isActive ? "text-blue-600 bg-blue-50" : ""
-                          }`}
+                          className={`h-10 px-3 lg:px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 text-sm lg:text-base ${item.isActive ? "text-blue-600 bg-blue-50" : ""
+                            }`}
                         >
                           {item.name}
                           <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-200" />
@@ -303,9 +301,8 @@ export function Navbar() {
                   ) : (
                     <Link
                       href={item.href}
-                      className={`h-10 px-3 lg:px-4 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 rounded-md text-sm lg:text-base ${
-                        item.isActive ? "text-blue-600 bg-blue-50" : ""
-                      }`}
+                      className={`h-10 px-3 lg:px-4 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 rounded-md text-sm lg:text-base ${item.isActive ? "text-blue-600 bg-blue-50" : ""
+                        }`}
                     >
                       {item.name}
                     </Link>
@@ -315,10 +312,10 @@ export function Navbar() {
 
               {/* Action Buttons */}
               <div className="ml-4 lg:ml-6 flex items-center space-x-2 lg:space-x-3 flex-shrink-0">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 lg:px-4 xl:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs lg:text-sm">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 lg:px-4 xl:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform text-xs lg:text-sm">
                   Login
                 </Button>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 lg:px-4 xl:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs lg:text-sm">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 lg:px-3 xl:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform text-xs lg:text-sm">
                   Membership
                 </Button>
               </div>
@@ -397,9 +394,8 @@ export function Navbar() {
                       ) : (
                         <Link
                           href={item.href}
-                          className={`block w-full text-left px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md font-medium transition-colors ${
-                            item.isActive ? "text-blue-600 bg-blue-50" : ""
-                          }`}
+                          className={`block w-full text-left px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md font-medium transition-colors ${item.isActive ? "text-blue-600 bg-blue-50" : ""
+                            }`}
                           onClick={() => setIsOpen(false)}
                         >
                           {item.name}
@@ -411,10 +407,10 @@ export function Navbar() {
                   {/* Mobile Action Buttons */}
                   <div className="pt-6 border-t border-gray-200">
                     <div className="space-y-3">
-                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg transition-all duration-300">
+                      <Button type="button" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg">
                         Login
                       </Button>
-                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg transition-all duration-300">
+                      <Button type="button" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 shadow-lg">
                         Membership
                       </Button>
                     </div>
