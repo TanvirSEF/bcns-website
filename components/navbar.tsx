@@ -119,7 +119,7 @@ export function Navbar() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-hidden">
       {/* Modern Top Bar - Contact Information & Search */}
       <div
         className={`bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white transition-all duration-300 ${
@@ -171,33 +171,33 @@ export function Navbar() {
               // If search is closed, render the original layout
               <>
                 {/* Contact Information */}
-                <div className="flex items-center space-x-3 sm:space-x-4 lg:space-x-6">
+                <div className="flex items-center space-x-3 sm:space-x-4 lg:space-x-6 overflow-hidden">
                   {/* Phone */}
                   <button
                     onClick={handlePhoneClick}
-                    className="flex items-center space-x-1.5 sm:space-x-2 text-blue-100 hover:text-white transition-all duration-300 group"
+                    className="flex items-center space-x-1.5 sm:space-x-2 text-blue-100 hover:text-white transition-all duration-300 group flex-shrink-0"
                   >
                     <div className="p-0.5 sm:p-1 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
                       <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                     </div>
-                    <span className="text-xs font-medium">+880 1711261736</span>
+                    <span className="text-xs font-medium hidden sm:inline">+880 1711261736</span>
+                    <span className="text-xs font-medium sm:hidden">+880 1711261736</span>
                   </button>
 
                   {/* Email */}
                   <button
                     onClick={handleEmailClick}
-                    className="flex items-center space-x-1.5 sm:space-x-2 text-blue-100 hover:text-white transition-all duration-300 group"
+                    className="flex items-center space-x-1.5 sm:space-x-2 text-blue-100 hover:text-white transition-all duration-300 group flex-shrink-0"
                   >
                     <div className="p-0.5 sm:p-1 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
                       <Mail className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                     </div>
-                    <span className="text-xs font-medium">
-                      office@bcns.org.bd
-                    </span>
+                    <span className="text-xs font-medium hidden lg:inline">office@bcns.org.bd</span>
+                    <span className="text-xs font-medium lg:hidden">office@bcns.org.bd</span>
                   </button>
 
                   {/* Location - Hidden on small screens */}
-                  <div className="hidden md:flex items-center space-x-2 text-blue-100">
+                  <div className="hidden md:flex items-center space-x-2 text-blue-100 flex-shrink-0">
                     <div className="p-1 bg-blue-600/20 rounded-full">
                       <MapPin className="h-3 w-3" />
                     </div>
@@ -205,7 +205,7 @@ export function Navbar() {
                   </div>
 
                   {/* Working Hours - Hidden on medium screens */}
-                  <div className="hidden lg:flex items-center space-x-2 text-blue-100">
+                  <div className="hidden lg:flex items-center space-x-2 text-blue-100 flex-shrink-0">
                     <div className="p-1 bg-blue-600/20 rounded-full">
                       <Clock className="h-3 w-3" />
                     </div>
@@ -214,7 +214,7 @@ export function Navbar() {
                 </div>
 
                 {/* Right side items: Search Icon + Language */}
-                <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
                   <Button
                     onClick={() => setIsSearchOpen(true)}
                     variant="ghost"
@@ -244,7 +244,7 @@ export function Navbar() {
 
       {/* Main Navigation Bar */}
       <div
-        className={`bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 w-full left-0 right-0 transition-all duration-300 ${
+        className={`bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 w-full transition-all duration-300 ${
           !isTopBarVisible ? "shadow-lg" : "shadow-sm"
         }`}
       >
@@ -253,7 +253,7 @@ export function Navbar() {
             {/* Logo Section */}
             <Link
               href="/"
-              className="flex items-center space-x-2 sm:space-x-4 group"
+              className="flex items-center space-x-2 sm:space-x-4 group flex-shrink-0"
             >
               <Image
                 src="/images/logo.png"
@@ -265,9 +265,9 @@ export function Navbar() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            <nav className="hidden lg:flex items-center space-x-1 overflow-hidden">
               {navigationItems.map((item) => (
-                <div key={item.name} className="relative">
+                <div key={item.name} className="relative flex-shrink-0">
                   {item.hasDropdown ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -314,7 +314,7 @@ export function Navbar() {
               ))}
 
               {/* Action Buttons */}
-              <div className="ml-6 flex items-center space-x-3">
+              <div className="ml-6 flex items-center space-x-3 flex-shrink-0">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 sm:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm">
                   Login
                 </Button>
@@ -330,7 +330,7 @@ export function Navbar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="lg:hidden p-2 hover:bg-gray-100"
+                  className="lg:hidden p-2 hover:bg-gray-100 flex-shrink-0"
                 >
                   <Menu className="h-6 w-6" />
                 </Button>

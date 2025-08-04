@@ -68,7 +68,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gray-900 text-white overflow-hidden">
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
@@ -90,8 +90,8 @@ export function Footer() {
                   href={link.href}
                   className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group"
                 >
-                  <link.icon className="h-4 w-4 text-gray-500 group-hover:text-blue-400 transition-colors" />
-                  <span className="text-sm font-medium">{link.name}</span>
+                  <link.icon className="h-4 w-4 text-gray-500 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                  <span className="text-sm font-medium truncate">{link.name}</span>
                 </Link>
               ))}
             </div>
@@ -109,8 +109,8 @@ export function Footer() {
                   href={link.href}
                   className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group"
                 >
-                  <link.icon className="h-4 w-4 text-gray-500 group-hover:text-pink-400 transition-colors" />
-                  <span className="text-sm font-medium">{link.name}</span>
+                  <link.icon className="h-4 w-4 text-gray-500 group-hover:text-pink-400 transition-colors flex-shrink-0" />
+                  <span className="text-sm font-medium truncate">{link.name}</span>
                 </Link>
               ))}
             </div>
@@ -128,8 +128,8 @@ export function Footer() {
                   href={link.href}
                   className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group"
                 >
-                  <link.icon className="h-4 w-4 text-gray-500 group-hover:text-pink-400 transition-colors" />
-                  <span className="text-sm font-medium">{link.name}</span>
+                  <link.icon className="h-4 w-4 text-gray-500 group-hover:text-pink-400 transition-colors flex-shrink-0" />
+                  <span className="text-sm font-medium truncate">{link.name}</span>
                 </Link>
               ))}
             </div>
@@ -146,7 +146,7 @@ export function Footer() {
                   <Link
                     key={social.name}
                     href={social.href}
-                    className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition-all duration-200 group"
+                    className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition-all duration-200 group flex-shrink-0"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -157,16 +157,16 @@ export function Footer() {
 
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 text-gray-300">
-                  <Phone className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">+880 1711261736</span>
+                  <Phone className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <span className="text-sm truncate">+880 1711261736</span>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-300">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">office@bcns.org.bd</span>
+                  <Mail className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <span className="text-sm truncate">office@bcns.org.bd</span>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-300">
-                  <MapPin className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">
+                  <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <span className="text-sm truncate">
                     Dhaka Medical College Hospital
                   </span>
                 </div>
@@ -180,7 +180,7 @@ export function Footer() {
       <div className="border-t border-gray-800">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-gray-400 text-center md:text-left">
               © {currentYear} Bangladesh Child Neurology Society (BCNS). All
               rights reserved.
             </div>

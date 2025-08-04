@@ -133,7 +133,7 @@ export function EventsAnnouncements() {
   };
 
   return (
-    <section className="py-12 sm:py-16 bg-gray-50">
+    <section className="py-12 sm:py-16 bg-gray-50 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="text-center mb-8 sm:mb-12">
@@ -227,11 +227,11 @@ export function EventsAnnouncements() {
                       <div className="space-y-2 mb-4 text-sm text-gray-500">
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span>{event.time}</span>
+                          <span className="truncate">{event.time}</span>
                         </div>
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span>{event.location}</span>
+                          <span className="truncate">{event.location}</span>
                         </div>
                       </div>
                       <Button

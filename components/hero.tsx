@@ -81,7 +81,7 @@ export function Hero() {
   ];
 
   return (
-    <section className="relative w-full bg-slate-900">
+    <section className="relative w-full bg-slate-900 overflow-hidden">
       <Carousel
         setApi={setApi}
         className="w-full"
@@ -93,7 +93,7 @@ export function Hero() {
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
       >
-        <CarouselContent className="-ml-0">
+        <CarouselContent className="ml-0">
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="pl-0">
               <div className="relative h-[560px] sm:h-[600px] md:h-[650px] lg:h-[720px] w-full">
