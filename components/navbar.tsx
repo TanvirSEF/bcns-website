@@ -171,11 +171,11 @@ export function Navbar() {
               // If search is closed, render the original layout
               <>
                 {/* Contact Information */}
-                <div className="flex items-center space-x-3 sm:space-x-4 lg:space-x-6 overflow-hidden">
+                <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 lg:space-x-6 overflow-hidden">
                   {/* Phone */}
                   <button
                     onClick={handlePhoneClick}
-                    className="flex items-center space-x-1.5 sm:space-x-2 text-blue-100 hover:text-white transition-all duration-300 group flex-shrink-0"
+                    className="flex items-center space-x-1 sm:space-x-1.5 text-blue-100 hover:text-white transition-all duration-300 group flex-shrink-0"
                   >
                     <div className="p-0.5 sm:p-1 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
                       <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
@@ -187,7 +187,7 @@ export function Navbar() {
                   {/* Email */}
                   <button
                     onClick={handleEmailClick}
-                    className="flex items-center space-x-1.5 sm:space-x-2 text-blue-100 hover:text-white transition-all duration-300 group flex-shrink-0"
+                    className="flex items-center space-x-1 sm:space-x-1.5 text-blue-100 hover:text-white transition-all duration-300 group flex-shrink-0"
                   >
                     <div className="p-0.5 sm:p-1 bg-blue-600/20 rounded-full group-hover:bg-blue-500/30 transition-all duration-300">
                       <Mail className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
@@ -273,7 +273,7 @@ export function Navbar() {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className={`h-10 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 ${
+                          className={`h-10 px-3 lg:px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 text-sm lg:text-base ${
                             item.isActive ? "text-blue-600 bg-blue-50" : ""
                           }`}
                         >
@@ -303,7 +303,7 @@ export function Navbar() {
                   ) : (
                     <Link
                       href={item.href}
-                      className={`h-10 px-4 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 rounded-md ${
+                      className={`h-10 px-3 lg:px-4 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 rounded-md text-sm lg:text-base ${
                         item.isActive ? "text-blue-600 bg-blue-50" : ""
                       }`}
                     >
@@ -314,11 +314,11 @@ export function Navbar() {
               ))}
 
               {/* Action Buttons */}
-              <div className="ml-6 flex items-center space-x-3 flex-shrink-0">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 sm:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm">
+              <div className="ml-4 lg:ml-6 flex items-center space-x-2 lg:space-x-3 flex-shrink-0">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 lg:px-4 xl:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs lg:text-sm">
                   Login
                 </Button>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 sm:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 lg:px-4 xl:px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs lg:text-sm">
                   Membership
                 </Button>
               </div>

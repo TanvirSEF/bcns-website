@@ -17,19 +17,19 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const StatsCard = () => (
   <Card className="bg-white/95 backdrop-blur-md border-0 shadow-xl rounded-2xl">
-    <CardContent className="p-5 sm:p-6">
-      <div className="grid grid-cols-3 gap-4 sm:gap-6 text-center">
+    <CardContent className="p-4 sm:p-5 lg:p-6">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6 text-center">
         <div>
-          <div className="text-2xl lg:text-3xl font-bold text-blue-600">500+</div>
-          <div className="text-sm text-gray-600 font-medium">Members</div>
+          <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">500+</div>
+          <div className="text-xs sm:text-sm text-gray-600 font-medium">Members</div>
         </div>
         <div>
-          <div className="text-2xl lg:text-3xl font-bold text-blue-600">50+</div>
-          <div className="text-sm text-gray-600 font-medium">Research</div>
+          <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">50+</div>
+          <div className="text-xs sm:text-sm text-gray-600 font-medium">Research</div>
         </div>
         <div>
-          <div className="text-2xl lg:text-3xl font-bold text-blue-600">25+</div>
-          <div className="text-sm text-gray-600 font-medium">Years</div>
+          <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">25+</div>
+          <div className="text-xs sm:text-sm text-gray-600 font-medium">Years</div>
         </div>
       </div>
     </CardContent>
@@ -96,7 +96,7 @@ export function Hero() {
         <CarouselContent className="ml-0">
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="pl-0">
-              <div className="relative h-[560px] sm:h-[600px] md:h-[650px] lg:h-[720px] w-full">
+              <div className="relative h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[720px] w-full">
                 <Image
                   src={slide.image}
                   alt={slide.title}
@@ -108,33 +108,33 @@ export function Hero() {
                 <div className="absolute inset-0 flex flex-col justify-center">
                   <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="max-w-xl text-center md:text-left">
-                      <div className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold bg-blue-600/90 text-white mb-4">
+                      <div className="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-blue-600/90 text-white mb-3 sm:mb-4">
                         {slide.badge}
                       </div>
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 leading-tight tracking-tight">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-3 sm:mb-4 leading-tight tracking-tight">
                         {slide.title}
                       </h1>
-                      <h2 className="text-lg sm:text-xl text-blue-200 mb-6">
+                      <h2 className="text-base sm:text-lg md:text-xl text-blue-200 mb-4 sm:mb-6">
                         {slide.subtitle}
                       </h2>
-                      <p className="text-base sm:text-lg text-gray-200 mb-8 leading-relaxed">
+                      <p className="text-sm sm:text-base md:text-lg text-gray-200 mb-6 sm:mb-8 leading-relaxed">
                         {slide.description}
                       </p>
-                      <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
                         <Button
                           size="lg"
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
                         >
                           {slide.ctaText}
-                          <ArrowRight className="ml-2 h-5 w-5" />
+                          <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                         </Button>
                         <Button
                           variant="outline"
                           size="lg"
                           onClick={() => setIsVideoModalOpen(true)}
-                          className="border-white/80 text-white hover:bg-white hover:text-gray-900 px-8 py-3 text-base font-semibold rounded-lg transition-all duration-300 group bg-white/20 backdrop-blur-sm"
+                          className="border-white/80 text-white hover:bg-white hover:text-gray-900 px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 group bg-white/20 backdrop-blur-sm"
                         >
-                          <Play className="mr-2 h-5 w-5 fill-current group-hover:scale-110 transition-transform duration-300" />
+                          <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current group-hover:scale-110 transition-transform duration-300" />
                           Watch Video
                         </Button>
                       </div>
@@ -145,16 +145,16 @@ export function Hero() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-4 bg-white/20 hover:bg-white/30 border-white/30 text-white hidden sm:inline-flex" />
-        <CarouselNext className="right-4 bg-white/20 hover:bg-white/30 border-white/30 text-white hidden sm:inline-flex" />
+        <CarouselPrevious className="left-2 sm:left-4 bg-white/20 hover:bg-white/30 border-white/30 text-white hidden sm:inline-flex" />
+        <CarouselNext className="right-2 sm:right-4 bg-white/20 hover:bg-white/30 border-white/30 text-white hidden sm:inline-flex" />
       </Carousel>
 
       {/* --- FIXED: Stats Card is now hidden on mobile and tablet --- */}
-      <div className="hidden lg:block absolute bottom-12 right-8 z-10">
+      <div className="hidden lg:block absolute bottom-8 sm:bottom-12 right-4 sm:right-8 z-10">
         <StatsCard />
       </div>
 
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex space-x-2 z-10 lg:hidden">
+      <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 flex space-x-2 z-10 lg:hidden">
         {Array.from({ length: count }).map((_, index) => (
           <button
             key={index}

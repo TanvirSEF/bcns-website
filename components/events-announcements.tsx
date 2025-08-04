@@ -133,25 +133,25 @@ export function EventsAnnouncements() {
   };
 
   return (
-    <section className="py-12 sm:py-16 bg-gray-50 overflow-hidden">
+    <section className="py-8 sm:py-12 md:py-16 bg-gray-50 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+        <div className="text-center mb-6 sm:mb-8 md:mb-12">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 md:mb-4">
             Stay Updated With Us
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
             Discover upcoming events and stay informed with our latest
             announcements.
           </p>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex justify-center mb-8 sm:mb-12">
+        <div className="flex justify-center mb-6 sm:mb-8 md:mb-12">
           <div className="flex bg-white rounded-lg p-1 shadow-sm border">
             <button
               onClick={() => setActiveTab("events")}
-              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-300 text-sm sm:text-base ${
+              className={`px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
                 activeTab === "events"
                   ? "bg-blue-600 text-white shadow-md"
                   : "text-gray-600 hover:bg-gray-100"
@@ -161,7 +161,7 @@ export function EventsAnnouncements() {
             </button>
             <button
               onClick={() => setActiveTab("announcements")}
-              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-300 text-sm sm:text-base ${
+              className={`px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
                 activeTab === "announcements"
                   ? "bg-blue-600 text-white shadow-md"
                   : "text-gray-600 hover:bg-gray-100"
@@ -182,7 +182,7 @@ export function EventsAnnouncements() {
                 : "opacity-0 absolute inset-0 pointer-events-none"
             }`}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {events.map((event) => {
                 const { day, month } = formatDate(event.date);
                 return (
@@ -191,7 +191,7 @@ export function EventsAnnouncements() {
                     className="group bg-white overflow-hidden flex flex-col h-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer p-0"
                   >
                     {/* Event Image - No padding, image fills the top */}
-                    <div className="relative h-44 w-full">
+                    <div className="relative h-32 sm:h-40 md:h-44 w-full">
                       <Image
                         src={event.image}
                         alt={event.title}
@@ -200,8 +200,8 @@ export function EventsAnnouncements() {
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute top-3 left-3 bg-white rounded-md p-2 text-center shadow-lg">
-                        <div className="text-sm font-bold text-blue-600">
+                      <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-white rounded-md p-1.5 sm:p-2 text-center shadow-lg">
+                        <div className="text-xs sm:text-sm font-bold text-blue-600">
                           {day}
                         </div>
                         <div className="text-xs font-medium text-gray-600">
@@ -210,37 +210,37 @@ export function EventsAnnouncements() {
                       </div>
                       <Badge
                         variant="secondary"
-                        className="absolute top-3 right-3 bg-white/90 text-gray-800"
+                        className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white/90 text-gray-800 text-xs"
                       >
                         {event.category}
                       </Badge>
                     </div>
 
                     {/* Card Content */}
-                    <div className="p-4 flex flex-col flex-grow">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 transition-colors group-hover:text-blue-600">
+                    <div className="p-3 sm:p-4 flex flex-col flex-grow">
+                      <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 transition-colors group-hover:text-blue-600">
                         {event.title}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-3 flex-grow">
                         {event.description}
                       </p>
-                      <div className="space-y-2 mb-4 text-sm text-gray-500">
+                      <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500">
                         <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
                           <span className="truncate">{event.time}</span>
                         </div>
                         <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
                           <span className="truncate">{event.location}</span>
                         </div>
                       </div>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full mt-auto transition-all duration-300 border-gray-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600"
+                        className="w-full mt-auto transition-all duration-300 border-gray-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 text-xs sm:text-sm"
                       >
                         View Details
-                        <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                        <ArrowRight className="ml-1.5 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-1" />
                       </Button>
                     </div>
                   </Card>
@@ -265,25 +265,25 @@ export function EventsAnnouncements() {
                     href={announcement.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`block p-4 sm:p-5 transition-colors duration-300 group hover:bg-gray-50 ${
+                    className={`block p-3 sm:p-4 md:p-5 transition-colors duration-300 group hover:bg-gray-50 ${
                       index !== announcements.length - 1
                         ? "border-b border-gray-200"
                         : ""
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center justify-between gap-3 sm:gap-4">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600">
+                        <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600">
                           {announcement.title}
                         </h3>
                         <p className="text-xs sm:text-sm text-gray-500 flex items-center">
-                          <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
                           <span>
                             {formatAnnouncementDate(announcement.date)}
                           </span>
                         </p>
                       </div>
-                      <ExternalLink className="h-5 w-5 text-gray-400 flex-shrink-0 transition-all duration-300 group-hover:text-blue-600 group-hover:scale-110" />
+                      <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0 transition-all duration-300 group-hover:text-blue-600 group-hover:scale-110" />
                     </div>
                   </a>
                 ))}
