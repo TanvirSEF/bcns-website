@@ -14,9 +14,8 @@ import {
   FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
 
 interface ContactInfo {
   icon: React.ComponentType<{ className?: string }>;
@@ -119,7 +118,7 @@ export default function ContactPage() {
         message: "",
         organization: "",
       });
-    } catch (error) {
+    } catch {
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
@@ -140,7 +139,7 @@ export default function ContactPage() {
             </h1>
             <p className="text-lg sm:text-xl lg:text-2xl text-blue-100 max-w-3xl mx-auto">
               Have questions about our services, membership, or upcoming events? 
-              We're here to help you connect with the BCNS community.
+              We&apos;re here to help you connect with the BCNS community.
             </p>
           </div>
         </div>
@@ -194,7 +193,7 @@ export default function ContactPage() {
                   Send us a Message
                 </h2>
                 <p className="text-gray-600 text-lg">
-                  Fill out the form below and we'll get back to you as soon as possible.
+                  Fill out the form below and we&apos;ll get back to you as soon as possible.
                 </p>
               </div>
 
@@ -300,7 +299,7 @@ export default function ContactPage() {
                     {submitStatus === "success" && (
                       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                         <p className="text-green-800 font-medium">
-                          Thank you! Your message has been sent successfully. We'll get back to you soon.
+                          Thank you! Your message has been sent successfully. We&apos;ll get back to you soon.
                         </p>
                       </div>
                     )}
