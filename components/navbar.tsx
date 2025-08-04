@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   Menu,
   Phone,
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/sheet";
 
 export function Navbar() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -38,7 +40,7 @@ export function Navbar() {
   const [lastScrollY, setLastScrollY] = React.useState(0);
 
   const navigationItems = [
-    { name: "Home", href: "/", isActive: true },
+    { name: "Home", href: "/" },
     {
       name: "About Us",
       href: "/about",
@@ -74,6 +76,14 @@ export function Navbar() {
     { name: "Contact us", href: "/contact" },
     { name: "Our Members", href: "/members" },
   ];
+
+  // Function to check if a navigation item is active
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(href);
+  };
 
   // Handle scroll behavior
   React.useEffect(() => {
@@ -272,7 +282,7 @@ export function Navbar() {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className={`h-10 px-3 lg:px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 text-sm lg:text-base ${item.isActive ? "text-blue-600 bg-blue-50" : ""
+                          className={`h-10 px-3 lg:px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 text-sm lg:text-base ${isActive(item.href) ? "text-blue-600 bg-blue-50" : ""
                             }`}
                         >
                           {item.name}
@@ -301,7 +311,7 @@ export function Navbar() {
                   ) : (
                     <Link
                       href={item.href}
-                      className={`h-10 px-3 lg:px-4 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 rounded-md text-sm lg:text-base ${item.isActive ? "text-blue-600 bg-blue-50" : ""
+                      className={`h-10 px-3 lg:px-4 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 rounded-md text-sm lg:text-base ${isActive(item.href) ? "text-blue-600 bg-blue-50" : ""
                         }`}
                     >
                       {item.name}
@@ -394,7 +404,7 @@ export function Navbar() {
                       ) : (
                         <Link
                           href={item.href}
-                          className={`block w-full text-left px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md font-medium transition-colors ${item.isActive ? "text-blue-600 bg-blue-50" : ""
+                          className={`block w-full text-left px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md font-medium transition-colors ${isActive(item.href) ? "text-blue-600 bg-blue-50" : ""
                             }`}
                           onClick={() => setIsOpen(false)}
                         >
