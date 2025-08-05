@@ -1,23 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "BCNS - Bangladesh Child Neurology Society",
   description:
-    "Official website of the Bangladesh Child Neurology Society (BCNS). Promoting child neurology care and research in Bangladesh.",
+    "Official website of the Bangladesh Child Neurology Society (BCNS).",
 };
 
 export default function RootLayout({
@@ -26,13 +22,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="overflow-x-hidden">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}
-      >
-        <Navbar />
-        <main className="flex-1 overflow-x-hidden">{children}</main>
-        <Footer />
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn(geistSans.variable, "antialiased min-h-screen")}>
+        {/* FIXED: Added a wrapper div to contain all content and prevent overflow */}
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   );
