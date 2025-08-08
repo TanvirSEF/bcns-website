@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import {
   ArrowRight,
@@ -121,7 +119,7 @@ export function CoreActivities() {
         {/* Bottom CTA */}
         <div className="text-center mt-10 md:mt-16">
           <p className="text-base md:text-lg text-gray-300 mb-4">
-            Discover how we&apos;re shaping the future of pediatric neurology 
+            Discover how we&apos;re shaping the future of pediatric neurology
           </p>
           <a
             href="/about"

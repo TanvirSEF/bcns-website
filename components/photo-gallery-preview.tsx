@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { ArrowRight, Camera, Users, Calendar, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     "Discover the mission of the Bangladesh Child Neurology Society (BCNS). We are dedicated to uniting professionals, enhancing clinical care, and advancing research in child neurology across Bangladesh.",
 };
 
+// Static generation for better performance
+export const revalidate = false; // Static at build time
+
 export default function MissionPage() {
   return (
     <div className="min-h-screen bg-white">

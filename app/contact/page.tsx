@@ -1,21 +1,14 @@
-"use client";
-
-import * as React from "react";
-import { useState } from "react";
-import {
-  Phone,
-  Mail,
-  MapPin,
-  Clock,
-  Send,
-  MessageSquare,
-  User,
-  Building,
-  FileText,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
+import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ContactForm } from "@/components/contact-form";
+
+export const metadata: Metadata = {
+  title: "Contact Us | BCNS - Bangladesh Child Neurology Society",
+  description:
+    "Get in touch with BCNS. Contact us for membership, events, research collaboration, or general inquiries. We're here to help the child neurology community.",
+};
 
 interface ContactInfo {
   icon: React.ComponentType<{ className?: string }>;
@@ -25,26 +18,7 @@ interface ContactInfo {
   href?: string;
 }
 
-interface ContactForm {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  organization?: string;
-}
-
 export default function ContactPage() {
-  const [formData, setFormData] = useState<ContactForm>({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-    organization: "",
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
-
   const contactInfo: ContactInfo[] = [
     {
       icon: Phone,
@@ -97,34 +71,6 @@ export default function ContactPage() {
     },
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus("idle");
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setSubmitStatus("success");
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-        organization: "",
-      });
-    } catch {
-      setSubmitStatus("error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 overflow-hidden">
       {/* Hero Section */}
@@ -138,7 +84,7 @@ export default function ContactPage() {
               Get in Touch
             </h1>
             <p className="text-lg sm:text-xl lg:text-2xl text-blue-100 max-w-3xl mx-auto">
-              Have questions about our services, membership, or upcoming events? 
+              Have questions about our services, membership, or upcoming events?
               We&apos;re here to help you connect with the BCNS community.
             </p>
           </div>
@@ -150,7 +96,10 @@ export default function ContactPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {contactInfo.map((info, index) => (
-              <Card key={index} className="bg-white/95 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <Card
+                key={index}
+                className="bg-white/95 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              >
                 <CardContent className="p-6 sm:p-8 text-center">
                   <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full mb-4 sm:mb-6">
                     <info.icon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
@@ -193,145 +142,12 @@ export default function ContactPage() {
                   Send us a Message
                 </h2>
                 <p className="text-gray-600 text-lg">
-                  Fill out the form below and we&apos;ll get back to you as soon as possible.
+                  Fill out the form below and we&apos;ll get back to you as soon
+                  as possible.
                 </p>
               </div>
 
-              <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
-                <CardContent className="p-6 sm:p-8">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                          Full Name *
-                        </label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                            placeholder="Enter your full name"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                          Email Address *
-                        </label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                            placeholder="Enter your email address"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-2">
-                        Organization
-                      </label>
-                      <div className="relative">
-                        <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <input
-                          type="text"
-                          id="organization"
-                          name="organization"
-                          value={formData.organization}
-                          onChange={handleInputChange}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          placeholder="Enter your organization (optional)"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                        Subject *
-                      </label>
-                      <div className="relative">
-                        <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <input
-                          type="text"
-                          id="subject"
-                          name="subject"
-                          value={formData.subject}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          placeholder="What is this regarding?"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                        Message *
-                      </label>
-                      <div className="relative">
-                        <MessageSquare className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <textarea
-                          id="message"
-                          name="message"
-                          value={formData.message}
-                          onChange={handleInputChange}
-                          required
-                          rows={6}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                          placeholder="Tell us more about your inquiry..."
-                        />
-                      </div>
-                    </div>
-
-                    {submitStatus === "success" && (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <p className="text-green-800 font-medium">
-                          Thank you! Your message has been sent successfully. We&apos;ll get back to you soon.
-                        </p>
-                      </div>
-                    )}
-
-                    {submitStatus === "error" && (
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                        <p className="text-red-800 font-medium">
-                          Sorry, there was an error sending your message. Please try again.
-                        </p>
-                      </div>
-                    )}
-
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      {isSubmitting ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          <span>Sending...</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-2">
-                          <Send className="h-4 w-4" />
-                          <span>Send Message</span>
-                        </div>
-                      )}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
+              <ContactForm />
             </div>
 
             {/* Department Contacts & Map */}
@@ -343,7 +159,10 @@ export default function ContactPage() {
                 </h3>
                 <div className="space-y-4">
                   {departments.map((dept, index) => (
-                    <Card key={index} className="bg-white/95 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card
+                      key={index}
+                      className="bg-white/95 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
                       <CardContent className="p-4 sm:p-6">
                         <div className="flex items-start space-x-4">
                           <div className="flex-shrink-0">
@@ -382,8 +201,12 @@ export default function ContactPage() {
                     <div className="aspect-video bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
                       <div className="text-center">
                         <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                        <p className="text-gray-500 font-medium">Interactive Map</p>
-                        <p className="text-sm text-gray-400">Dhaka Medical College, Dhaka, Bangladesh</p>
+                        <p className="text-gray-500 font-medium">
+                          Interactive Map
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          Dhaka Medical College, Dhaka, Bangladesh
+                        </p>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -391,9 +214,7 @@ export default function ContactPage() {
                         <MapPin className="inline h-4 w-4 mr-2 text-blue-600" />
                         Dhaka Medical College
                       </p>
-                      <p className="text-gray-600 text-sm">
-                        Dhaka, Bangladesh
-                      </p>
+                      <p className="text-gray-600 text-sm">Dhaka, Bangladesh</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -422,7 +243,8 @@ export default function ContactPage() {
                   How long does it take to get a response?
                 </h4>
                 <p className="text-gray-600">
-                  We typically respond to all inquiries within 24-48 hours during business days.
+                  We typically respond to all inquiries within 24-48 hours
+                  during business days.
                 </p>
               </CardContent>
             </Card>
@@ -433,7 +255,8 @@ export default function ContactPage() {
                   Can I visit your office?
                 </h4>
                 <p className="text-gray-600">
-                  Yes, we welcome visitors by appointment. Please contact us to schedule a meeting.
+                  Yes, we welcome visitors by appointment. Please contact us to
+                  schedule a meeting.
                 </p>
               </CardContent>
             </Card>
@@ -444,7 +267,8 @@ export default function ContactPage() {
                   How do I become a member?
                 </h4>
                 <p className="text-gray-600">
-                  Visit our membership page or contact our membership department for detailed information.
+                  Visit our membership page or contact our membership department
+                  for detailed information.
                 </p>
               </CardContent>
             </Card>
@@ -455,7 +279,8 @@ export default function ContactPage() {
                   Do you offer emergency support?
                 </h4>
                 <p className="text-gray-600">
-                  For medical emergencies, please contact your nearest hospital or emergency services.
+                  For medical emergencies, please contact your nearest hospital
+                  or emergency services.
                 </p>
               </CardContent>
             </Card>
@@ -464,4 +289,4 @@ export default function ContactPage() {
       </section>
     </div>
   );
-} 
+}

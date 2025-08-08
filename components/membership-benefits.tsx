@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { BookOpen, Users, Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";

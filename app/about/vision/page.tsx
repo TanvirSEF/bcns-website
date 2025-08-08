@@ -7,6 +7,9 @@ export const metadata: Metadata = {
     "Explore the vision of BCNS. We envision a future where every child in Bangladesh has access to expert neurological care and where our society is a global leader in pediatric neurology research.",
 };
 
+// Static generation for better performance
+export const revalidate = false; // Static at build time
+
 export default function VisionPage() {
   return (
     <div className="min-h-screen bg-white">
