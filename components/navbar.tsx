@@ -165,7 +165,7 @@ export function Navbar() {
             className="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Link href="/login">
-              <User className="mr-2 h-4 w-4" /> Login
+              <User className="h-4 w-4" />Login
             </Link>
           </Button>
           <Button
@@ -173,7 +173,7 @@ export function Navbar() {
             className="w-full lg:w-auto bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Link href="/membership">
-              <Shield className="mr-2 h-4 w-4" /> Membership
+              <Shield className="h-4 w-4" /> Membership
             </Link>
           </Button>
         </>
@@ -189,7 +189,7 @@ export function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full">
         <div className="bg-blue-900 text-white">
-          <div className="container mx-auto px-4 py-2">
+          <div className="container mx-auto px-4 py-1.5">
             <div className="flex items-center justify-between text-xs sm:text-sm">
               <div className="flex items-center space-x-4 lg:space-x-6">
                 <a
@@ -246,7 +246,7 @@ export function Navbar() {
           )}
         >
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-20">
+            <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex-shrink-0">
                 <Image
                   src="/images/logo.png"

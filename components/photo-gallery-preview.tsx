@@ -82,35 +82,31 @@ export function PhotoGalleryPreview() {
   ];
 
   return (
-    <section className="py-16 sm:py-20 lg:py-24 bg-gray-50 overflow-hidden">
+    <section className="py-10 sm:py-14 lg:py-16 bg-gradient-to-b from-blue-50/40 via-white to-white overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-12 sm:mb-16">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6 ring-8 ring-blue-50">
-            <Camera className="h-8 w-8 text-blue-600" />
+        <div className="text-center mb-8 sm:mb-10">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4 ring-8 ring-blue-50">
+            <Camera className="h-6 w-6 text-blue-600" />
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-extrabold text-gray-900 mb-4 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">
             Glimpses of Our Events
           </h2>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Capturing the moments that shape the future of pediatric neurology
-            through collaboration, research, and learning.
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Highlights from conferences, workshops, and research activities.
           </p>
         </div>
 
-        {/* --- FIXED GALLERY GRID FOR MOBILE --- */}
-        {/* Changed to responsive row height to fix mobile view */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[18rem] sm:auto-rows-[20rem] gap-4 sm:gap-6 mb-12 sm:mb-16">
+        {/* Compact responsive gallery grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[12rem] sm:auto-rows-[14rem] lg:auto-rows-[16rem] gap-3 sm:gap-4 md:gap-5 mb-8 sm:mb-12">
           {galleryImages.map((image, index) => (
             <Link
               key={image.id}
               href={image.href}
-              className={`group relative flex flex-col justify-end overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-500
+              className={`group relative flex flex-col justify-end overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-blue-100/60 bg-white
                 ${
-                  // Changed to responsive spanning to fix mobile view
-                  index === 0
-                    ? "sm:col-span-2 lg:col-span-2 sm:row-span-2"
-                    : "col-span-1"
+                  // Feature the first tile only on large screens
+                  index === 0 ? "lg:col-span-2 lg:row-span-2" : "col-span-1"
                 }
               `}
             >
@@ -118,26 +114,26 @@ export function PhotoGalleryPreview() {
                 src={image.src}
                 alt={image.alt}
                 fill
-                className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent transition-all duration-500"></div>
-              <div className="relative z-10 p-4 sm:p-6 space-y-3 transform transition-transform duration-500 ease-in-out translate-y-8 group-hover:translate-y-0">
-                <h3 className="text-lg sm:text-xl font-sans font-bold text-white line-clamp-2">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity"></div>
+              <div className="relative z-10 p-3 sm:p-4 space-y-2 transform transition-transform duration-300 ease-out translate-y-6 group-hover:translate-y-0">
+                <h3 className="text-base sm:text-lg font-bold text-white line-clamp-2">
                   {image.eventName}
                 </h3>
-                <div className="space-y-2 text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200">
-                  <div className="flex items-center text-xs sm:text-sm">
+                <div className="space-y-1.5 text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="flex items-center text-[11px] sm:text-xs">
                     <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="truncate">{image.date}</span>
                   </div>
-                  <div className="flex items-center text-xs sm:text-sm">
+                  <div className="flex items-center text-[11px] sm:text-xs">
                     <Users className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="truncate">{image.attendees}</span>
                   </div>
                 </div>
               </div>
-              <div className="absolute top-4 left-4 z-10">
-                <span className="bg-white/95 backdrop-blur-sm text-gray-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+              <div className="absolute top-3 left-3 z-10">
+                <span className="bg-white/95 backdrop-blur-sm text-gray-800 px-2.5 py-0.5 rounded-full text-[11px] font-semibold shadow-sm border border-blue-100/60">
                   {image.category}
                 </span>
               </div>
@@ -145,39 +141,39 @@ export function PhotoGalleryPreview() {
           ))}
         </div>
 
-        {/* --- ENHANCED STATISTICS SECTION --- */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16">
-          <div className="flex items-center space-x-6 p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full">
-              <Calendar className="h-7 w-7" />
+        {/* Compact statistics */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12">
+          <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-blue-100/60">
+            <div className="flex-shrink-0 w-11 h-11 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full">
+              <Calendar className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">
                 25+
               </div>
-              <div className="text-gray-600 font-medium">Events This Year</div>
+              <div className="text-gray-600 text-sm">Events This Year</div>
             </div>
           </div>
-          <div className="flex items-center space-x-6 p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center bg-green-100 text-green-600 rounded-full">
-              <Users className="h-7 w-7" />
+          <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-blue-100/60">
+            <div className="flex-shrink-0 w-11 h-11 flex items-center justify-center bg-green-100 text-green-600 rounded-full">
+              <Users className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">
                 500+
               </div>
-              <div className="text-gray-600 font-medium">Active Members</div>
+              <div className="text-gray-600 text-sm">Active Members</div>
             </div>
           </div>
-          <div className="flex items-center space-x-6 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 sm:col-span-2 lg:col-span-1">
-            <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full">
-              <FileText className="h-7 w-7" />
+          <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-blue-100/60">
+            <div className="flex-shrink-0 w-11 h-11 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full">
+              <FileText className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">
                 50+
               </div>
-              <div className="text-gray-600 font-medium">Research Papers</div>
+              <div className="text-gray-600 text-sm">Research Papers</div>
             </div>
           </div>
         </div>
@@ -185,12 +181,12 @@ export function PhotoGalleryPreview() {
         {/* CTA Button */}
         <div className="text-center">
           <Button
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-base sm:text-lg font-semibold rounded-xl transition-all duration-300 group shadow-lg hover:shadow-xl transform hover:scale-105"
+            size="sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 group shadow-sm hover:shadow-md"
             asChild
           >
             <Link href="/gallery">
-              Explore The Full Gallery
+              View Full Gallery
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
           </Button>

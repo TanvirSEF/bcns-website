@@ -5,6 +5,7 @@ import { ArrowRight, ExternalLink, Calendar, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import Link from "next/link";
 
 interface Publication {
   id: string;
@@ -66,27 +67,30 @@ export function LatestPublications() {
   };
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-[#111827] overflow-hidden">
+    <section className="py-10 sm:py-12 lg:py-14 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-white mb-4 sm:mb-6">
+        <div className="text-center mb-8 sm:mb-10">
+          <div className="inline-block text-[11px] font-semibold tracking-widest uppercase text-blue-300/80 bg-blue-500/10 border border-blue-500/20 rounded-full px-2.5 py-0.5 mb-2.5">
+            Publications
+          </div>
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-white mb-2">
             From Our Journals
           </h2>
-          <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
-            Discover cutting-edge research and clinical insights from leading
-            pediatric neurologists
+          <p className="text-xs sm:text-sm text-gray-300/90 max-w-xl mx-auto leading-relaxed">
+            Discover research and clinical insights from leading pediatric
+            neurologists.
           </p>
         </div>
 
         {/* Asymmetrical Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 mb-12 lg:mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-8 lg:mb-10">
           {/* Left Column - Featured Publication (60%) */}
           <div className="md:col-span-2 lg:col-span-3">
-            <div className="group cursor-pointer">
-              <div className="bg-gray-900 rounded-xl sm:rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-all duration-300">
+            <Link href={featuredPublication.link} className="group block">
+              <div className="bg-slate-800/60 rounded-xl sm:rounded-2xl overflow-hidden border border-slate-700 hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
                 {/* Featured Image */}
-                <div className="h-48 sm:h-64 relative overflow-hidden">
+                <div className="h-40 sm:h-56 relative overflow-hidden">
                   <Image
                     src={featuredPublication.image}
                     alt={featuredPublication.title}
@@ -109,38 +113,42 @@ export function LatestPublications() {
                 </div>
 
                 {/* Content */}
-                <div className="p-4 sm:p-6 lg:p-8">
-                  <h3 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-serif font-bold text-white mb-2 sm:mb-3 lg:mb-4 group-hover:text-blue-300 transition-colors line-clamp-2">
+                <div className="p-4 sm:p-5 lg:p-6">
+                  <h3 className="text-base sm:text-lg lg:text-xl font-serif font-bold text-white mb-2 sm:mb-2.5 lg:mb-3 group-hover:text-blue-300 transition-colors line-clamp-2">
                     {featuredPublication.title}
                   </h3>
 
-                  <div className="flex items-center text-gray-400 mb-2 sm:mb-3 lg:mb-4">
+                  <div className="flex items-center text-gray-400 mb-2">
                     <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                    <span className="text-xs sm:text-sm">
+                    <span className="text-[11px] sm:text-xs">
                       {featuredPublication.author}
                     </span>
                   </div>
 
-                  <p className="text-gray-300 leading-relaxed mb-3 sm:mb-4 lg:mb-6 line-clamp-3 text-sm lg:text-base">
+                  <p className="text-gray-300 leading-relaxed mb-3 sm:mb-4 line-clamp-3 text-xs sm:text-sm">
                     {featuredPublication.abstract}
                   </p>
 
-                  <div className="flex items-center text-blue-400 font-semibold text-sm sm:text-base group-hover:text-blue-300 transition-colors">
+                  <div className="flex items-center text-blue-300 font-semibold text-xs sm:text-sm">
                     Read Full Paper
-                    <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                    <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-1" />
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Right Column - Secondary Publications (40%) */}
-          <div className="md:col-span-2 lg:col-span-2 space-y-4 lg:space-y-6">
+          <div className="md:col-span-2 lg:col-span-2 space-y-3 lg:space-y-4">
             {secondaryPublications.map((publication) => (
-              <div key={publication.id} className="group cursor-pointer">
-                <div className="bg-gray-900 rounded-lg sm:rounded-xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-all duration-300">
+              <Link
+                key={publication.id}
+                href={publication.link}
+                className="group block"
+              >
+                <div className="bg-slate-800/60 rounded-lg sm:rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/5 transition-all duration-300">
                   {/* Publication Image */}
-                  <div className="h-28 sm:h-32 relative overflow-hidden">
+                  <div className="h-24 sm:h-28 relative overflow-hidden">
                     <Image
                       src={publication.image}
                       alt={publication.title}
@@ -156,27 +164,29 @@ export function LatestPublications() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-4 sm:p-6">
-                    <h4 className="text-base sm:text-lg font-serif font-semibold text-white mb-2 sm:mb-3 group-hover:text-blue-300 transition-colors line-clamp-2">
+                  <div className="p-3 sm:p-4">
+                    <h4 className="text-sm sm:text-base font-serif font-semibold text-white mb-2 group-hover:text-blue-300 transition-colors line-clamp-2">
                       {publication.title}
                     </h4>
 
-                    <div className="flex items-center text-gray-400 mb-2 sm:mb-3">
+                    <div className="flex items-center text-gray-400 mb-2">
                       <User className="h-3 w-3 mr-1" />
-                      <span className="text-xs">{publication.author}</span>
+                      <span className="text-[11px] sm:text-xs">
+                        {publication.author}
+                      </span>
                     </div>
 
-                    <p className="text-gray-400 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 line-clamp-2">
+                    <p className="text-gray-400 text-[11px] sm:text-xs leading-relaxed mb-3 line-clamp-2">
                       {publication.abstract}
                     </p>
 
-                    <div className="flex items-center text-blue-400 text-xs sm:text-sm font-medium group-hover:text-blue-300 transition-colors">
+                    <div className="flex items-center text-blue-300 text-[11px] sm:text-xs font-medium">
                       Read More
-                      <ExternalLink className="ml-1 sm:ml-2 h-3 w-3 group-hover:scale-110 transition-transform duration-300" />
+                      <ExternalLink className="ml-1 sm:ml-2 h-3 w-3 transition-transform duration-300 group-hover:scale-110" />
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -185,11 +195,14 @@ export function LatestPublications() {
         <div className="text-center">
           <Button
             variant="outline"
-            size="lg"
-            className="border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl transition-all duration-300 group"
+            size="sm"
+            className="border-blue-500 text-blue-300 hover:bg-blue-600 hover:text-white px-5 py-2.5 text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 group"
+            asChild
           >
-            Explore All Publications
-            <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform duration-300" />
+            <Link href="/publications">
+              Explore All Publications
+              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
           </Button>
         </div>
       </div>
