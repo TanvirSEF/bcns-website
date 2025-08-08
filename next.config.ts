@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Performance optimizations
   reactStrictMode: true,
-  swcMinify: true,
+  // swcMinify is deprecated in Next.js 15 - SWC is the default
 
   // Image optimization
   images: {
@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
 
   // Experimental features for better performance
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // Disabled - causing critters module error in Next.js 15
     scrollRestoration: true,
   },
 
