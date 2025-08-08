@@ -7,6 +7,7 @@ import {
   MapPin,
   ArrowRight,
   ExternalLink,
+  Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -133,7 +134,7 @@ export function EventsAnnouncements() {
   };
 
   return (
-    <section className="py-8 sm:py-12 md:py-16 bg-gray-50 overflow-hidden">
+    <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-b from-blue-50/60 via-white to-white overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="text-center mb-6 sm:mb-8 md:mb-12">
@@ -148,25 +149,27 @@ export function EventsAnnouncements() {
 
         {/* Tab Buttons */}
         <div className="flex justify-center mb-6 sm:mb-8 md:mb-12">
-          <div className="flex bg-white rounded-lg p-1 shadow-sm border">
+          <div className="flex bg-white/80 backdrop-blur rounded-xl p-1 shadow-sm border border-blue-100">
             <button
               onClick={() => setActiveTab("events")}
-              className={`px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
+              className={`inline-flex items-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
                 activeTab === "events"
                   ? "bg-blue-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                  : "text-blue-700 hover:bg-blue-50"
               }`}
             >
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Upcoming Events
             </button>
             <button
               onClick={() => setActiveTab("announcements")}
-              className={`px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
+              className={`inline-flex items-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
                 activeTab === "announcements"
                   ? "bg-blue-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                  : "text-blue-700 hover:bg-blue-50"
               }`}
             >
+              <Megaphone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Latest Announcements
             </button>
           </div>
@@ -188,7 +191,7 @@ export function EventsAnnouncements() {
                 return (
                   <Card
                     key={event.id}
-                    className="group bg-white overflow-hidden flex flex-col h-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer p-0"
+                    className="group bg-white/90 backdrop-blur overflow-hidden flex flex-col h-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer p-0 border border-blue-100"
                   >
                     {/* Event Image - No padding, image fills the top */}
                     <div className="relative h-32 sm:h-40 md:h-44 w-full">
@@ -201,7 +204,7 @@ export function EventsAnnouncements() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-white rounded-md p-1.5 sm:p-2 text-center shadow-lg">
-                        <div className="text-xs sm:text-sm font-bold text-blue-600">
+                        <div className="text-xs sm:text-sm font-bold text-blue-700">
                           {day}
                         </div>
                         <div className="text-xs font-medium text-gray-600">
@@ -210,7 +213,7 @@ export function EventsAnnouncements() {
                       </div>
                       <Badge
                         variant="secondary"
-                        className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white/90 text-gray-800 text-xs"
+                        className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-blue-50/90 text-blue-700 text-xs border border-blue-100"
                       >
                         {event.category}
                       </Badge>
@@ -218,7 +221,7 @@ export function EventsAnnouncements() {
 
                     {/* Card Content */}
                     <div className="p-3 sm:p-4 flex flex-col flex-grow">
-                      <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 transition-colors group-hover:text-blue-600">
+                      <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 transition-colors group-hover:text-blue-700">
                         {event.title}
                       </h3>
                       <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-3 flex-grow">
@@ -237,7 +240,7 @@ export function EventsAnnouncements() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full mt-auto transition-all duration-300 border-gray-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 text-xs sm:text-sm"
+                        className="w-full mt-auto transition-all duration-300 border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 text-xs sm:text-sm"
                       >
                         View Details
                         <ArrowRight className="ml-1.5 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -258,22 +261,22 @@ export function EventsAnnouncements() {
             }`}
           >
             <div className="max-w-4xl mx-auto">
-              <div className="bg-white rounded-lg shadow-sm border">
+              <div className="bg-white/90 backdrop-blur rounded-xl shadow-sm border border-blue-100">
                 {announcements.map((announcement, index) => (
                   <a
                     key={announcement.id}
                     href={announcement.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`block p-3 sm:p-4 md:p-5 transition-colors duration-300 group hover:bg-gray-50 ${
+                    className={`block p-3 sm:p-4 md:p-5 transition-colors duration-300 group hover:bg-blue-50/60 ${
                       index !== announcements.length - 1
-                        ? "border-b border-gray-200"
+                        ? "border-b border-blue-100"
                         : ""
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3 sm:gap-4">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600">
+                        <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-700">
                           {announcement.title}
                         </h3>
                         <p className="text-xs sm:text-sm text-gray-500 flex items-center">
@@ -283,7 +286,7 @@ export function EventsAnnouncements() {
                           </span>
                         </p>
                       </div>
-                      <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0 transition-all duration-300 group-hover:text-blue-600 group-hover:scale-110" />
+                      <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0 transition-all duration-300 group-hover:text-blue-700 group-hover:scale-110" />
                     </div>
                   </a>
                 ))}
