@@ -47,8 +47,6 @@ const navigationItems = [
     dropdownItems: [
       { name: "Our Mission", href: "/about/mission", icon: Award },
       { name: "Our Vision", href: "/about/vision", icon: BookOpen },
-      { name: "History", href: "/about/history", icon: Calendar },
-      { name: "Leadership", href: "/about/leadership", icon: Users },
     ],
   },
   {
