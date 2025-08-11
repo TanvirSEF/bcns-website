@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, userData: User) => void;
+  login: (token: string, userData?: User) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
 }
@@ -25,35 +25,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         const token = tokenStorage.get();
-        if (!token) {
-          setIsLoading(false);
-          return;
+        if (token) {
+          // Optimistically derive minimal user info from JWT to avoid logout
+          // on reload if the profile endpoint is temporarily unavailable.
+          try {
+            const base64 = token.split(".")[1];
+            const decoded = JSON.parse(
+              typeof window !== "undefined"
+                ? atob(base64)
+                : Buffer.from(base64, "base64").toString()
+            );
+            if (decoded?.email || decoded?.name || decoded?.sub) {
+              setUser({
+                id: decoded.sub || decoded.userId || "unknown",
+                name: decoded.name || decoded.email?.split("@")[0] || "Member",
+                email: decoded.email || "",
+              });
+            }
+          } catch {}
         }
 
-        // Optimistically derive minimal user info from JWT to avoid logout
-        // on reload if the profile endpoint is temporarily unavailable.
+        // Always attempt to fetch the full profile (supports cookie-only sessions too)
         try {
-          const base64 = token.split(".")[1];
-          const decoded = JSON.parse(
-            typeof window !== "undefined"
-              ? atob(base64)
-              : Buffer.from(base64, "base64").toString()
-          );
-          if (decoded?.email || decoded?.name || decoded?.sub) {
-            setUser({
-              id: decoded.sub || decoded.userId || "unknown",
-              name: decoded.name || decoded.email?.split("@")[0] || "Member",
-              email: decoded.email || "",
-            });
-          }
-        } catch {}
-
-        // Fetch full user profile via our proxy to Users service (has phone, bio, address, avatar).
-        try {
-          const me = await getMe(token);
+          const me = await getMe(token || undefined);
           if (me) setUser(me);
         } catch {
-          // Do not remove token on transient errors; keep optimistic user
+          // Do not remove token on transient errors; keep optimistic user if any
           console.warn("Profile fetch failed during init");
         }
       } catch (error) {
@@ -66,16 +63,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
   }, []);
 
-  const login = (token: string, userData: User) => {
+  const login = async (token: string, userData?: User) => {
+    setIsLoading(true);
     tokenStorage.set(token);
-    setUser(userData);
-    setIsLoading(false);
+    // Optimistically set user if provided (from immediate login response)
+    if (userData) {
+      setUser(userData);
+    }
+    try {
+      // Always fetch the full profile to populate fields like avatar, phone, etc.
+      const me = await getMe(token);
+      if (me) setUser(me);
+    } catch {
+      console.warn("Profile fetch failed right after login");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
     tokenStorage.remove();
     setUser(null);
-    window.location.href = "/login";
+    // Best-effort clear httpOnly cookies on server side
+    fetch("/api/auth/logout", { method: "POST" }).finally(() => {
+      window.location.href = "/login";
+    });
   };
 
   const updateUser = (userData: Partial<User>) => {

@@ -78,13 +78,9 @@ export default function LoginPage() {
           response.token || response.access_token || response.accessToken;
 
         if (token) {
-          login(token, userData);
+          await login(token, userData);
         }
-        // Always fetch profile after login to confirm session and populate user
-        // and then redirect. This covers cookie-based sessions as well.
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 100);
+        router.push("/dashboard");
       } else {
         setError(
           response.message ||

@@ -107,7 +107,7 @@ export default function SignupPage() {
 
       // If the backend returns a token + user on registration, log the user in and redirect
       if (response.token && response.user) {
-        login(response.token, response.user);
+        await login(response.token, response.user);
         router.push("/dashboard");
         return;
       }
