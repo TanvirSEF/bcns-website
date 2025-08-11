@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
 import {
   Menu,
   Phone,
@@ -21,6 +22,7 @@ import {
   Award,
   LogOut,
   LayoutDashboard,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +38,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navigationItems = [
   { name: "Home", href: "/", icon: null },
@@ -80,11 +89,7 @@ const navigationItems = [
   { name: "Our Members", href: "/members", icon: Users, requiresAuth: true },
 ];
 
-type NavbarClientProps = {
-  isAuthenticatedInitial: boolean;
-};
-
-export function NavbarClient({ isAuthenticatedInitial }: NavbarClientProps) {
+export function NavbarClient() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
@@ -93,9 +98,7 @@ export function NavbarClient({ isAuthenticatedInitial }: NavbarClientProps) {
   const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
   const dropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  const [isAuthenticated, setIsAuthenticated] = React.useState(
-    isAuthenticatedInitial
-  );
+  const { isAuthenticated, user, logout } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -145,21 +148,75 @@ export function NavbarClient({ isAuthenticatedInitial }: NavbarClientProps) {
     >
       {isAuthenticated ? (
         <>
-          <Button
-            asChild
-            className="w-full lg:w-auto bg-blue-700 hover:bg-blue-800 text-white"
-          >
-            <Link href="/dashboard">
-              <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
-            </Link>
-          </Button>
-          <Button
-            onClick={() => setIsAuthenticated(false)}
-            variant="destructive"
-            className="w-full lg:w-auto"
-          >
-            <LogOut className="mr-2 h-4 w-4" /> Logout
-          </Button>
+          {!isMobile && (
+            <Button
+              asChild
+              className="w-full lg:w-auto bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              <Link href="/membership">
+                <Shield className="mr-2 h-4 w-4" /> Membership
+              </Link>
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "h-8 w-8 rounded-full border-2 border-blue-600",
+                  isMobile && "w-full h-10 rounded-md justify-start"
+                )}
+              >
+                {isMobile ? (
+                  <>
+                    <User className="mr-2 h-4 w-4" />
+                    {user?.name || "User Menu"}
+                  </>
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="flex items-center justify-start gap-2 p-2">
+                <div className="flex flex-col space-y-1 leading-none">
+                  <p className="font-medium">{user?.name}</p>
+                  <p className="w-[200px] truncate text-sm text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard" className="cursor-pointer">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/profile" className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </Link>
+              </DropdownMenuItem>
+              {isMobile && (
+                <DropdownMenuItem asChild>
+                  <Link href="/membership" className="cursor-pointer">
+                    <Shield className="mr-2 h-4 w-4" />
+                    Membership
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer text-red-600 focus:text-red-600"
+                onClick={logout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </>
       ) : (
         <>
@@ -168,8 +225,17 @@ export function NavbarClient({ isAuthenticatedInitial }: NavbarClientProps) {
             className="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Link href="/login">
-              <User className="h-4 w-4" />
+              <User className="mr-2 h-4 w-4" />
               Login
+            </Link>
+          </Button>
+          <Button
+            asChild
+            className="w-full lg:w-auto bg-green-600 hover:bg-green-700 text-white"
+          >
+            <Link href="/signup">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Sign Up
             </Link>
           </Button>
           <Button
@@ -177,7 +243,7 @@ export function NavbarClient({ isAuthenticatedInitial }: NavbarClientProps) {
             className="w-full lg:w-auto bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Link href="/membership">
-              <Shield className="h-4 w-4" /> Membership
+              <Shield className="mr-2 h-4 w-4" /> Membership
             </Link>
           </Button>
         </>

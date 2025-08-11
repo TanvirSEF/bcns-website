@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { AuthProvider } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
@@ -24,12 +25,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(geistSans.variable, "antialiased min-h-screen")}>
-        {/* FIXED: Added a wrapper div to contain all content and prevent overflow */}
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <AuthProvider>
+          {/* FIXED: Added a wrapper div to contain all content and prevent overflow */}
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
