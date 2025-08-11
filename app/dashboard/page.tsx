@@ -35,72 +35,79 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="relative min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-indigo-200/25 blur-[60px]" />
+      </div>
+
+      <div className="container mx-auto px-4 py-10 sm:py-12">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user.name}!
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
+            <span className="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-600 bg-clip-text text-transparent">
+              Welcome back, {user.name}!
+            </span>
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 max-w-2xl">
             Here&apos;s your dashboard overview for today.
           </p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <Card className="p-6 rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 border-0 shadow-lg shadow-emerald-100/50 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-200/50 hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-emerald-700">
                   Membership Status
                 </p>
-                <p className="text-2xl font-bold text-gray-900">Active</p>
+                <p className="text-2xl font-bold text-emerald-900">Active</p>
               </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Award className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 bg-gradient-to-br from-emerald-400 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
+                <Award className="h-6 w-6 text-white" />
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-lg shadow-blue-100/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-200/50 hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-blue-700">
                   Events Attended
                 </p>
-                <p className="text-2xl font-bold text-gray-900">12</p>
+                <p className="text-2xl font-bold text-blue-900">12</p>
               </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-blue-600" />
+              <div className="h-12 w-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
+                <Calendar className="h-6 w-6 text-white" />
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-violet-50 border-0 shadow-lg shadow-purple-100/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-200/50 hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-purple-700">
                   Publications
                 </p>
-                <p className="text-2xl font-bold text-gray-900">3</p>
+                <p className="text-2xl font-bold text-purple-900">3</p>
               </div>
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-purple-600" />
+              <div className="h-12 w-12 bg-gradient-to-br from-purple-400 to-violet-500 rounded-xl flex items-center justify-center shadow-lg">
+                <BookOpen className="h-6 w-6 text-white" />
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 border-0 shadow-lg shadow-orange-100/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-200/50 hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-orange-700">
                   Network Connections
                 </p>
-                <p className="text-2xl font-bold text-gray-900">47</p>
+                <p className="text-2xl font-bold text-orange-900">47</p>
               </div>
-              <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6 text-orange-600" />
+              <div className="h-12 w-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-xl flex items-center justify-center shadow-lg">
+                <Users className="h-6 w-6 text-white" />
               </div>
             </div>
           </Card>
@@ -110,7 +117,7 @@ export default function DashboardPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Recent Activities */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">
                   Recent Activities
@@ -149,7 +156,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Upcoming Events */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">
                   Upcoming Events
@@ -157,7 +164,7 @@ export default function DashboardPage() {
                 <Calendar className="h-5 w-5 text-gray-400" />
               </div>
               <div className="space-y-4">
-                <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border-0 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium text-gray-900">
                       Annual Conference 2024
@@ -177,18 +184,24 @@ export default function DashboardPage() {
                       <Clock className="h-4 w-4 mr-1" />
                       March 15-17, 2024
                     </div>
-                    <Button size="sm" variant="outline">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full"
+                    >
                       View Details
                     </Button>
                   </div>
                 </div>
 
-                <div className="border border-gray-200 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl p-4 border-0 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium text-gray-900">
                       Monthly Webinar
                     </h3>
-                    <Badge variant="outline">Next Week</Badge>
+                    <Badge variant="outline" className="bg-slate-50">
+                      Next Week
+                    </Badge>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">
                     Latest advances in pediatric epilepsy treatment.
@@ -198,7 +211,11 @@ export default function DashboardPage() {
                       <Clock className="h-4 w-4 mr-1" />
                       February 28, 2024
                     </div>
-                    <Button size="sm" variant="outline">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full"
+                    >
                       Register
                     </Button>
                   </div>
@@ -210,10 +227,10 @@ export default function DashboardPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Profile Summary */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="h-6 w-6 text-blue-600" />
+                <div className="h-12 w-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center shadow-lg">
+                  <User className="h-6 w-6 text-white" />
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">{user.name}</h3>
@@ -237,7 +254,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Quick Actions */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <h3 className="font-medium text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <Button
@@ -284,7 +301,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Notifications */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-medium text-gray-900">Notifications</h3>
                 <Bell className="h-5 w-5 text-gray-400" />

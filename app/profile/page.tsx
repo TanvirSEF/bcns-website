@@ -127,13 +127,22 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="relative min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-indigo-200/25 blur-[60px]" />
+      </div>
+
+      <div className="container mx-auto px-4 py-10 sm:py-12">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
+                <span className="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-600 bg-clip-text text-transparent">
+                  Profile
+                </span>
+              </h1>
               <p className="text-gray-600">
                 Manage your personal information and preferences
               </p>
@@ -144,12 +153,16 @@ export default function ProfilePage() {
                   <Button
                     disabled={saving}
                     onClick={handleSave}
-                    className="bg-green-600 hover:bg-green-700 disabled:opacity-60"
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-60 rounded-full"
                   >
                     <Save className="mr-2 h-4 w-4" />
                     {saving ? "Saving..." : "Save Changes"}
                   </Button>
-                  <Button onClick={handleCancel} variant="outline">
+                  <Button
+                    onClick={handleCancel}
+                    variant="outline"
+                    className="rounded-full"
+                  >
                     <X className="mr-2 h-4 w-4" />
                     Cancel
                   </Button>
@@ -157,7 +170,7 @@ export default function ProfilePage() {
               ) : (
                 <Button
                   onClick={() => setIsEditing(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-blue-600 hover:bg-blue-700 rounded-full"
                 >
                   <Edit3 className="mr-2 h-4 w-4" />
                   Edit Profile
@@ -170,11 +183,11 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Overview */}
           <div className="lg:col-span-1">
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <div className="text-center">
                 {/* Profile Picture */}
                 <div className="relative mx-auto mb-4">
-                  <div className="h-24 w-24 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center mx-auto">
+                  <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mx-auto ring-4 ring-white/50 shadow-2xl">
                     {editData.profilePictureUrl || user.profilePictureUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -186,11 +199,11 @@ export default function ProfilePage() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <User className="h-12 w-12 text-blue-600" />
+                      <User className="h-14 w-14 text-blue-600" />
                     )}
                   </div>
                   {isEditing && (
-                    <label className="absolute bottom-0 right-0 h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 cursor-pointer">
+                    <label className="absolute bottom-1 right-1 h-8 w-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white hover:from-blue-600 hover:to-indigo-700 cursor-pointer shadow-xl transition-all duration-200">
                       <Camera className="h-4 w-4" />
                       <input
                         type="file"
@@ -232,7 +245,7 @@ export default function ProfilePage() {
 
                 {/* Membership Status */}
                 <div className="mb-4">
-                  <Badge className="bg-green-100 text-green-800">
+                  <Badge className="bg-green-100 text-green-800 rounded-full">
                     <Shield className="mr-1 h-3 w-3" />
                     Active Member
                   </Badge>
@@ -250,7 +263,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* Quick Stats */}
-            <Card className="p-6 mt-6">
+            <Card className="p-6 mt-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <h3 className="font-semibold text-gray-900 mb-4">
                 Profile Completion
               </h3>
@@ -283,7 +296,7 @@ export default function ProfilePage() {
           {/* Profile Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Personal Information */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Personal Information
               </h3>
@@ -375,7 +388,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* Professional Information */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Professional Information
               </h3>
@@ -481,12 +494,12 @@ export default function ProfilePage() {
             </Card>
 
             {/* Quick Actions */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl bg-white/70 backdrop-blur-sm border-0 shadow-xl shadow-slate-200/50">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Quick Actions
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="border rounded-md p-4">
+                <div className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-xl p-4 shadow-sm border-0">
                   <h4 className="font-medium mb-2">Change Password</h4>
                   <div className="space-y-2">
                     <input
@@ -524,7 +537,7 @@ export default function ProfilePage() {
                           setPwdSaving(false);
                         }
                       }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-full"
                     >
                       {pwdSaving ? "Working..." : "Update Password"}
                     </Button>
@@ -532,7 +545,11 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button asChild variant="outline" className="h-auto p-4">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="h-auto p-4 rounded-2xl"
+                >
                   <Link
                     href="/dashboard"
                     className="flex flex-col items-center text-center"
@@ -543,7 +560,11 @@ export default function ProfilePage() {
                   </Link>
                 </Button>
 
-                <Button asChild variant="outline" className="h-auto p-4">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="h-auto p-4 rounded-2xl"
+                >
                   <Link
                     href="/events"
                     className="flex flex-col items-center text-center"
@@ -554,7 +575,11 @@ export default function ProfilePage() {
                   </Link>
                 </Button>
 
-                <Button asChild variant="outline" className="h-auto p-4">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="h-auto p-4 rounded-2xl"
+                >
                   <Link
                     href="/members"
                     className="flex flex-col items-center text-center"
