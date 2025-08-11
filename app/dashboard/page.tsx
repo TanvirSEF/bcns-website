@@ -35,10 +35,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-indigo-200/25 blur-[60px]" />
+    <div className="relative min-h-screen bg-gradient-to-b from-white via-slate-50 to-white overflow-x-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <div className="absolute top-0 left-0 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl transform -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-indigo-200/25 blur-[60px] transform translate-x-1/2 translate-y-1/2" />
       </div>
 
       <div className="container mx-auto px-4 py-10 sm:py-12">

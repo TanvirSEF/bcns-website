@@ -82,12 +82,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    tokenStorage.remove();
+    // Clear user state immediately to prevent race conditions
     setUser(null);
+    tokenStorage.remove();
+
     // Best-effort clear httpOnly cookies on server side
-    fetch("/api/auth/logout", { method: "POST" }).finally(() => {
-      window.location.href = "/login";
-    });
+    fetch("/api/auth/logout", { method: "POST" })
+      .catch(() => {
+        // Ignore fetch errors during logout
+        console.warn(
+          "Logout API call failed, but continuing with client-side logout"
+        );
+      })
+      .finally(() => {
+        // Force redirect to login after a short delay to ensure state is cleared
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 100);
+      });
   };
 
   const updateUser = (userData: Partial<User>) => {
@@ -120,7 +132,8 @@ export function useRequireAuth() {
 
   useEffect(() => {
     if (!auth.isLoading && !auth.isAuthenticated) {
-      // Redirect to login page if not authenticated
+      // Clear any existing state and redirect to login page if not authenticated
+      tokenStorage.remove();
       window.location.href = "/login";
     }
   }, [auth.isAuthenticated, auth.isLoading]);
