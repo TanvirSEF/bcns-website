@@ -95,8 +95,27 @@ export async function registerUser(
       },
       body: JSON.stringify(userData),
     });
-
-    return await handleApiResponse<AuthResponse>(response);
+    const raw = await handleApiResponse<unknown>(response);
+    // Normalize differing API shapes
+    const obj = raw as Record<string, unknown>;
+    const token =
+      (obj.token as string) ||
+      (obj.access_token as string) ||
+      (obj.accessToken as string);
+    const userFromObj = obj.user as Partial<User> | undefined;
+    const fallbackUser =
+      obj.id || obj.name || obj.email
+        ? {
+            id: (obj.id as string) || "unknown",
+            name: (obj.name as string) || "",
+            email: (obj.email as string) || "",
+          }
+        : undefined;
+    const user: User | undefined =
+      (userFromObj as User) || (fallbackUser as User | undefined);
+    const success =
+      obj.success !== undefined ? Boolean(obj.success) : Boolean(token || user);
+    return { ...(obj as object), success, token, user } as AuthResponse;
   } catch (error) {
     console.error("Register API error:", error);
     throw error;
@@ -170,7 +189,7 @@ export async function updateMe(
 
 export async function uploadProfileImage(file: File): Promise<{ url: string }> {
   const form = new FormData();
-  form.append("file", file);
+  form.append("file", file); // Frontend uses 'file', proxy converts to 'profilePicture'
   const res = await fetch(`/api/users/me`, {
     method: "POST",
     body: form,

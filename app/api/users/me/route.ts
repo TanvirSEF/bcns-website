@@ -68,11 +68,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward to your backend's new upload endpoint
+    // Forward to your backend's profile picture upload endpoint
     const upstreamForm = new FormData();
-    upstreamForm.append("file", file);
+    upstreamForm.append("profilePicture", file); // Match your backend's expected field name
     const response = await fetch(
-      "https://api.tanvirmern.com/api/users/upload-image",
+      "https://api.tanvirmern.com/api/users/me/profile-picture",
       {
         method: "POST",
         headers: {

@@ -163,8 +163,8 @@ export function NavbarClient() {
               <Button
                 variant="ghost"
                 className={cn(
-                  "h-8 w-8 rounded-full border-2 border-blue-600",
-                  isMobile && "w-full h-10 rounded-md justify-start"
+                  "h-8 w-8 rounded-full border-2 border-blue-600 p-0 overflow-hidden",
+                  isMobile && "w-full h-10 rounded-md justify-start p-2"
                 )}
               >
                 {isMobile ? (
@@ -177,30 +177,51 @@ export function NavbarClient() {
                           (user?.avatar as string)
                         }
                         alt="Avatar"
-                        className="mr-2 h-6 w-6 rounded-full object-cover"
+                        className="mr-2 h-6 w-6 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <User className="mr-2 h-4 w-4" />
+                      <User className="mr-2 h-4 w-4 flex-shrink-0" />
                     )}
                     {user?.name || "User Menu"}
                   </>
-                ) : user?.profilePictureUrl || user?.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={
-                      (user?.profilePictureUrl as string) ||
-                      (user?.avatar as string)
-                    }
-                    alt="Avatar"
-                    className="h-7 w-7 rounded-full object-cover"
-                  />
                 ) : (
-                  <User className="h-4 w-4" />
+                  <>
+                    {user?.profilePictureUrl || user?.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={
+                          (user?.profilePictureUrl as string) ||
+                          (user?.avatar as string)
+                        }
+                        alt="Avatar"
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-4 w-4" />
+                    )}
+                  </>
                 )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="flex items-center justify-start gap-2 p-2">
+                <div className="flex-shrink-0">
+                  {user?.profilePictureUrl || user?.avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={
+                        (user?.profilePictureUrl as string) ||
+                        (user?.avatar as string)
+                      }
+                      alt="Profile"
+                      className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
+                      <User className="h-5 w-5 text-blue-600" />
+                    </div>
+                  )}
+                </div>
                 <div className="flex flex-col space-y-1 leading-none">
                   <p className="font-medium">{user?.name}</p>
                   <p className="w-[200px] truncate text-sm text-muted-foreground">

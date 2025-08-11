@@ -3,7 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Eye, EyeOff, User, ShieldCheck, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  User,
+  ShieldCheck,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
@@ -11,11 +20,12 @@ import { registerUser, RegisterRequest } from "@/lib/api";
 
 export default function SignupPage() {
   const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = React.useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
-  
+
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
@@ -30,14 +40,14 @@ export default function SignupPage() {
   const { isAuthenticated } = useAuth();
   React.useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [isAuthenticated, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
     // Clear errors when user starts typing
     if (error) setError("");
     if (success) setSuccess("");
@@ -48,35 +58,35 @@ export default function SignupPage() {
       setError("Full name is required");
       return false;
     }
-    
+
     if (!formData.email.trim()) {
       setError("Email is required");
       return false;
     }
-    
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       setError("Please enter a valid email address");
       return false;
     }
-    
+
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
       return false;
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return false;
     }
-    
+
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
     setError("");
     setSuccess("");
@@ -89,28 +99,29 @@ export default function SignupPage() {
       };
 
       const response = await registerUser(registerData);
-      
-      if (response.success) {
-        setSuccess("Account created successfully! Redirecting to login...");
-        
-        // Auto-login if token is provided
-        if (response.token && response.user) {
-          login(response.token, response.user);
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 1500);
-        } else {
-          // Redirect to login page
-          setTimeout(() => {
-            router.push('/login');
-          }, 2000);
-        }
-      } else {
+
+      if (!response.success) {
         setError(response.message || "Registration failed. Please try again.");
+        return;
       }
+
+      // If the backend returns a token + user on registration, log the user in and redirect
+      if (response.token && response.user) {
+        login(response.token, response.user);
+        router.push("/dashboard");
+        return;
+      }
+
+      // Otherwise, show success and send user to login page
+      setSuccess("Account created successfully! Redirecting to login...");
+      setTimeout(() => router.push("/login"), 1000);
     } catch (error) {
-      console.error('Registration error:', error);
-      setError(error instanceof Error ? error.message : "Registration failed. Please try again.");
+      console.error("Registration error:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Registration failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +130,7 @@ export default function SignupPage() {
   const passwordStrength = React.useMemo(() => {
     const password = formData.password;
     if (!password) return { strength: 0, text: "" };
-    
+
     let strength = 0;
     if (password.length >= 6) strength++;
     if (password.length >= 8) strength++;
@@ -127,8 +138,15 @@ export default function SignupPage() {
     if (/[a-z]/.test(password)) strength++;
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-    
-    const levels = ["Very Weak", "Weak", "Fair", "Good", "Strong", "Very Strong"];
+
+    const levels = [
+      "Very Weak",
+      "Weak",
+      "Fair",
+      "Good",
+      "Strong",
+      "Very Strong",
+    ];
     return { strength, text: levels[strength] || "" };
   }, [formData.password]);
 
@@ -151,20 +169,27 @@ export default function SignupPage() {
             Join Our Community
           </h1>
           <p className="text-blue-100/90 text-base leading-relaxed mb-6">
-            Become a member of Bangladesh&apos;s premier child neurology society and contribute to advancing healthcare for children.
+            Become a member of Bangladesh&apos;s premier child neurology society
+            and contribute to advancing healthcare for children.
           </p>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <CheckCircle className="h-5 w-5 text-green-300" />
-              <span className="text-blue-100">Access to exclusive research resources</span>
+              <span className="text-blue-100">
+                Access to exclusive research resources
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle className="h-5 w-5 text-green-300" />
-              <span className="text-blue-100">Professional networking opportunities</span>
+              <span className="text-blue-100">
+                Professional networking opportunities
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle className="h-5 w-5 text-green-300" />
-              <span className="text-blue-100">Continuing education programs</span>
+              <span className="text-blue-100">
+                Continuing education programs
+              </span>
             </div>
           </div>
         </div>
@@ -274,7 +299,9 @@ export default function SignupPage() {
                     type="button"
                     onClick={() => setIsPasswordVisible((v) => !v)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:text-gray-700 focus:outline-none"
-                    aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                    aria-label={
+                      isPasswordVisible ? "Hide password" : "Show password"
+                    }
                   >
                     {isPasswordVisible ? (
                       <EyeOff className="h-4 w-4" />
@@ -287,20 +314,30 @@ export default function SignupPage() {
                   <div className="mt-2">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-gray-500">Password strength:</span>
-                      <span className={`font-medium ${
-                        passwordStrength.strength <= 2 ? 'text-red-500' :
-                        passwordStrength.strength <= 4 ? 'text-yellow-500' : 'text-green-500'
-                      }`}>
+                      <span
+                        className={`font-medium ${
+                          passwordStrength.strength <= 2
+                            ? "text-red-500"
+                            : passwordStrength.strength <= 4
+                            ? "text-yellow-500"
+                            : "text-green-500"
+                        }`}
+                      >
                         {passwordStrength.text}
                       </span>
                     </div>
                     <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full transition-all duration-300 ${
-                          passwordStrength.strength <= 2 ? 'bg-red-500' :
-                          passwordStrength.strength <= 4 ? 'bg-yellow-500' : 'bg-green-500'
+                          passwordStrength.strength <= 2
+                            ? "bg-red-500"
+                            : passwordStrength.strength <= 4
+                            ? "bg-yellow-500"
+                            : "bg-green-500"
                         }`}
-                        style={{ width: `${(passwordStrength.strength / 6) * 100}%` }}
+                        style={{
+                          width: `${(passwordStrength.strength / 6) * 100}%`,
+                        }}
                       />
                     </div>
                   </div>
@@ -332,7 +369,11 @@ export default function SignupPage() {
                     type="button"
                     onClick={() => setIsConfirmPasswordVisible((v) => !v)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:text-gray-700 focus:outline-none"
-                    aria-label={isConfirmPasswordVisible ? "Hide password" : "Show password"}
+                    aria-label={
+                      isConfirmPasswordVisible
+                        ? "Hide password"
+                        : "Show password"
+                    }
                   >
                     {isConfirmPasswordVisible ? (
                       <EyeOff className="h-4 w-4" />
@@ -341,9 +382,12 @@ export default function SignupPage() {
                     )}
                   </button>
                 </div>
-                {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                  <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
-                )}
+                {formData.confirmPassword &&
+                  formData.password !== formData.confirmPassword && (
+                    <p className="mt-1 text-xs text-red-500">
+                      Passwords do not match
+                    </p>
+                  )}
               </div>
 
               <Button
