@@ -169,9 +169,31 @@ export function NavbarClient() {
               >
                 {isMobile ? (
                   <>
-                    <User className="mr-2 h-4 w-4" />
+                    {user?.profilePictureUrl || user?.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={
+                          (user?.profilePictureUrl as string) ||
+                          (user?.avatar as string)
+                        }
+                        alt="Avatar"
+                        className="mr-2 h-6 w-6 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="mr-2 h-4 w-4" />
+                    )}
                     {user?.name || "User Menu"}
                   </>
+                ) : user?.profilePictureUrl || user?.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={
+                      (user?.profilePictureUrl as string) ||
+                      (user?.avatar as string)
+                    }
+                    alt="Avatar"
+                    className="h-7 w-7 rounded-full object-cover"
+                  />
                 ) : (
                   <User className="h-4 w-4" />
                 )}

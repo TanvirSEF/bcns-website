@@ -156,11 +156,40 @@ export async function updateMe(
     },
     body: JSON.stringify(payload),
   });
+  const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data.message || `HTTP ${response.status}`);
+    throw new Error(data?.message || `HTTP ${response.status}`);
   }
-  return response.json();
+  // Unwrap common shapes: { user: {...} } or {...}
+  if (data && typeof data === "object") {
+    if (data.user) return data.user as User;
+    if (data.data?.user) return data.data.user as User;
+  }
+  return data as User;
+}
+
+export async function uploadProfileImage(file: File): Promise<{ url: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`/api/users/me`, {
+    method: "POST",
+    body: form,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      data?.message || `Image upload failed (HTTP ${res.status})`
+    );
+  }
+  // Handle multiple possible response shapes from your backend
+  const url: string | undefined =
+    (data && (data.url as string)) ||
+    (data && (data.profilePictureUrl as string)) ||
+    (data?.user && (data.user.profilePictureUrl as string));
+  if (!url) {
+    throw new Error("Image URL missing in response");
+  }
+  return { url };
 }
 
 export interface ChangePasswordRequest {

@@ -42,7 +42,7 @@ export async function PATCH(request: NextRequest) {
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }

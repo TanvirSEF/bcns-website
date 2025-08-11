@@ -22,14 +22,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useRequireAuth } from "@/lib/auth-context";
-import { changeMyPassword, updateMe } from "@/lib/api";
+import { changeMyPassword, updateMe, uploadProfileImage } from "@/lib/api";
+import { toast } from "react-toastify";
 
 export default function ProfilePage() {
   const { user, isLoading, updateUser } = useRequireAuth();
   const [isEditing, setIsEditing] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [pwdSaving, setPwdSaving] = React.useState(false);
-  const [message, setMessage] = React.useState<string | null>(null);
+
   const [pwd, setPwd] = React.useState({
     currentPassword: "",
     newPassword: "",
@@ -51,13 +52,13 @@ export default function ProfilePage() {
       setEditData({
         name: user.name || "",
         email: user.email || "",
-        phone: "",
-        location: "",
-        bio: "",
+        phone: user.phone || "",
+        location: user.address || "",
+        bio: user.bio || "",
         specialization: "",
         experience: "",
         institution: "",
-        profilePictureUrl: "",
+        profilePictureUrl: user.profilePictureUrl || "",
       });
     }
   }, [user]);
@@ -76,27 +77,33 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     setSaving(true);
-    setMessage(null);
     try {
       const updated = await updateMe({
         name: editData.name || undefined,
         phone: editData.phone || undefined,
         address: editData.location || undefined,
         bio: editData.bio || undefined,
-        profilePictureUrl: undefined, // handled by future upload integration
+        profilePictureUrl: editData.profilePictureUrl || undefined,
       });
-      updateUser({
-        name: updated.name,
-        email: updated.email,
-        phone: (updated as any).phone,
-        address: (updated as any).address,
-        bio: (updated as any).bio,
-        avatar: (updated as any).profilePictureUrl,
+      updateUser(updated);
+      // Re-sync local form with saved values
+      setEditData({
+        name: updated.name || "",
+        email: updated.email || "",
+        phone: (updated as { phone?: string }).phone || "",
+        location: (updated as { address?: string }).address || "",
+        bio: (updated as { bio?: string }).bio || "",
+        specialization: editData.specialization,
+        experience: editData.experience,
+        institution: editData.institution,
+        profilePictureUrl:
+          (updated as { profilePictureUrl?: string }).profilePictureUrl || "",
       });
-      setMessage("Profile updated successfully");
+      toast.success("Profile updated successfully");
       setIsEditing(false);
-    } catch (e: any) {
-      setMessage(e?.message || "Failed to update profile");
+    } catch (e) {
+      const err = e as Error;
+      toast.error(err.message || "Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -135,11 +142,12 @@ export default function ProfilePage() {
               {isEditing ? (
                 <>
                   <Button
+                    disabled={saving}
                     onClick={handleSave}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-60"
                   >
                     <Save className="mr-2 h-4 w-4" />
-                    Save Changes
+                    {saving ? "Saving..." : "Save Changes"}
                   </Button>
                   <Button onClick={handleCancel} variant="outline">
                     <X className="mr-2 h-4 w-4" />
@@ -166,8 +174,20 @@ export default function ProfilePage() {
               <div className="text-center">
                 {/* Profile Picture */}
                 <div className="relative mx-auto mb-4">
-                  <div className="h-24 w-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-                    <User className="h-12 w-12 text-blue-600" />
+                  <div className="h-24 w-24 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center mx-auto">
+                    {editData.profilePictureUrl || user.profilePictureUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={
+                          editData.profilePictureUrl ||
+                          (user.profilePictureUrl as string)
+                        }
+                        alt="Profile"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-12 w-12 text-blue-600" />
+                    )}
                   </div>
                   {isEditing && (
                     <label className="absolute bottom-0 right-0 h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 cursor-pointer">
@@ -177,13 +197,25 @@ export default function ProfilePage() {
                         accept="image/*"
                         className="hidden"
                         onChange={async (e) => {
-                          const f = e.target.files?.[0];
-                          if (!f) return;
-                          const preview = URL.createObjectURL(f);
-                          setEditData({
-                            ...editData,
-                            profilePictureUrl: preview,
-                          });
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            toast.info("Uploading image...");
+                            const { url } = await uploadProfileImage(file);
+                            setEditData({
+                              ...editData,
+                              profilePictureUrl: url,
+                            });
+                            // Persist immediately so refresh keeps it
+                            const saved = await updateMe({
+                              profilePictureUrl: url,
+                            });
+                            updateUser(saved);
+                            toast.success("Profile picture updated");
+                          } catch (e) {
+                            const err = e as { message?: string };
+                            toast.error(err?.message || "Image upload failed");
+                          }
                         }}
                       />
                     </label>
@@ -255,9 +287,7 @@ export default function ProfilePage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Personal Information
               </h3>
-              {message && (
-                <p className="mb-3 text-sm text-green-700">{message}</p>
-              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -315,7 +345,7 @@ export default function ProfilePage() {
                   ) : (
                     <p className="text-gray-900 flex items-center">
                       <Phone className="mr-2 h-4 w-4 text-gray-400" />
-                      {editData.phone || "Not provided"}
+                      {user.phone || "Not provided"}
                     </p>
                   )}
                 </div>
@@ -337,7 +367,7 @@ export default function ProfilePage() {
                   ) : (
                     <p className="text-gray-900 flex items-center">
                       <MapPin className="mr-2 h-4 w-4 text-gray-400" />
-                      {editData.location || "Not provided"}
+                      {user.address || "Not provided"}
                     </p>
                   )}
                 </div>
@@ -443,7 +473,7 @@ export default function ProfilePage() {
                     />
                   ) : (
                     <p className="text-gray-900">
-                      {editData.bio || "No bio provided"}
+                      {user.bio || "No bio provided"}
                     </p>
                   )}
                 </div>
@@ -481,13 +511,15 @@ export default function ProfilePage() {
                       disabled={pwdSaving}
                       onClick={async () => {
                         setPwdSaving(true);
-                        setMessage(null);
                         try {
                           const res = await changeMyPassword(pwd);
-                          setMessage(res.message || "Password changed");
+                          toast.success(res.message || "Password changed");
                           setPwd({ currentPassword: "", newPassword: "" });
-                        } catch (e: any) {
-                          setMessage(e?.message || "Failed to change password");
+                        } catch (e) {
+                          const err = e as { message?: string };
+                          toast.error(
+                            err?.message || "Failed to change password"
+                          );
                         } finally {
                           setPwdSaving(false);
                         }

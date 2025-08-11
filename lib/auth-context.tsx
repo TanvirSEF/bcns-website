@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User, getUserProfile, tokenStorage } from "./api";
+import { User, getMe, tokenStorage } from "./api";
 
 interface AuthContextType {
   user: User | null;
@@ -48,14 +48,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         } catch {}
 
-        // Verify token by fetching user profile via our proxy.
-        // Our proxy will also forward upstream session cookies if present.
+        // Fetch full user profile via our proxy to Users service (has phone, bio, address, avatar).
         try {
-          const response = await getUserProfile(token);
-          if (response.success && response.user) {
-            setUser(response.user);
-          }
-        } catch (e) {
+          const me = await getMe(token);
+          if (me) setUser(me);
+        } catch {
           // Do not remove token on transient errors; keep optimistic user
           console.warn("Profile fetch failed during init");
         }

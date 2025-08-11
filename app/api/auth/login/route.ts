@@ -28,7 +28,9 @@ export async function POST(request: NextRequest) {
     });
 
     // If API returned a JWT token, set it as httpOnly cookie for SSR safety
-    const token = (data as any)?.accessToken || (data as any)?.token;
+    type UpstreamAuth = { accessToken?: string; token?: string };
+    const tokenSource = data as UpstreamAuth;
+    const token = tokenSource.accessToken || tokenSource.token;
     if (token) {
       nextRes.cookies.set("auth_token", token, {
         httpOnly: true,
