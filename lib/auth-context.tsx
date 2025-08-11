@@ -17,6 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isAuthenticated = !!user;
 
@@ -82,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    // Set logging out flag to prevent useRequireAuth interference
+    setIsLoggingOut(true);
     // Clear user state immediately to prevent race conditions
     setUser(null);
     tokenStorage.remove();
@@ -95,10 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
       })
       .finally(() => {
-        // Force redirect to login after a short delay to ensure state is cleared
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 100);
+        // Immediate redirect to avoid race conditions with useRequireAuth
+        window.location.href = "/login";
       });
   };
 
