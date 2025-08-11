@@ -39,12 +39,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  CustomDropdown,
+  CustomDropdownItem,
+  CustomDropdownSeparator,
+} from "@/components/ui/custom-dropdown";
 
 const navigationItems = [
   { name: "Home", href: "/", icon: null },
@@ -158,8 +156,9 @@ export function NavbarClient() {
               </Link>
             </Button>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <CustomDropdown
+            align="end"
+            trigger={
               <Button
                 variant="ghost"
                 className={cn(
@@ -202,64 +201,56 @@ export function NavbarClient() {
                   </>
                 )}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="flex items-center justify-start gap-2 p-2">
-                <div className="flex-shrink-0">
-                  {user?.profilePictureUrl || user?.avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={
-                        (user?.profilePictureUrl as string) ||
-                        (user?.avatar as string)
-                      }
-                      alt="Profile"
-                      className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
-                    />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
-                      <User className="h-5 w-5 text-blue-600" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium">{user?.name}</p>
-                  <p className="w-[200px] truncate text-sm text-muted-foreground">
-                    {user?.email}
-                  </p>
-                </div>
+            }
+          >
+            <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
+              <div className="flex-shrink-0">
+                {user?.profilePictureUrl || user?.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={
+                      (user?.profilePictureUrl as string) ||
+                      (user?.avatar as string)
+                    }
+                    alt="Profile"
+                    className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
+                    <User className="h-5 w-5 text-blue-600" />
+                  </div>
+                )}
               </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard" className="cursor-pointer">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/profile" className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </Link>
-              </DropdownMenuItem>
-              {isMobile && (
-                <DropdownMenuItem asChild>
-                  <Link href="/membership" className="cursor-pointer">
-                    <Shield className="mr-2 h-4 w-4" />
-                    Membership
-                  </Link>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="cursor-pointer text-red-600 focus:text-red-600"
-                onClick={logout}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <div className="flex flex-col space-y-1 leading-none min-w-0 flex-1">
+                <p className="font-medium truncate">{user?.name}</p>
+                <p className="truncate text-sm text-gray-500">{user?.email}</p>
+              </div>
+            </div>
+
+            <CustomDropdownItem href="/dashboard">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </CustomDropdownItem>
+
+            <CustomDropdownItem href="/profile">
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </CustomDropdownItem>
+
+            {isMobile && (
+              <CustomDropdownItem href="/membership">
+                <Shield className="mr-2 h-4 w-4" />
+                Membership
+              </CustomDropdownItem>
+            )}
+
+            <CustomDropdownSeparator />
+
+            <CustomDropdownItem onClick={logout} variant="destructive">
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </CustomDropdownItem>
+          </CustomDropdown>
         </>
       ) : (
         <>
