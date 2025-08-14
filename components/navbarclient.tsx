@@ -424,7 +424,82 @@ export function NavbarClient() {
                 <ActionButtons />
               </div>
 
-              <div className="lg:hidden">
+              <div className="lg:hidden flex items-center gap-3">
+                {/* Mobile user profile - show next to hamburger */}
+                {isAuthenticated && user && (
+                  <CustomDropdown
+                    align="end"
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-8 rounded-full border-2 border-blue-600 p-0 overflow-hidden"
+                      >
+                        {user?.profilePictureUrl || user?.avatar ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={
+                              (user?.profilePictureUrl as string) ||
+                              (user?.avatar as string)
+                            }
+                            alt="Avatar"
+                            className="h-full w-full rounded-full object-cover"
+                          />
+                        ) : (
+                          <User className="h-4 w-4" />
+                        )}
+                      </Button>
+                    }
+                  >
+                    <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
+                      <div className="flex-shrink-0">
+                        {user?.profilePictureUrl || user?.avatar ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={
+                              (user?.profilePictureUrl as string) ||
+                              (user?.avatar as string)
+                            }
+                            alt="Profile"
+                            className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
+                            <User className="h-5 w-5 text-blue-600" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col space-y-1 leading-none min-w-0 flex-1">
+                        <p className="font-medium truncate">{user?.name}</p>
+                        <p className="truncate text-sm text-gray-500">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <CustomDropdownItem href="/dashboard">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </CustomDropdownItem>
+
+                    <CustomDropdownItem href="/profile">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </CustomDropdownItem>
+
+                    <CustomDropdownItem href="/membership">
+                      <Shield className="mr-2 h-4 w-4" />
+                      Membership
+                    </CustomDropdownItem>
+
+                    <CustomDropdownSeparator />
+
+                    <CustomDropdownItem onClick={logout} variant="destructive">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </CustomDropdownItem>
+                  </CustomDropdown>
+                )}
+
                 <Sheet
                   open={isMobileMenuOpen}
                   onOpenChange={setIsMobileMenuOpen}
@@ -470,8 +545,47 @@ export function NavbarClient() {
                         )}
                       </Accordion>
 
-                      {/* Added login and membership buttons to mobile nav */}
-                      <ActionButtons isMobile />
+                      {/* Mobile action buttons - only show for non-authenticated users */}
+                      {!isAuthenticated && (
+                        <div className="flex flex-col w-full pt-6 border-t border-gray-200 mt-6 gap-3">
+                          <Button
+                            asChild
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            <Link
+                              href="/login"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <User className="mr-2 h-4 w-4" />
+                              Login
+                            </Link>
+                          </Button>
+                          <Button
+                            asChild
+                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            <Link
+                              href="/signup"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <UserPlus className="mr-2 h-4 w-4" />
+                              Sign Up
+                            </Link>
+                          </Button>
+                          <Button
+                            asChild
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                          >
+                            <Link
+                              href="/membership"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <Shield className="mr-2 h-4 w-4" />
+                              Membership
+                            </Link>
+                          </Button>
+                        </div>
+                      )}
                     </nav>
                   </SheetContent>
                 </Sheet>
