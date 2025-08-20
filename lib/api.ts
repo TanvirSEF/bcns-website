@@ -28,6 +28,7 @@ export interface AuthResponse {
   role?: string;
   createdAt?: string;
   error?: string;
+  details?: string;
 }
 
 export interface User {
@@ -56,7 +57,19 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     // Handle different error response formats
     const errorMessage =
-      data.message || data.error || `HTTP error! status: ${response.status}`;
+      data.message ||
+      data.error ||
+      data.details ||
+      `HTTP error! status: ${response.status}`;
+
+    // Log detailed error information for debugging
+    console.error("API Error Response:", {
+      status: response.status,
+      statusText: response.statusText,
+      data,
+      url: response.url,
+    });
+
     throw new Error(errorMessage);
   }
 
@@ -79,6 +92,19 @@ export async function loginUser(
     return await handleApiResponse<AuthResponse>(response);
   } catch (error) {
     console.error("Login API error:", error);
+
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes("timeout")) {
+        throw new Error("Login request timed out. Please try again.");
+      }
+      if (error.message.includes("connect")) {
+        throw new Error(
+          "Unable to connect to authentication service. Please check your internet connection."
+        );
+      }
+    }
+
     throw error;
   }
 }
@@ -95,7 +121,9 @@ export async function registerUser(
       },
       body: JSON.stringify(userData),
     });
+
     const raw = await handleApiResponse<unknown>(response);
+
     // Normalize differing API shapes
     const obj = raw as Record<string, unknown>;
     const token =
@@ -118,6 +146,24 @@ export async function registerUser(
     return { ...(obj as object), success, token, user } as AuthResponse;
   } catch (error) {
     console.error("Register API error:", error);
+
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes("timeout")) {
+        throw new Error("Registration request timed out. Please try again.");
+      }
+      if (error.message.includes("connect")) {
+        throw new Error(
+          "Unable to connect to authentication service. Please check your internet connection."
+        );
+      }
+      if (error.message.includes("External API error")) {
+        throw new Error(
+          "Authentication service is currently unavailable. Please try again later."
+        );
+      }
+    }
+
     throw error;
   }
 }
