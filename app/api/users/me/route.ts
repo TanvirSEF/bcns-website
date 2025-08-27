@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  fetchFromBackend,
+  fetchMultipartFromBackend,
+  getAuthHeader,
+} from "@/lib/server-utils";
 
 function buildAuthHeader(request: NextRequest): string | undefined {
-  let authHeader = request.headers.get("authorization") || undefined;
+  let authHeader = getAuthHeader(request);
   if (!authHeader) {
     const cookieToken = request.cookies.get("auth_token")?.value;
     if (cookieToken) authHeader = `Bearer ${cookieToken}`;
@@ -19,21 +24,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const response = await fetch("https://api.tanvirmern.com/api/users/me", {
-      method: "GET",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/json",
-      },
-    });
-
-    const data = await response.json();
+    const data = await fetchFromBackend<Record<string, unknown>>(
+      "/api/users/me",
+      {
+        method: "GET",
+        headers: {
+          Authorization: authHeader,
+        },
+      }
+    );
     const normalized =
       data && typeof data === "object"
-        ? data.user || data.data?.user || data
+        ? (data as { user?: unknown; data?: { user?: unknown } }).user ||
+          (data as { user?: unknown; data?: { user?: unknown } }).data?.user ||
+          data
         : data;
     return NextResponse.json(normalized, {
-      status: response.status,
+      status: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, PATCH",
@@ -71,20 +78,17 @@ export async function POST(request: NextRequest) {
     // Forward to your backend's profile picture upload endpoint
     const upstreamForm = new FormData();
     upstreamForm.append("profilePicture", file); // Match your backend's expected field name
-    const response = await fetch(
-      "https://api.tanvirmern.com/api/users/me/profile-picture",
+    const data = await fetchMultipartFromBackend(
+      "/api/users/me/profile-picture",
+      upstreamForm,
       {
-        method: "POST",
         headers: {
           Authorization: authHeader,
         },
-        body: upstreamForm,
       }
     );
-
-    const data = await response.json();
     return NextResponse.json(data, {
-      status: response.status,
+      status: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, PATCH, POST",
@@ -111,23 +115,25 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json();
 
-    const response = await fetch("https://api.tanvirmern.com/api/users/me", {
-      method: "PATCH",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await response.json();
+    const data = await fetchFromBackend<Record<string, unknown>>(
+      "/api/users/me",
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: authHeader,
+        },
+        body: JSON.stringify(body),
+      }
+    );
     // Normalize response to always return the user object at top-level
     const normalized =
       data && typeof data === "object"
-        ? data.user || data.data?.user || data
+        ? (data as { user?: unknown; data?: { user?: unknown } }).user ||
+          (data as { user?: unknown; data?: { user?: unknown } }).data?.user ||
+          data
         : data;
     return NextResponse.json(normalized, {
-      status: response.status,
+      status: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, PATCH",

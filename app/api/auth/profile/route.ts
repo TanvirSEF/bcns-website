@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fetchFromBackend, getAuthHeader } from "@/lib/server-utils";
 
 export async function GET(request: NextRequest) {
   try {
-    let authHeader = request.headers.get("authorization");
+    let authHeader = getAuthHeader(request);
     // Fallback to token stored as httpOnly cookie during login proxy
     if (!authHeader) {
       const cookieToken = request.cookies.get("auth_token")?.value;
@@ -25,22 +26,16 @@ export async function GET(request: NextRequest) {
       ? Buffer.from(upstreamCookieEncoded, "base64").toString("utf8")
       : undefined;
 
-    const response = await fetch(
-      "https://api.tanvirmern.com/api/auth/profile",
-      {
-        method: "GET",
-        headers: {
-          Authorization: authHeader,
-          "Content-Type": "application/json",
-          ...(upstreamCookie ? { cookie: upstreamCookie } : {}),
-        },
-      }
-    );
-
-    const data = await response.json();
+    const data = await fetchFromBackend("/api/auth/profile", {
+      method: "GET",
+      headers: {
+        Authorization: authHeader,
+        ...(upstreamCookie ? { cookie: upstreamCookie } : {}),
+      },
+    });
 
     return NextResponse.json(data, {
-      status: response.status,
+      status: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET",

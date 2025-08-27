@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { getAllMembers, User as UserType } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { tokenStorage } from "@/lib/api";
 
 const Members = () => {
   const [members, setMembers] = useState<UserType[]>([]);
@@ -34,17 +33,12 @@ const Members = () => {
     const fetchMembers = async () => {
       try {
         setLoading(true);
-        const token = tokenStorage.get();
-        console.log("🔍 Members Page - Token:", token ? "Present" : "Missing");
-        console.log("🔍 Members Page - isAuthenticated:", isAuthenticated);
 
         // Only fetch members, not admins for security
-        const response = await getAllMembers(token || undefined);
-        console.log("📡 Members Page - API Response:", response);
+        const response = await getAllMembers();
 
         setMembers(response.members);
         setFilteredMembers(response.members);
-        console.log("👥 Members Page - Set members:", response.members.length);
       } catch (err) {
         console.error("❌ Members Page - Error fetching members:", err);
         setError("Failed to load members. Please try again later.");
@@ -54,10 +48,7 @@ const Members = () => {
     };
 
     if (isAuthenticated) {
-      console.log("🚀 Members Page - Fetching members...");
       fetchMembers();
-    } else {
-      console.log("🔒 Members Page - Not authenticated, skipping fetch");
     }
   }, [isAuthenticated]);
 

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
     const response = await fetch(
-      "https://api.tanvirmern.com/api/auth/register",
+      `${process.env.BACKEND_API_URL}/api/auth/register`,
       {
         method: "POST",
         headers: {

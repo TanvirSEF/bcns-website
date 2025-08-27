@@ -1,13 +1,14 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User, getMe, tokenStorage } from "./api";
+import type { User } from "./types";
+import { getMe } from "./user";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, userData?: User) => Promise<void>;
+  login: (userData?: User) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
 }
@@ -19,37 +20,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const isAuthenticated = !!user;
 
-  // Check for existing token on mount
+  // Check for existing authentication on mount
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = tokenStorage.get();
-        if (token) {
-          // Optimistically derive minimal user info from JWT to avoid logout
-          // on reload if the profile endpoint is temporarily unavailable.
-          try {
-            const base64 = token.split(".")[1];
-            const decoded = JSON.parse(
-              typeof window !== "undefined"
-                ? atob(base64)
-                : Buffer.from(base64, "base64").toString()
-            );
-            if (decoded?.email || decoded?.name || decoded?.sub) {
-              setUser({
-                id: decoded.sub || decoded.userId || "unknown",
-                name: decoded.name || decoded.email?.split("@")[0] || "Member",
-                email: decoded.email || "",
-              });
-            }
-          } catch {}
-        }
-
-        // Always attempt to fetch the full profile (supports cookie-only sessions too)
+        // Always attempt to fetch the full profile using HttpOnly cookies
         try {
-          const me = await getMe(token || undefined);
+          const me = await getMe();
           if (me) setUser(me);
         } catch {
-          // Do not remove token on transient errors; keep optimistic user if any
           console.warn("Profile fetch failed during init");
         }
       } catch (error) {
@@ -62,16 +41,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
   }, []);
 
-  const login = async (token: string, userData?: User) => {
+  const login = async (userData?: User) => {
     setIsLoading(true);
-    tokenStorage.set(token);
     // Optimistically set user if provided (from immediate login response)
     if (userData) {
       setUser(userData);
     }
     try {
       // Always fetch the full profile to populate fields like avatar, phone, etc.
-      const me = await getMe(token);
+      const me = await getMe();
       if (me) setUser(me);
     } catch {
       console.warn("Profile fetch failed right after login");
@@ -83,7 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     // Clear user state immediately to prevent race conditions
     setUser(null);
-    tokenStorage.remove();
 
     // Best-effort clear httpOnly cookies on server side
     fetch("/api/auth/logout", { method: "POST" })
@@ -129,8 +106,7 @@ export function useRequireAuth() {
 
   useEffect(() => {
     if (!auth.isLoading && !auth.isAuthenticated) {
-      // Clear any existing state and redirect to login page if not authenticated
-      tokenStorage.remove();
+      // Redirect to login page if not authenticated
       window.location.href = "/login";
     }
   }, [auth.isAuthenticated, auth.isLoading]);

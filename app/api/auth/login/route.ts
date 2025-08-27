@@ -8,14 +8,17 @@ export async function POST(request: NextRequest) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    const response = await fetch("https://api.tanvirmern.com/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
+    const response = await fetch(
+      `${process.env.BACKEND_API_URL}/api/auth/login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      }
+    );
 
     clearTimeout(timeoutId);
 

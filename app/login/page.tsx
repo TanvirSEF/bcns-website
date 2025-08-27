@@ -78,7 +78,7 @@ export default function LoginPage() {
           response.token || response.access_token || response.accessToken;
 
         if (token) {
-          await login(token, userData);
+          await login(userData);
         }
         router.push("/dashboard");
       } else {

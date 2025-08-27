@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fetchFromBackend, getAuthHeader } from "@/lib/server-utils";
 
 function buildAuthHeader(request: NextRequest): string | undefined {
-  let authHeader = request.headers.get("authorization") || undefined;
+  let authHeader = getAuthHeader(request);
   if (!authHeader) {
     const cookieToken = request.cookies.get("auth_token")?.value;
     if (cookieToken) authHeader = `Bearer ${cookieToken}`;
@@ -21,21 +22,15 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json();
 
-    const response = await fetch(
-      "https://api.tanvirmern.com/api/users/me/change-password",
-      {
-        method: "PATCH",
-        headers: {
-          Authorization: authHeader,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      }
-    );
-
-    const data = await response.json();
+    const data = await fetchFromBackend("/api/users/me/change-password", {
+      method: "PATCH",
+      headers: {
+        Authorization: authHeader,
+      },
+      body: JSON.stringify(body),
+    });
     return NextResponse.json(data, {
-      status: response.status,
+      status: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "PATCH",
