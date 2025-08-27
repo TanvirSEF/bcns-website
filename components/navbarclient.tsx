@@ -22,7 +22,7 @@ import {
   Award,
   LogOut,
   LayoutDashboard,
-  UserPlus,
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -263,15 +263,7 @@ export function NavbarClient() {
               Login
             </Link>
           </Button>
-          <Button
-            asChild
-            className="w-full lg:w-auto bg-green-600 hover:bg-green-700 text-white"
-          >
-            <Link href="/signup">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Sign Up
-            </Link>
-          </Button>
+
           <Button
             asChild
             className="w-full lg:w-auto bg-blue-500 hover:bg-blue-600 text-white"
@@ -560,18 +552,7 @@ export function NavbarClient() {
                               Login
                             </Link>
                           </Button>
-                          <Button
-                            asChild
-                            className="w-full bg-green-600 hover:bg-green-700 text-white"
-                          >
-                            <Link
-                              href="/signup"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                              <UserPlus className="mr-2 h-4 w-4" />
-                              Sign Up
-                            </Link>
-                          </Button>
+
                           <Button
                             asChild
                             className="w-full bg-blue-500 hover:bg-blue-600 text-white"

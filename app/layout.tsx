@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { AuthProvider } from "@/lib/auth-context";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { cn } from "@/lib/utils";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -27,20 +28,22 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(geistSans.variable, "antialiased min-h-screen")}>
-        <AuthProvider>
-          {/* FIXED: Added a wrapper div to contain all content and prevent overflow */}
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <ToastContainer
-            position="top-right"
-            newestOnTop
-            closeOnClick
-            pauseOnHover={false}
-          />
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            {/* FIXED: Added a wrapper div to contain all content and prevent overflow */}
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <ToastContainer
+              position="top-right"
+              newestOnTop
+              closeOnClick
+              pauseOnHover={false}
+            />
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
