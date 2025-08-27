@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Image from 'next/image';
+import Image from "next/image";
 
-import { 
-  Users, 
-  Search, 
-  User, 
-  Building, 
-  Mail, 
+import {
+  Users,
+  Search,
+  User,
+  Building,
+  Mail,
   Phone,
   Award,
   Shield,
   Loader2,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import { getAllMembers, User as UserType } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -26,7 +26,8 @@ const Members = () => {
   const [filteredMembers, setFilteredMembers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -36,16 +37,17 @@ const Members = () => {
         const token = tokenStorage.get();
         console.log("🔍 Members Page - Token:", token ? "Present" : "Missing");
         console.log("🔍 Members Page - isAuthenticated:", isAuthenticated);
-        
+
+        // Only fetch members, not admins for security
         const response = await getAllMembers(token || undefined);
         console.log("📡 Members Page - API Response:", response);
-        
+
         setMembers(response.members);
         setFilteredMembers(response.members);
         console.log("👥 Members Page - Set members:", response.members.length);
       } catch (err) {
-        console.error('❌ Members Page - Error fetching members:', err);
-        setError('Failed to load members. Please try again later.');
+        console.error("❌ Members Page - Error fetching members:", err);
+        setError("Failed to load members. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -60,17 +62,20 @@ const Members = () => {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredMembers(members);
-    } else {
-      const filtered = members.filter(member => 
-        member.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.address?.toLowerCase().includes(searchQuery.toLowerCase())
+    let filtered = members;
+
+    // Apply search filter
+    if (searchQuery.trim() !== "") {
+      filtered = filtered.filter(
+        (member) =>
+          member.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          member.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          member.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          member.address?.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setFilteredMembers(filtered);
     }
+
+    setFilteredMembers(filtered);
   }, [searchQuery, members]);
 
   if (!isAuthenticated) {
@@ -79,7 +84,9 @@ const Members = () => {
         <Card className="w-full max-w-md mx-4">
           <CardContent className="p-8 text-center">
             <Shield className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Restricted</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Access Restricted
+            </h2>
             <p className="text-gray-600 mb-6">
               You need to be logged in to view our members directory.
             </p>
@@ -110,12 +117,13 @@ const Members = () => {
             Our Members
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Meet the distinguished pediatric neurologists who are part of the Bangladesh Child Neurology Society.
-            Connect with experts, share knowledge, and advance the field together.
+            Meet the distinguished pediatric neurologists who are part of the
+            Bangladesh Child Neurology Society. Connect with experts, share
+            knowledge, and advance the field together.
           </p>
         </div>
 
-        {/* Search and Stats Section */}
+        {/* Search Section */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
             <div className="relative w-full lg:w-96">
@@ -124,8 +132,10 @@ const Members = () => {
                 type="text"
                 placeholder="Search members by name, email, or affiliation..."
                 value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/80 backdrop-blur-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500 w-full h-10 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchQuery(e.target.value)
+                }
+                className="pl-10 bg-white/80 backdrop-blur-sm border-gray-300 w-full h-10 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -165,8 +175,8 @@ const Members = () => {
                   Error Loading Members
                 </h5>
                 <p className="text-red-700">{error}</p>
-                <Button 
-                  onClick={() => window.location.reload()} 
+                <Button
+                  onClick={() => window.location.reload()}
                   className="mt-4 bg-red-600 hover:bg-red-700 text-white"
                 >
                   Try Again
@@ -184,17 +194,16 @@ const Members = () => {
                 <CardContent className="p-12 text-center">
                   <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {searchQuery ? 'No members found' : 'No members available'}
+                    {searchQuery ? "No members found" : "No members available"}
                   </h3>
                   <p className="text-gray-600">
-                    {searchQuery 
-                      ? 'Try adjusting your search terms or browse all members.'
-                      : 'Members will appear here once they join the society.'
-                    }
+                    {searchQuery
+                      ? "Try adjusting your search terms or browse all members."
+                      : "Members will appear here once they join the society."}
                   </p>
                   {searchQuery && (
-                    <Button 
-                      onClick={() => setSearchQuery('')} 
+                    <Button
+                      onClick={() => setSearchQuery("")}
                       className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
                     >
                       Clear Search
@@ -205,21 +214,30 @@ const Members = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredMembers.map((member) => (
-                  <Card 
-                    key={member.id} 
+                  <Card
+                    key={member.id}
                     className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 group hover:scale-[1.02]"
                   >
                     <CardContent className="p-6">
                       {/* Member Photo */}
                       <div className="flex justify-center mb-4">
                         <div className="relative">
-                          {(member.profilePictureUrl || member.avatar) ? (
+                          {(member.profilePictureUrl || member.avatar) &&
+                          !failedImages.has(member.id || "") ? (
                             <Image
-                              src={member.profilePictureUrl || member.avatar || ''}
-                              alt={member.name || 'Member'}
+                              src={
+                                member.profilePictureUrl || member.avatar || ""
+                              }
+                              alt={member.name || "Member"}
                               width={80}
                               height={80}
                               className="w-20 h-20 rounded-full object-cover border-4 border-blue-100 group-hover:border-blue-200 transition-colors duration-300"
+                              onError={() => {
+                                // Add to failed images set
+                                setFailedImages((prev) =>
+                                  new Set(prev).add(member.id || "")
+                                );
+                              }}
                             />
                           ) : (
                             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center border-4 border-blue-100 group-hover:border-blue-200 transition-colors duration-300">
@@ -235,9 +253,9 @@ const Members = () => {
                       {/* Member Info */}
                       <div className="text-center">
                         <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors duration-300">
-                          {member.name || 'Member Name'}
+                          {member.name || "Member Name"}
                         </h3>
-                        
+
                         {member.address && (
                           <div className="flex items-center justify-center gap-1 text-sm text-gray-600 mb-2">
                             <Building className="h-3 w-3" />
@@ -265,7 +283,8 @@ const Members = () => {
                         {member.createdAt && (
                           <div className="mt-3 pt-3 border-t border-gray-100">
                             <p className="text-xs text-gray-500">
-                              Member since {new Date(member.createdAt).getFullYear()}
+                              Member since{" "}
+                              {new Date(member.createdAt).getFullYear()}
                             </p>
                           </div>
                         )}

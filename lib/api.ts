@@ -281,9 +281,15 @@ export async function changeMyPassword(
   return data;
 }
 
-// Fetch all members
-export async function getAllMembers(token?: string): Promise<{ success: boolean; members: User[]; total: number }> {
-  const response = await fetch(`/api/members`, {
+// Fetch all members (members only, no admins for security)
+export async function getAllMembers(
+  token?: string
+): Promise<{ success: boolean; members: User[]; total: number }> {
+  const url = new URL("/api/members", window.location.origin);
+  // Always fetch only members for security
+  url.searchParams.append("role", "member");
+
+  const response = await fetch(url.toString(), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -291,12 +297,12 @@ export async function getAllMembers(token?: string): Promise<{ success: boolean;
     },
     cache: "no-store",
   });
-  
+
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.message || `HTTP ${response.status}`);
   }
-  
+
   return response.json();
 }
 
