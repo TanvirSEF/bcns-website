@@ -1,96 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const BACKEND_URL = process.env.BACKEND_API_URL || 'https://api.tanvirmern.com';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Add timeout to the fetch request
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
 
-    const response = await fetch(
-      `${process.env.BACKEND_API_URL}/api/auth/register`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      }
-    );
-
-    clearTimeout(timeoutId);
+    const data = await response.json();
 
     if (!response.ok) {
-      console.error("External API error:", {
-        status: response.status,
-        statusText: response.statusText,
-        url: response.url,
-      });
-
-      const errorData = await response
-        .text()
-        .catch(() => "Unable to read error response");
-      console.error("External API error response:", errorData);
-
       return NextResponse.json(
-        {
-          success: false,
-          message: `External API error: ${response.status} ${response.statusText}`,
-          details: errorData,
-        },
+        { success: false, message: data.message || 'Registration failed' },
         { status: response.status }
       );
     }
 
-    const data = await response.json();
-
-    return NextResponse.json(data, {
-      status: response.status,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
+    return NextResponse.json({
+      success: true,
+      data: data,
     });
+
   } catch (error) {
-    console.error("Proxy register error:", error);
-
-    // Handle specific error types
-    if (error instanceof Error) {
-      if (error.name === "AbortError") {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Request timeout - external API is not responding",
-          },
-          { status: 504 }
-        );
-      }
-
-      if (error.message.includes("fetch")) {
-        return NextResponse.json(
-          { success: false, message: "Unable to connect to external API" },
-          { status: 503 }
-        );
-      }
-    }
-
+    console.error('Register API error:', error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }
     );
   }
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
 }

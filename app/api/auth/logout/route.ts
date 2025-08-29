@@ -1,32 +1,49 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST() {
-  // Clear auth cookies we may have set during login proxy
-  const res = new NextResponse(null, { status: 204 });
-  res.cookies.set("auth_token", "", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(0),
-  });
-  res.cookies.set("upstream_session", "", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(0),
-  });
-  return res;
+const BACKEND_URL = process.env.BACKEND_API_URL || 'https://api.tanvirmern.com';
+
+function getToken(request: NextRequest): string | null {
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7);
+  }
+  return request.cookies.get('auth_token')?.value || null;
 }
 
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+export async function POST(request: NextRequest) {
+  try {
+    const token = getToken(request);
+    
+    if (token) {
+      // Try to logout from backend
+      try {
+        await fetch(`${BACKEND_URL}/api/auth/logout`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (error) {
+        // Ignore backend logout errors
+        console.log('Backend logout failed:', error);
+      }
+    }
+
+    // Always return success to clear frontend state
+    const response = NextResponse.json({
+      success: true,
+      message: 'Logged out successfully',
+    });
+
+    // Clear any cookies
+    response.cookies.delete('auth_token');
+    response.cookies.delete('upstream_session');
+
+    return response;
+
+  } catch (error) {
+    console.error('Logout API error:', error);
+    return NextResponse.json(
+      { success: false, message: "Logout failed" },
+      { status: 500 }
+    );
+  }
 }

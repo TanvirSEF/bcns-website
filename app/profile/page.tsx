@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useRequireAuth } from "@/lib/auth-context";
-import { changeMyPassword, updateMe, uploadProfileImage } from "@/lib/api";
+import { changePassword, updateProfile, uploadProfileImage } from "@/lib/api";
 import { toast } from "react-toastify";
 
 export default function ProfilePage() {
@@ -78,27 +78,28 @@ export default function ProfilePage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const updated = await updateMe({
+      const updated = await updateProfile({
         name: editData.name || undefined,
         phone: editData.phone || undefined,
         address: editData.location || undefined,
         bio: editData.bio || undefined,
         profilePictureUrl: editData.profilePictureUrl || undefined,
       });
-      updateUser(updated);
-      // Re-sync local form with saved values
-      setEditData({
-        name: updated.name || "",
-        email: updated.email || "",
-        phone: (updated as { phone?: string }).phone || "",
-        location: (updated as { address?: string }).address || "",
-        bio: (updated as { bio?: string }).bio || "",
-        specialization: editData.specialization,
-        experience: editData.experience,
-        institution: editData.institution,
-        profilePictureUrl:
-          (updated as { profilePictureUrl?: string }).profilePictureUrl || "",
-      });
+      if (updated.success && updated.data) {
+        updateUser(updated.data);
+        // Re-sync local form with saved values
+        setEditData({
+          name: updated.data.name || "",
+          email: updated.data.email || "",
+          phone: updated.data.phone || "",
+          location: updated.data.address || "",
+          bio: updated.data.bio || "",
+          specialization: editData.specialization,
+          experience: editData.experience,
+          institution: editData.institution,
+          profilePictureUrl: updated.data.profilePictureUrl || "",
+        });
+      }
       toast.success("Profile updated successfully");
       setIsEditing(false);
     } catch (e) {
@@ -217,16 +218,23 @@ export default function ProfilePage() {
                           if (!file) return;
                           try {
                             toast.info("Uploading image...");
-                            const { url } = await uploadProfileImage(file);
-                            setEditData({
-                              ...editData,
-                              profilePictureUrl: url,
-                            });
+                            const response = await uploadProfileImage(file);
+                            const url = response.data?.imageUrl;
+                            if (url) {
+                              setEditData({
+                                ...editData,
+                                profilePictureUrl: url,
+                              });
+                            }
                             // Persist immediately so refresh keeps it
-                            const saved = await updateMe({
-                              profilePictureUrl: url,
-                            });
-                            updateUser(saved);
+                            if (url) {
+                              const saved = await updateProfile({
+                                profilePictureUrl: url,
+                              });
+                              if (saved.success && saved.data) {
+                                updateUser(saved.data);
+                              }
+                            }
                             toast.success("Profile picture updated");
                           } catch (e) {
                             const err = e as { message?: string };
@@ -528,7 +536,7 @@ export default function ProfilePage() {
                       onClick={async () => {
                         setPwdSaving(true);
                         try {
-                          const res = await changeMyPassword(pwd);
+                          const res = await changePassword(pwd.currentPassword, pwd.newPassword);
                           toast.success(res.message || "Password changed");
                           setPwd({ currentPassword: "", newPassword: "" });
                         } catch (e) {

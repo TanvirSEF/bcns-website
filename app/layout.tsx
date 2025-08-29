@@ -30,7 +30,6 @@ export default function RootLayout({
       <body className={cn(geistSans.variable, "antialiased min-h-screen")}>
         <ErrorBoundary>
           <AuthProvider>
-            {/* FIXED: Added a wrapper div to contain all content and prevent overflow */}
             <div className="flex flex-col min-h-screen">
               <Navbar />
               <main className="flex-1">{children}</main>

@@ -1,15 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import type { User } from "./types";
-import { getMe } from "./user";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { User, logoutUser, getProfile } from './api';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData?: User) => Promise<void>;
-  logout: () => void;
+  login: (userData: User) => void;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
 }
 
@@ -18,98 +19,126 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const isAuthenticated = !!user;
 
-  // Check for existing authentication on mount
+  // Initialize auth state on mount
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initAuth = async () => {
       try {
-        // Always attempt to fetch the full profile using HttpOnly cookies
-        try {
-          const me = await getMe();
-          if (me) setUser(me);
-        } catch {
-          console.warn("Profile fetch failed during init");
+        setIsLoading(true);
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        
+        if (!token) {
+          setUser(null);
+          return;
+        }
+
+        const response = await getProfile();
+        
+        if (response.success && response.data) {
+          setUser(response.data);
+        } else {
+          // Invalid token - clean up
+          localStorage.removeItem('auth_token');
+          setUser(null);
         }
       } catch (error) {
-        console.error("Auth initialization error:", error);
+        console.error('Authentication failed:', error);
+        // Clean up on error
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+        }
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    initializeAuth();
+    initAuth();
   }, []);
 
-  const login = async (userData?: User) => {
+  const login = (userData: User) => {
+    setUser(userData);
+    setIsLoading(false);
+  };
+
+  const logout = async () => {
     setIsLoading(true);
-    // Optimistically set user if provided (from immediate login response)
-    if (userData) {
-      setUser(userData);
-    }
     try {
-      // Always fetch the full profile to populate fields like avatar, phone, etc.
-      const me = await getMe();
-      if (me) setUser(me);
-    } catch {
-      console.warn("Profile fetch failed right after login");
+      await logoutUser();
+    } catch (error) {
+      console.error('Logout error:', error);
     } finally {
+      setUser(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+      }
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    // Clear user state immediately to prevent race conditions
-    setUser(null);
-
-    // Best-effort clear httpOnly cookies on server side
-    fetch("/api/auth/logout", { method: "POST" })
-      .catch(() => {
-        // Ignore fetch errors during logout
-        console.warn(
-          "Logout API call failed, but continuing with client-side logout"
-        );
-      })
-      .finally(() => {
-        // Immediate redirect to avoid race conditions with useRequireAuth
-        window.location.href = "/login";
-      });
+  const refreshUser = async () => {
+    try {
+      const response = await getProfile();
+      if (response.success && response.data) {
+        setUser(response.data);
+      } else {
+        await logout();
+      }
+    } catch (error) {
+      console.error('Refresh user failed:', error);
+      await logout();
+    }
   };
 
   const updateUser = (userData: Partial<User>) => {
-    setUser((prevUser) => (prevUser ? { ...prevUser, ...userData } : null));
+    if (user) {
+      setUser({ ...user, ...userData });
+    }
   };
 
-  const value: AuthContextType = {
-    user,
-    isAuthenticated,
-    isLoading,
-    login,
-    logout,
-    updateUser,
-  };
+  const isAuthenticated = !!user && !isLoading;
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
+      isLoading,
+      login,
+      logout,
+      refreshUser,
+      updateUser,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
 
-// Hook for protected routes
 export function useRequireAuth() {
-  const auth = useAuth();
-
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+  
   useEffect(() => {
-    if (!auth.isLoading && !auth.isAuthenticated) {
-      // Redirect to login page if not authenticated
-      window.location.href = "/login";
+    // Only redirect if we're done loading and not authenticated
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login');
     }
-  }, [auth.isAuthenticated, auth.isLoading]);
-
-  return auth;
+  }, [isAuthenticated, isLoading, router]);
+  
+  const { updateUser: contextUpdateUser } = useAuth();
+  
+  return {
+    user,
+    isAuthenticated,
+    isLoading,
+    updateUser: contextUpdateUser,
+    isAuthorized: isAuthenticated && !isLoading,
+  };
 }

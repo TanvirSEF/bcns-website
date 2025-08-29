@@ -37,10 +37,10 @@ const Members = () => {
         // Only fetch members, not admins for security
         const response = await getAllMembers();
 
-        setMembers(response.members);
-        setFilteredMembers(response.members);
+        setMembers(response.data || []);
+        setFilteredMembers(response.data || []);
       } catch (err) {
-        console.error("❌ Members Page - Error fetching members:", err);
+        console.error("Members Page - Error fetching members:", err);
         setError("Failed to load members. Please try again later.");
       } finally {
         setLoading(false);

@@ -15,7 +15,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
-import { loginUser, LoginRequest } from "@/lib/api";
+import { loginUser, User } from "@/lib/api";
+
+// Flexible login response interface
+interface LoginResponseData {
+  user?: User;
+  token?: string;
+  data?: {
+    user?: User;
+    token?: string;
+  };
+  accessToken?: string;
+  access_token?: string;
+}
 
 export default function LoginPage() {
   const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
@@ -38,8 +50,22 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!emailAddress.trim() || !passwordValue.trim()) {
-      setError("Please fill in all fields");
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailAddress.trim()) {
+      setError("Email address is required");
+      return;
+    }
+    if (!emailRegex.test(emailAddress.trim())) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    if (!passwordValue.trim()) {
+      setError("Password is required");
+      return;
+    }
+    if (passwordValue.length < 6) {
+      setError("Password must be at least 6 characters long");
       return;
     }
 
@@ -48,45 +74,33 @@ export default function LoginPage() {
     setSuccess("");
 
     try {
-      const credentials: LoginRequest = {
-        email: emailAddress.trim(),
-        password: passwordValue,
-      };
+      const response = await loginUser(emailAddress.trim(), passwordValue);
 
-      const response = await loginUser(credentials);
-
-      // Handle different response formats from your API
-      if (
-        response.success ||
-        response.token ||
-        response.access_token ||
-        response.accessToken
-      ) {
+      if (response.success && response.data) {
         setSuccess("Login successful! Redirecting...");
-
-        // Create user object from response
-        const userData = response.user || {
-          id: response.id || "unknown",
-          name: response.name || emailAddress.split("@")[0],
-          email: emailAddress,
-          avatar: response.avatar,
-          role: response.role,
-          createdAt: response.createdAt,
-        };
-
-        const token =
-          response.token || response.access_token || response.accessToken;
-
-        if (token) {
-          await login(userData);
+        
+        // Handle different possible response structures
+        const responseData = response.data as unknown as LoginResponseData;
+        
+        // Extract user and token from response
+        const user = responseData.user || responseData.data?.user || (responseData as unknown as User);
+        const token = responseData.token || responseData.data?.token || responseData.accessToken || responseData.access_token;
+        
+        if (!user) {
+          setError("Login succeeded but user data is missing. Please try again.");
+          return;
         }
+        
+        if (!token) {
+          setError("Login succeeded but authentication token is missing. Please try again.");
+          return;
+        }
+        
+        // Update auth context and redirect
+        login(user);
         router.push("/dashboard");
       } else {
-        setError(
-          response.message ||
-            response.error ||
-            "Login failed. Please check your credentials."
-        );
+        setError(response.message || "Login failed. Please check your credentials.");
       }
     } catch (error) {
       console.error("Login error:", error);

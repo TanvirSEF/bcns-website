@@ -1,57 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchFromBackend, getAuthHeader } from "@/lib/server-utils";
 
-function buildAuthHeader(request: NextRequest): string | undefined {
-  let authHeader = getAuthHeader(request);
-  if (!authHeader) {
-    const cookieToken = request.cookies.get("auth_token")?.value;
-    if (cookieToken) authHeader = `Bearer ${cookieToken}`;
+const BACKEND_URL = process.env.BACKEND_API_URL || 'https://api.tanvirmern.com';
+
+function getToken(request: NextRequest): string | null {
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7);
   }
-  return authHeader;
+  return request.cookies.get('auth_token')?.value || null;
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PUT(request: NextRequest) {
   try {
-    const authHeader = buildAuthHeader(request);
-    if (!authHeader) {
+    const token = getToken(request);
+    if (!token) {
       return NextResponse.json(
-        { success: false, message: "Authorization header required" },
+        { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
 
     const body = await request.json();
 
-    const data = await fetchFromBackend("/api/users/me/change-password", {
-      method: "PATCH",
+    const response = await fetch(`${BACKEND_URL}/api/users/me/change-password`, {
+      method: 'PUT',
       headers: {
-        Authorization: authHeader,
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(body),
     });
-    return NextResponse.json(data, {
-      status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "PATCH",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Password change failed');
+    }
+
+    const data = await response.json();
+
+    return NextResponse.json({
+      success: true,
+      message: data.message || 'Password changed successfully',
     });
-  } catch {
+
+  } catch (error) {
+    console.error('Change password API error:', error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: error instanceof Error ? error.message : "Failed to change password" },
       { status: 500 }
     );
   }
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "PATCH",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    },
-  });
 }

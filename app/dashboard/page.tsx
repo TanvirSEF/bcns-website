@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React from "react";
 import Link from "next/link";
 import {
   User,
@@ -20,9 +20,15 @@ import { Badge } from "@/components/ui/badge";
 import { useRequireAuth } from "@/lib/auth-context";
 
 export default function DashboardPage() {
-  const { user, isLoading } = useRequireAuth();
+  const { user, isLoading, isAuthorized } = useRequireAuth();
+  const [mounted, setMounted] = React.useState(false);
 
-  if (isLoading) {
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading spinner while auth is initializing or component is mounting
+  if (!mounted || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -30,8 +36,14 @@ export default function DashboardPage() {
     );
   }
 
+  // Don't render anything if not authorized (useRequireAuth will handle redirect)
+  if (!isAuthorized) {
+    return null;
+  }
+
+  // Don't render if no user (shouldn't happen if authorized, but safety check)
   if (!user) {
-    return null; // This will redirect to login via useRequireAuth
+    return null;
   }
 
   return (

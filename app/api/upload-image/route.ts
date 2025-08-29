@@ -1,74 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "nodejs";
+const BACKEND_URL = process.env.BACKEND_API_URL || 'https://api.tanvirmern.com';
+
+function getToken(request: NextRequest): string | null {
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7);
+  }
+  return request.cookies.get('auth_token')?.value || null;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const CF_ACCOUNT_ID = process.env.CF_IMAGES_ACCOUNT_ID;
-    const CF_IMAGES_TOKEN = process.env.CF_IMAGES_TOKEN;
-
-    if (!CF_ACCOUNT_ID || !CF_IMAGES_TOKEN) {
+    const token = getToken(request);
+    if (!token) {
       return NextResponse.json(
-        {
-          success: false,
-          message:
-            "Cloudflare Images credentials are not configured on the server.",
-        },
-        { status: 500 }
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
       );
     }
 
-    const form = await request.formData();
-    const file = form.get("file");
-    if (!file || !(file instanceof Blob)) {
+    const formData = await request.formData();
+    const image = formData.get('image') as File;
+
+    if (!image) {
       return NextResponse.json(
         { success: false, message: "No image file provided" },
         { status: 400 }
       );
     }
 
-    const upstreamForm = new FormData();
-    upstreamForm.append("file", file);
+    // Forward to backend
+    const backendFormData = new FormData();
+    backendFormData.append('image', image);
 
-    const uploadRes = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/images/v1`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${CF_IMAGES_TOKEN}`,
-        },
-        body: upstreamForm,
-      }
-    );
+    const response = await fetch(`${BACKEND_URL}/api/upload-image`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: backendFormData,
+    });
 
-    const data = await uploadRes.json();
-    if (!uploadRes.ok || !data?.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: data?.errors?.[0]?.message || "Upload failed",
-        },
-        { status: uploadRes.status }
-      );
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
+      throw new Error(errorData.message || 'Upload failed');
     }
 
-    const result = data.result;
-    const url: string | undefined = Array.isArray(result?.variants)
-      ? result.variants[0]
-      : undefined;
+    const data = await response.json();
 
+    return NextResponse.json({
+      success: true,
+      data: { imageUrl: data.imageUrl || data.url || data.data?.imageUrl },
+    });
+
+  } catch (error) {
+    console.error('Upload image API error:', error);
     return NextResponse.json(
-      {
-        success: true,
-        id: result?.id,
-        url,
-        variants: result?.variants,
-      },
-      { status: 200 }
-    );
-  } catch {
-    return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: error instanceof Error ? error.message : "Upload failed" },
       { status: 500 }
     );
   }
