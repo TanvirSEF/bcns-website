@@ -1,187 +1,305 @@
-// API Configuration - Use environment variables for security
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
+// Simple API configuration
+import {
+  User,
+  Event,
+  Document,
+  Album,
+  Photo,
+  Poll,
+  Publication,
+  ZoomMeeting,
+  ActivityLog,
+  LoginResponse,
+  RegisterResponse,
+} from "@/types/api";
 
-// Simple Types
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  role?: string;
-  phone?: string;
-  address?: string;
-  bio?: string;
-  profilePictureUrl?: string;
-  createdAt?: string;
-  updatedAt?: string;
+import config from "./config";
+
+const API_BASE = config.apiBase;
+
+// Get token helper (will be overridden when called from components with useAuth)
+const getAuthToken = (): string | null => {
+  return typeof window !== "undefined"
+    ? localStorage.getItem("auth_token")
+    : null;
+};
+
+// Simple request function
+async function request<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const token = getAuthToken();
+
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || data.error || "API Error");
+  }
+
+  return data;
 }
 
-export interface ApiResponse<T = unknown> {
+// Helper to extract data from a response object
+function extractData<T>(response: {
   success: boolean;
-  data?: T;
+  data: T;
   message?: string;
-  error?: string;
+}): T {
+  if (response.success && response.data) {
+    return response.data;
+  } else {
+    throw new Error(response.message || "Data extraction failed");
+  }
 }
 
-// Flexible response type for backend APIs with varying structures
-interface FlexibleLoginResponse {
-  user?: User;
-  token?: string;
-  data?: {
-    user?: User;
-    token?: string;
-  };
-  accessToken?: string;
-  access_token?: string;
-}
+// Simple API functions - much cleaner!
+export const api = {
+  // Auth
+  login: async (email: string, password: string) => {
+    const response = await request<{
+      success: boolean;
+      data: LoginResponse;
+      message?: string;
+    }>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+    return response;
+  },
 
-// API Function - Use relative URLs to avoid CORS issues
-async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-  
-  try {
+  register: async (name: string, email: string, password: string) => {
+    const response = await request<{
+      success: boolean;
+      data: RegisterResponse;
+      message?: string;
+    }>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password }),
+    });
+    return response; // Return full response for register to handle success/error
+  },
+
+  logout: () => request("/auth/logout", { method: "POST" }),
+
+  profile: async () => {
+    const response = await request<{
+      success: boolean;
+      data: User;
+      message?: string;
+    }>("/users/me");
+    return extractData<User>(response);
+  },
+
+  // Users
+  updateProfile: async (data: Partial<User>) => {
+    const response = await request<{
+      success: boolean;
+      data: User;
+      message?: string;
+    }>("/users/me", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    return extractData<User>(response);
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await request<{ success: boolean; message?: string }>(
+      "/users/me/change-password",
+      {
+        method: "PUT",
+        body: JSON.stringify({ currentPassword, newPassword }),
+      }
+    );
+    return response; // Return full response for error handling
+  },
+
+  getMembers: async () => {
+    const response = await request<{
+      success: boolean;
+      data: User[];
+      message?: string;
+    }>("/members");
+    return extractData<User[]>(response);
+  },
+
+  // Events
+  getEvents: () => request<Event[]>("/events"),
+  getEvent: (id: string) => request<Event>(`/events/${id}`),
+  createEvent: (data: Partial<Event>) =>
+    request<Event>("/events", { method: "POST", body: JSON.stringify(data) }),
+  registerForEvent: (id: string) =>
+    request(`/events/${id}/register`, { method: "POST" }),
+
+  // Documents
+  getMyDocuments: () => request<Document[]>("/documents/my-documents"),
+  getAllDocuments: () => request<Document[]>("/documents/admin/all"),
+  updateDocumentStatus: (id: string, status: "approved" | "rejected") =>
+    request(`/documents/admin/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+
+  // Gallery
+  getAlbums: () => request<Album[]>("/gallery/albums"),
+  createAlbum: (data: Partial<Album>) =>
+    request<Album>("/gallery/albums", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getAlbumPhotos: (id: string) =>
+    request<Photo[]>(`/gallery/albums/${id}/photos`),
+
+  // Polls
+  getPolls: () => request<Poll[]>("/polls"),
+  getPoll: (id: string) => request<Poll>(`/polls/${id}`),
+  createPoll: (data: Partial<Poll>) =>
+    request<Poll>("/polls", { method: "POST", body: JSON.stringify(data) }),
+  voteInPoll: (id: string, optionId: string) =>
+    request(`/polls/${id}/vote`, {
+      method: "POST",
+      body: JSON.stringify({ optionId }),
+    }),
+  getPollResults: (id: string) => request<Poll>(`/polls/${id}/results`),
+
+  // Publications
+  getPublications: () => request<Publication[]>("/publications"),
+  getPublication: (id: string) => request<Publication>(`/publications/${id}`),
+  createPublication: (data: Partial<Publication>) =>
+    request<Publication>("/publications", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Search
+  search: (query: string) => request(`/search?q=${encodeURIComponent(query)}`),
+
+  // Notifications
+  subscribeNotifications: () =>
+    request("/notifications/subscribe", { method: "POST" }),
+  unsubscribeNotifications: () =>
+    request("/notifications/unsubscribe", { method: "POST" }),
+
+  // 2FA
+  generate2FA: () => request("/2fa/generate", { method: "POST" }),
+  turnOn2FA: (token: string) =>
+    request("/2fa/turn-on", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+  turnOff2FA: () => request("/2fa/turn-off", { method: "POST" }),
+  authenticate2FA: (token: string) =>
+    request("/2fa/authenticate", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+
+  // Zoom
+  createZoomMeeting: (data: Partial<ZoomMeeting>) =>
+    request<ZoomMeeting>("/zoom/meetings", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Logs
+  getActivityLogs: () => request<ActivityLog[]>("/logs/activity"),
+
+  // File upload helper
+  uploadFile: async (
+    endpoint: string,
+    file: File,
+    additionalData?: Record<string, string>
+  ) => {
+    const token = getAuthToken();
+    const formData = new FormData();
+    formData.append("file", file);
+
+    if (additionalData) {
+      Object.entries(additionalData).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+    }
+
     const response = await fetch(`${API_BASE}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
-      },
-      ...options,
+      method: "POST",
+      headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+      body: formData,
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
-      throw new Error(data.message || data.error || 'API Error');
+      throw new Error(data.message || data.error || "Upload failed");
     }
 
     return data;
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
-  }
-}
+  },
 
-// Auth Functions
-export const loginUser = async (email: string, password: string) => {
-  const response = await apiCall<{ user: User; token: string }>('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-  
-  // Store token immediately if login is successful
-  if (response.success && response.data) {
-    // Try different possible token locations
-    const responseData = response.data as FlexibleLoginResponse;
-    const token = responseData.token || responseData.data?.token || responseData.accessToken || responseData.access_token;
-    
-    if (token && typeof window !== 'undefined') {
-      localStorage.setItem('auth_token', token);
+  // Profile image upload helper
+  uploadProfileImage: async (file: File) => {
+    const token = getAuthToken();
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await fetch(`${API_BASE}/upload-image`, {
+      method: "POST",
+      headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || data.error || "Upload failed");
     }
-  }
-  
-  return response;
+
+    return data;
+  },
 };
 
-export const registerUser = async (name: string, email: string, password: string) => {
-  const response = await apiCall<{ user: User; token: string }>('/auth/register', {
-    method: 'POST',
-    body: JSON.stringify({ name, email, password }),
-  });
-  
-  // Store token immediately if registration is successful
-  if (response.success && response.data) {
-    // Try different possible token locations
-    const responseData = response.data as FlexibleLoginResponse;
-    const token = responseData.token || responseData.data?.token || responseData.accessToken || responseData.access_token;
-    
-    if (token && typeof window !== 'undefined') {
-      localStorage.setItem('auth_token', token);
-    }
-  }
-  
-  return response;
-};
-
-export const logoutUser = async () => {
-  try {
-    await apiCall('/auth/logout', { method: 'POST' });
-  } finally {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-    }
-  }
-};
-
-export const getProfile = async () => {
-  try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token) {
-      return { success: false, message: 'No authentication token' };
-    }
-    
-    const response = await apiCall<User>('/users/me');
-    return response;
-  } catch (error) {
-    console.error('Profile fetch failed:', error);
-    // Remove invalid token
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-    }
-    throw error;
-  }
-};
-
-export const updateProfile = (data: Partial<User>) => 
-  apiCall<User>('/users/me', {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  });
-
-export const changePassword = (currentPassword: string, newPassword: string) =>
-  apiCall('/users/me/change-password', {
-    method: 'PUT',
-    body: JSON.stringify({ currentPassword, newPassword }),
-  });
-
-export const getAllMembers = () => apiCall<User[]>('/members');
-
-export const uploadProfileImage = async (file: File) => {
-  const token = localStorage.getItem('auth_token');
-  const formData = new FormData();
-  formData.append('image', file);
-
-  const response = await fetch(`${API_BASE}/upload-image`, {
-    method: 'POST',
-    headers: { ...(token && { Authorization: `Bearer ${token}` }) },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Upload failed');
-  }
-
-  return response.json();
-};
-
-export const checkAuth = async (): Promise<boolean> => {
-  try {
-    if (typeof window === 'undefined') return false;
-    
-    const token = localStorage.getItem('auth_token');
-    if (!token) return false;
-    
-    await getProfile();
-    return true;
-  } catch {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-    }
-    return false;
-  }
-};
-
-// Backward compatibility aliases
-export const changeMyPassword = changePassword;
-export const updateMe = updateProfile;
+// Backward compatibility aliases (for existing code)
+export const loginUser = api.login;
+export const registerUser = api.register;
+export const logoutUser = api.logout;
+export const getProfile = api.profile;
+export const updateProfile = api.updateProfile;
+export const changePassword = api.changePassword;
+export const getAllMembers = api.getMembers;
+export const getEvents = api.getEvents;
+export const createEvent = api.createEvent;
+export const getEvent = api.getEvent;
+export const registerForEvent = api.registerForEvent;
+export const getMyDocuments = api.getMyDocuments;
+export const getAllDocuments = api.getAllDocuments;
+export const updateDocumentStatus = api.updateDocumentStatus;
+export const getAlbums = api.getAlbums;
+export const createAlbum = api.createAlbum;
+export const getAlbumPhotos = api.getAlbumPhotos;
+export const getPolls = api.getPolls;
+export const createPoll = api.createPoll;
+export const getPoll = api.getPoll;
+export const voteInPoll = api.voteInPoll;
+export const getPollResults = api.getPollResults;
+export const getPublications = api.getPublications;
+export const createPublication = api.createPublication;
+export const getPublication = api.getPublication;
+export const globalSearch = api.search;
+export const subscribeToNotifications = api.subscribeNotifications;
+export const unsubscribeFromNotifications = api.unsubscribeNotifications;
+export const generate2FA = api.generate2FA;
+export const turnOn2FA = api.turnOn2FA;
+export const turnOff2FA = api.turnOff2FA;
+export const authenticate2FA = api.authenticate2FA;
+export const createZoomMeeting = api.createZoomMeeting;
+export const getActivityLogs = api.getActivityLogs;
+export const uploadProfileImage = api.uploadProfileImage;

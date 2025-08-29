@@ -21,14 +21,9 @@ import { useRequireAuth } from "@/lib/auth-context";
 
 export default function DashboardPage() {
   const { user, isLoading, isAuthorized } = useRequireAuth();
-  const [mounted, setMounted] = React.useState(false);
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Show loading spinner while auth is initializing or component is mounting
-  if (!mounted || isLoading) {
+  // Show loading spinner while checking authentication
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -36,14 +31,13 @@ export default function DashboardPage() {
     );
   }
 
-  // Don't render anything if not authorized (useRequireAuth will handle redirect)
-  if (!isAuthorized) {
-    return null;
-  }
-
-  // Don't render if no user (shouldn't happen if authorized, but safety check)
-  if (!user) {
-    return null;
+  // useRequireAuth will handle redirection to login if not authenticated
+  if (!isAuthorized || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (

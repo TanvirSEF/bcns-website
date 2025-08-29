@@ -1,17 +1,24 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { User, logoutUser, getProfile } from './api';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { User } from "@/types/api";
+import { getProfile, logoutUser } from "./api";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData: User) => void;
+  login: (userData: User, token: string) => void;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
+  getToken: () => string | null;
+  checkAuthStatus: () => {
+    hasToken: boolean;
+    hasStoredUser: boolean;
+    currentUser: boolean;
+  };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,94 +27,155 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state on mount
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        setIsLoading(true);
-        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-        
-        if (!token) {
-          setUser(null);
-          return;
-        }
+  // Token management utilities
+  const getToken = (): string | null => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("auth_token");
+  };
 
-        const response = await getProfile();
-        
-        if (response.success && response.data) {
-          setUser(response.data);
-        } else {
-          // Invalid token - clean up
-          localStorage.removeItem('auth_token');
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Authentication failed:', error);
-        // Clean up on error
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-        }
-        setUser(null);
-      } finally {
-        setIsLoading(false);
+  const setToken = (token: string): void => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("auth_token", token);
+    }
+  };
+
+  const removeToken = (): void => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("auth_token");
+    }
+  };
+
+  const hasToken = (): boolean => {
+    return !!getToken();
+  };
+
+  // User data management utilities
+  const getUserFromStorage = (): User | null => {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const storedUser = localStorage.getItem("user_data");
+      if (storedUser) {
+        return JSON.parse(storedUser);
       }
-    };
+    } catch {
+      // Silent error handling for corrupted user data
+      localStorage.removeItem("user_data");
+    }
+    return null;
+  };
 
-    initAuth();
-  }, []);
+  const setUserData = (userData: User): void => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user_data", JSON.stringify(userData));
+    }
+  };
 
-  const login = (userData: User) => {
-    setUser(userData);
-    setIsLoading(false);
+  const removeUserData = (): void => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user_data");
+    }
+  };
+
+  // Initialize auth state
+  useEffect(() => {
+    try {
+      const token = hasToken();
+      const storedUser = getUserFromStorage();
+
+      if (token && storedUser) {
+        setUser(storedUser);
+      } else if (token && !storedUser) {
+        // Clean up invalid token
+        removeToken();
+        setUser(null);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      // If there's any error in initialization, clear everything
+      setUser(null);
+      removeToken();
+      removeUserData();
+    } finally {
+      setIsLoading(false);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const login = (userData: User, token: string) => {
+    try {
+      setUser(userData);
+      setToken(token);
+      setUserData(userData);
+    } catch (error) {
+      console.error("Auth Context - Storage failed:", error);
+      // If storage fails, at least set the user in memory
+      setUser(userData);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = async () => {
     setIsLoading(true);
     try {
       await logoutUser();
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch {
+      // Continue with logout even if API call fails
     } finally {
       setUser(null);
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
-      }
+      removeToken();
+      removeUserData();
       setIsLoading(false);
     }
   };
 
   const refreshUser = async () => {
     try {
-      const response = await getProfile();
-      if (response.success && response.data) {
-        setUser(response.data);
-      } else {
-        await logout();
-      }
-    } catch (error) {
-      console.error('Refresh user failed:', error);
+      const userData = await getProfile();
+      setUser(userData);
+      setUserData(userData);
+    } catch {
+      // If refresh fails, logout the user
       await logout();
     }
   };
 
   const updateUser = (userData: Partial<User>) => {
     if (user) {
-      setUser({ ...user, ...userData });
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      setUserData(updatedUser);
     }
+  };
+
+  const checkAuthStatus = () => {
+    const token = hasToken();
+    const storedUser = getUserFromStorage();
+
+    return {
+      hasToken: token,
+      hasStoredUser: !!storedUser,
+      currentUser: !!user,
+    };
   };
 
   const isAuthenticated = !!user && !isLoading;
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated,
-      isLoading,
-      login,
-      logout,
-      refreshUser,
-      updateUser,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        isLoading,
+        login,
+        logout,
+        refreshUser,
+        updateUser,
+        getToken,
+        checkAuthStatus,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -116,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
@@ -124,16 +192,15 @@ export function useAuth() {
 export function useRequireAuth() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  
+
   useEffect(() => {
-    // Only redirect if we're done loading and not authenticated
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isAuthenticated, isLoading, router]);
-  
+
   const { updateUser: contextUpdateUser } = useAuth();
-  
+
   return {
     user,
     isAuthenticated,

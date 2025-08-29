@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_API_URL || 'https://api.tanvirmern.com';
+import config from "@/lib/config";
 
 function getToken(request: NextRequest): string | null {
-  const authHeader = request.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
     return authHeader.slice(7);
   }
-  return request.cookies.get('auth_token')?.value || null;
+  return request.cookies.get("auth_token")?.value || null;
 }
 
 export async function POST(request: NextRequest) {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    const image = formData.get('image') as File;
+    const image = formData.get("image") as File;
 
     if (!image) {
       return NextResponse.json(
@@ -32,17 +32,19 @@ export async function POST(request: NextRequest) {
 
     // Forward to backend
     const backendFormData = new FormData();
-    backendFormData.append('image', image);
+    backendFormData.append("image", image);
 
-    const response = await fetch(`${BACKEND_URL}/api/upload-image`, {
-      method: 'POST',
+    const response = await fetch(`${config.backendUrl}/api/upload-image`, {
+      method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: backendFormData,
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
-      throw new Error(errorData.message || 'Upload failed');
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: "Upload failed" }));
+      throw new Error(errorData.message || "Upload failed");
     }
 
     const data = await response.json();
@@ -51,11 +53,13 @@ export async function POST(request: NextRequest) {
       success: true,
       data: { imageUrl: data.imageUrl || data.url || data.data?.imageUrl },
     });
-
   } catch (error) {
-    console.error('Upload image API error:', error);
+    console.error("Upload image API error:", error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : "Upload failed" },
+      {
+        success: false,
+        message: error instanceof Error ? error.message : "Upload failed",
+      },
       { status: 500 }
     );
   }

@@ -1,71 +1,47 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  ShieldCheck,
-  AlertCircle,
-  CheckCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AlertCircle, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { loginUser, User } from "@/lib/api";
+import { loginUser } from "@/lib/api";
+import { User } from "@/types/api";
 
-// Flexible login response interface
 interface LoginResponseData {
-  user?: User;
+  user?: Record<string, unknown>;
   token?: string;
+  access_token?: string;
+  accessToken?: string;
   data?: {
-    user?: User;
+    user?: Record<string, unknown>;
     token?: string;
   };
-  accessToken?: string;
-  access_token?: string;
 }
 
 export default function LoginPage() {
-  const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState("");
-  const [success, setSuccess] = React.useState("");
-  const [emailAddress, setEmailAddress] = React.useState("");
-  const [passwordValue, setPasswordValue] = React.useState("");
-
   const router = useRouter();
-  const { login, isAuthenticated } = useAuth();
+  const { login } = useAuth();
 
-  // Redirect if already authenticated
-  React.useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated, router]);
+  const [emailAddress, setEmailAddress] = useState("");
+  const [passwordValue, setPasswordValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailAddress.trim()) {
-      setError("Email address is required");
+    if (!emailAddress.trim() || !passwordValue.trim()) {
+      setError("Please fill in all fields");
       return;
     }
-    if (!emailRegex.test(emailAddress.trim())) {
+
+    if (!emailAddress.includes("@")) {
       setError("Please enter a valid email address");
-      return;
-    }
-    if (!passwordValue.trim()) {
-      setError("Password is required");
-      return;
-    }
-    if (passwordValue.length < 6) {
-      setError("Password must be at least 6 characters long");
       return;
     }
 
@@ -77,38 +53,58 @@ export default function LoginPage() {
       const response = await loginUser(emailAddress.trim(), passwordValue);
 
       if (response.success && response.data) {
-        setSuccess("Login successful! Redirecting...");
-        
         // Handle different possible response structures
         const responseData = response.data as unknown as LoginResponseData;
-        
-        // Extract user and token from response
-        const user = responseData.user || responseData.data?.user || (responseData as unknown as User);
-        const token = responseData.token || responseData.data?.token || responseData.accessToken || responseData.access_token;
-        
-        if (!user) {
-          setError("Login succeeded but user data is missing. Please try again.");
+
+        const user =
+          responseData.user || responseData.data?.user || responseData;
+        const token =
+          responseData.token ||
+          responseData.access_token ||
+          responseData.accessToken ||
+          responseData.data?.token;
+
+        if (!user || !token) {
+          setError("Login response is incomplete. Please try again.");
           return;
         }
-        
-        if (!token) {
-          setError("Login succeeded but authentication token is missing. Please try again.");
-          return;
-        }
-        
-        // Update auth context and redirect
-        login(user);
-        router.push("/dashboard");
+
+        // Update auth context (this will handle storage)
+        login(user as User, token);
+
+        // Show success message briefly then redirect immediately
+        setSuccess("Login successful! Redirecting...");
+
+        // Small delay to show success message, then redirect
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 500);
       } else {
-        setError(response.message || "Login failed. Please check your credentials.");
+        setError(
+          response.message || "Invalid email or password. Please try again."
+        );
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Login failed. Please try again."
-      );
+    } catch (error: unknown) {
+      // Handle different types of errors
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
+      if (errorMessage.includes("fetch")) {
+        setError("Network error. Please check your connection and try again.");
+      } else if (
+        errorMessage.includes("401") ||
+        errorMessage.toLowerCase().includes("unauthorized")
+      ) {
+        setError("Invalid email or password. Please check your credentials.");
+      } else if (errorMessage.includes("429")) {
+        setError(
+          "Too many login attempts. Please wait a few minutes and try again."
+        );
+      } else if (errorMessage.includes("500")) {
+        setError("Server error. Please try again later.");
+      } else {
+        setError(errorMessage || "Login failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -172,100 +168,81 @@ export default function LoginPage() {
 
             {success && (
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md flex items-start space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <ShieldCheck className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                 <span className="text-sm text-green-700">{success}</span>
               </div>
             )}
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              {/* Email */}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="text-sm font-medium text-gray-700"
                 >
-                  Email address
+                  Email Address
                 </label>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={emailAddress}
-                    onChange={handleInputChange(setEmailAddress)}
-                    placeholder="you@example.com"
-                    className="w-full rounded-md border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-                  />
-                </div>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={emailAddress}
+                  onChange={handleInputChange(setEmailAddress)}
+                  className="mt-1"
+                  required
+                />
               </div>
 
-              {/* Password */}
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="text-sm font-medium text-gray-700"
                 >
                   Password
                 </label>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
+                <div className="relative mt-1">
+                  <Input
                     id="password"
-                    name="password"
-                    type={isPasswordVisible ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
                     value={passwordValue}
                     onChange={handleInputChange(setPasswordValue)}
-                    placeholder="••••••••"
-                    className="w-full rounded-md border border-gray-300 bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900 placeholder:text-gray-400 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                    className="pr-10"
+                    required
                   />
                   <button
                     type="button"
-                    onClick={() => setIsPasswordVisible((v) => !v)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:text-gray-700 focus:outline-none"
-                    aria-label={
-                      isPasswordVisible ? "Hide password" : "Show password"
-                    }
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                   >
-                    {isPasswordVisible ? (
+                    {showPassword ? (
                       <EyeOff className="h-4 w-4" />
                     ) : (
                       <Eye className="h-4 w-4" />
                     )}
                   </button>
                 </div>
-                <div className="mt-2 text-right">
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm font-medium text-blue-700 hover:text-blue-800"
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
               </div>
 
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
               >
-                {isLoading ? "Signing In..." : "Sign In"}
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
-
-              <p className="text-center text-sm text-gray-600">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/signup"
-                  className="font-semibold text-blue-700 hover:text-blue-800"
-                >
-                  Create one now
-                </Link>
-              </p>
             </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Don&apos;t have an account?{" "}
+                <a
+                  href="/register"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Contact us to join
+                </a>
+              </p>
+            </div>
           </div>
         </Card>
       </div>

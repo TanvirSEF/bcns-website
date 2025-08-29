@@ -1,32 +1,29 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-
+import { Badge } from "@/components/ui/badge";
 import {
   Users,
   Search,
-  User,
-  Building,
+  Shield,
   Mail,
   Phone,
-  Award,
-  Shield,
-  Loader2,
-  AlertCircle,
+  MapPin,
+  Calendar,
+  User,
 } from "lucide-react";
-import { getAllMembers, User as UserType } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { getAllMembers } from "@/lib/api";
+import { User as UserType } from "@/types/api";
 
-const Members = () => {
+export default function MembersPage() {
   const [members, setMembers] = useState<UserType[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<UserType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -37,8 +34,9 @@ const Members = () => {
         // Only fetch members, not admins for security
         const response = await getAllMembers();
 
-        setMembers(response.data || []);
-        setFilteredMembers(response.data || []);
+        // New API returns data directly, not wrapped in success/data
+        setMembers(response || []);
+        setFilteredMembers(response || []);
       } catch (err) {
         console.error("Members Page - Error fetching members:", err);
         setError("Failed to load members. Please try again later.");
@@ -129,179 +127,130 @@ const Members = () => {
                 className="pl-10 bg-white/80 backdrop-blur-sm border-gray-300 w-full h-10 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span>{filteredMembers.length} members</span>
-              </div>
-              {searchQuery && (
-                <div className="flex items-center gap-2">
-                  <Search className="h-4 w-4" />
-                  <span>Filtered results</span>
-                </div>
-              )}
+            <div className="flex items-center gap-4">
+              <Badge variant="secondary" className="text-sm">
+                {filteredMembers.length} Members
+              </Badge>
             </div>
           </div>
         </div>
 
+        {/* Error State */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 text-center">{error}</p>
+          </div>
+        )}
+
         {/* Loading State */}
         {loading && (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <Loader2 className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
-              <p className="text-gray-600">Loading members...</p>
+          <div className="text-center py-12">
+            <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              Loading members...
             </div>
           </div>
         )}
 
-        {/* Error State */}
-        {error && (
-          <Card className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200 shadow-lg">
-            <CardContent className="p-6 flex items-start space-x-4">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="h-5 w-5 text-red-600" />
-              </div>
-              <div>
-                <h5 className="text-lg font-semibold text-red-800 mb-2">
-                  Error Loading Members
-                </h5>
-                <p className="text-red-700">{error}</p>
-                <Button
-                  onClick={() => window.location.reload()}
-                  className="mt-4 bg-red-600 hover:bg-red-700 text-white"
-                >
-                  Try Again
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Members Grid */}
         {!loading && !error && (
-          <>
-            {filteredMembers.length === 0 ? (
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                <CardContent className="p-12 text-center">
-                  <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {searchQuery ? "No members found" : "No members available"}
-                  </h3>
-                  <p className="text-gray-600">
-                    {searchQuery
-                      ? "Try adjusting your search terms or browse all members."
-                      : "Members will appear here once they join the society."}
-                  </p>
-                  {searchQuery && (
-                    <Button
-                      onClick={() => setSearchQuery("")}
-                      className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      Clear Search
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredMembers.map((member) => (
-                  <Card
-                    key={member.id}
-                    className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 group hover:scale-[1.02]"
-                  >
-                    <CardContent className="p-6">
-                      {/* Member Photo */}
-                      <div className="flex justify-center mb-4">
-                        <div className="relative">
-                          {(member.profilePictureUrl || member.avatar) &&
-                          !failedImages.has(member.id || "") ? (
-                            <Image
-                              src={
-                                member.profilePictureUrl || member.avatar || ""
-                              }
-                              alt={member.name || "Member"}
-                              width={80}
-                              height={80}
-                              className="w-20 h-20 rounded-full object-cover border-4 border-blue-100 group-hover:border-blue-200 transition-colors duration-300"
-                              onError={() => {
-                                // Add to failed images set
-                                setFailedImages((prev) =>
-                                  new Set(prev).add(member.id || "")
-                                );
-                              }}
-                            />
-                          ) : (
-                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center border-4 border-blue-100 group-hover:border-blue-200 transition-colors duration-300">
-                              <User className="h-8 w-8 text-white" />
-                            </div>
-                          )}
-                          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                            <Award className="h-3 w-3 text-white" />
-                          </div>
-                        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMembers.map((member) => (
+              <Card
+                key={member.id}
+                className="group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-gray-200 hover:border-blue-300"
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                        {member.name?.charAt(0)?.toUpperCase() || "U"}
                       </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        {member.name || "Name not available"}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {member.role || "Member"}
+                      </p>
 
-                      {/* Member Info */}
-                      <div className="text-center">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors duration-300">
-                          {member.name || "Member Name"}
-                        </h3>
+                      <div className="space-y-2">
+                        {member.email && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                            <span className="truncate">{member.email}</span>
+                          </div>
+                        )}
+
+                        {member.phone && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                            <span>{member.phone}</span>
+                          </div>
+                        )}
 
                         {member.address && (
-                          <div className="flex items-center justify-center gap-1 text-sm text-gray-600 mb-2">
-                            <Building className="h-3 w-3" />
+                          <div className="flex items-center text-sm text-gray-600">
+                            <MapPin className="h-4 w-4 mr-2 text-gray-400" />
                             <span className="truncate">{member.address}</span>
                           </div>
                         )}
-
-                        {/* Contact Info */}
-                        <div className="space-y-1 text-xs text-gray-500">
-                          {member.email && (
-                            <div className="flex items-center justify-center gap-1">
-                              <Mail className="h-3 w-3" />
-                              <span className="truncate">{member.email}</span>
-                            </div>
-                          )}
-                          {member.phone && (
-                            <div className="flex items-center justify-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              <span>{member.phone}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Member Since */}
-                        {member.createdAt && (
-                          <div className="mt-3 pt-3 border-t border-gray-100">
-                            <p className="text-xs text-gray-500">
-                              Member since{" "}
-                              {new Date(member.createdAt).getFullYear()}
-                            </p>
-                          </div>
-                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </>
+
+                      {member.bio && (
+                        <p className="mt-3 text-sm text-gray-600 line-clamp-2">
+                          {member.bio}
+                        </p>
+                      )}
+
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="flex items-center text-xs text-gray-500">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          <span>
+                            Joined{" "}
+                            {member.createdAt
+                              ? new Date(member.createdAt).toLocaleDateString()
+                              : "Recently"}
+                          </span>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          onClick={() => {
+                            // Handle member contact
+                            if (member.email) {
+                              window.location.href = `mailto:${member.email}`;
+                            }
+                          }}
+                        >
+                          Contact
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
 
-        {/* Footer Stats */}
-        {!loading && !error && filteredMembers.length > 0 && (
-          <div className="mt-12 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-sm text-gray-600">
-              <Users className="h-4 w-4" />
-              <span>
-                Showing {filteredMembers.length} of {members.length} members
-              </span>
-            </div>
+        {/* Empty State */}
+        {!loading && !error && filteredMembers.length === 0 && (
+          <div className="text-center py-12">
+            <User className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No members found
+            </h3>
+            <p className="text-gray-600">
+              {searchQuery
+                ? "Try adjusting your search terms"
+                : "No members are currently available"}
+            </p>
           </div>
         )}
       </div>
     </div>
   );
-};
-
-export default Members;
+}

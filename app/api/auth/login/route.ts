@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Use environment variable for backend URL with fallback
-const BACKEND_URL = process.env.BACKEND_API_URL;
+import config from "@/lib/config";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+    const response = await fetch(`${config.backendUrl}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(body),
     });
@@ -20,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { success: false, message: data.message || 'Login failed' },
+        { success: false, message: data.message || "Login failed" },
         { status: response.status }
       );
     }
@@ -29,9 +27,8 @@ export async function POST(request: NextRequest) {
       success: true,
       data: data,
     });
-
   } catch (error) {
-    console.error('Login API error:', error);
+    console.error("Login API error:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }

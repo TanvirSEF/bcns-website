@@ -85,21 +85,22 @@ export default function ProfilePage() {
         bio: editData.bio || undefined,
         profilePictureUrl: editData.profilePictureUrl || undefined,
       });
-      if (updated.success && updated.data) {
-        updateUser(updated.data);
-        // Re-sync local form with saved values
-        setEditData({
-          name: updated.data.name || "",
-          email: updated.data.email || "",
-          phone: updated.data.phone || "",
-          location: updated.data.address || "",
-          bio: updated.data.bio || "",
-          specialization: editData.specialization,
-          experience: editData.experience,
-          institution: editData.institution,
-          profilePictureUrl: updated.data.profilePictureUrl || "",
-        });
-      }
+
+      // New API returns data directly, not wrapped in success/data
+      updateUser(updated);
+      // Re-sync local form with saved values
+      setEditData({
+        name: updated.name || "",
+        email: updated.email || "",
+        phone: updated.phone || "",
+        location: updated.address || "",
+        bio: updated.bio || "",
+        specialization: editData.specialization,
+        experience: editData.experience,
+        institution: editData.institution,
+        profilePictureUrl: updated.profilePictureUrl || "",
+      });
+
       toast.success("Profile updated successfully");
       setIsEditing(false);
     } catch (e) {
@@ -219,7 +220,12 @@ export default function ProfilePage() {
                           try {
                             toast.info("Uploading image...");
                             const response = await uploadProfileImage(file);
-                            const url = response.data?.imageUrl;
+
+                            // New API returns data directly, not wrapped in success/data
+                            const url =
+                              response.imageUrl ||
+                              response.url ||
+                              response.data?.imageUrl;
                             if (url) {
                               setEditData({
                                 ...editData,
@@ -231,9 +237,8 @@ export default function ProfilePage() {
                               const saved = await updateProfile({
                                 profilePictureUrl: url,
                               });
-                              if (saved.success && saved.data) {
-                                updateUser(saved.data);
-                              }
+                              // New API returns data directly
+                              updateUser(saved);
                             }
                             toast.success("Profile picture updated");
                           } catch (e) {
@@ -411,7 +416,7 @@ export default function ProfilePage() {
                   {isEditing ? (
                     <input
                       type="text"
-                      value={editData.institution}  
+                      value={editData.institution}
                       onChange={(e) =>
                         setEditData({
                           ...editData,
@@ -536,9 +541,18 @@ export default function ProfilePage() {
                       onClick={async () => {
                         setPwdSaving(true);
                         try {
-                          const res = await changePassword(pwd.currentPassword, pwd.newPassword);
-                          toast.success(res.message || "Password changed");
-                          setPwd({ currentPassword: "", newPassword: "" });
+                          const res = await changePassword(
+                            pwd.currentPassword,
+                            pwd.newPassword
+                          );
+                          if (res.success) {
+                            toast.success("Password changed successfully");
+                            setPwd({ currentPassword: "", newPassword: "" });
+                          } else {
+                            toast.error(
+                              res.message || "Failed to change password"
+                            );
+                          }
                         } catch (e) {
                           const err = e as { message?: string };
                           toast.error(

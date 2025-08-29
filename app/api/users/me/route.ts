@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.BACKEND_API_URL || 'https://api.tanvirmern.com';
+import config from "@/lib/config";
 
 function getToken(request: NextRequest): string | null {
-  const authHeader = request.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
     return authHeader.slice(7);
   }
-  return request.cookies.get('auth_token')?.value || null;
+  return request.cookies.get("auth_token")?.value || null;
 }
 
 export async function GET(request: NextRequest) {
   try {
     const token = getToken(request);
-    
+
     if (!token) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
@@ -21,10 +20,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/users/me`, {
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+    const response = await fetch(`${config.backendUrl}/api/users/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
 
@@ -36,7 +35,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    
+
     // Extract user data from various possible response structures
     const user = data.user || data.data?.user || data;
 
@@ -44,9 +43,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: user,
     });
-
   } catch (error) {
-    console.error('Profile API error:', error);
+    console.error("Profile API error:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch profile" },
       { status: 500 }
@@ -66,17 +64,17 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
 
-    const response = await fetch(`${BACKEND_URL}/api/users/me`, {
-      method: 'PUT',
+    const response = await fetch(`${config.backendUrl}/api/users/me`, {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(body),
     });
 
     if (!response.ok) {
-      throw new Error('Backend request failed');
+      throw new Error("Backend request failed");
     }
 
     const data = await response.json();
@@ -86,9 +84,8 @@ export async function PUT(request: NextRequest) {
       success: true,
       data: user,
     });
-
   } catch (error) {
-    console.error('Update profile API error:', error);
+    console.error("Update profile API error:", error);
     return NextResponse.json(
       { success: false, message: "Failed to update profile" },
       { status: 500 }
