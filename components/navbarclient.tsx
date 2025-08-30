@@ -78,7 +78,6 @@ const navigationItems = [
     ],
   },
   { name: "Contact us", href: "/contact", icon: Phone },
-  { name: "Membership", href: "/membership", icon: Shield, requiresAuth: false },
   { name: "Our Members", href: "/members", icon: Users, requiresAuth: true },
 ];
 
