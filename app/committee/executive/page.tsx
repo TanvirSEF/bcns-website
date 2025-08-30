@@ -1,17 +1,11 @@
 import React from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Crown, 
-  Shield, 
-  Users, 
-  UserCheck, 
-  BookOpen, 
-  Award, 
-  Mail, 
+import {
+  Crown,
+  Mail,
   Phone,
   Building,
-  GraduationCap,
   Star,
   ChevronRight
 } from 'lucide-react';
@@ -41,7 +35,7 @@ const committeeMembers: CommitteeMember[] = [
     role: "President",
     priority: 1
   },
-  
+
   // Vice Presidents
   {
     id: 2,
@@ -346,15 +340,14 @@ const Executive = () => {
                 </div>
 
                 {/* Members Grid */}
-                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 ${
-                  role === 'President' ? 'justify-items-center' : ''
-                }`}>
+                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 ${role === 'President' ? 'justify-items-center' : ''
+                  }`}>
                   {role === 'President' && (
                     <div className="col-span-full flex justify-center">
                       <div className="w-full max-w-md">
                         {members.map((member) => (
-                          <Card 
-                            key={member.id} 
+                          <Card
+                            key={member.id}
                             className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-105 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-primary/20 overflow-hidden ring-2 ring-primary/30"
                           >
                             <CardContent className="p-8">
@@ -395,7 +388,7 @@ const Executive = () => {
 
                                   <div className="flex items-center justify-center text-sm text-muted-foreground">
                                     <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
-                                    <a 
+                                    <a
                                       href={`tel:${member.mobile}`}
                                       className="hover:text-primary transition-colors font-medium"
                                     >
@@ -405,7 +398,7 @@ const Executive = () => {
 
                                   <div className="flex items-center justify-center text-sm text-muted-foreground">
                                     <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
-                                    <a 
+                                    <a
                                       href={`mailto:${member.email}`}
                                       className="hover:text-primary transition-colors truncate font-medium"
                                       title={member.email}
@@ -421,10 +414,10 @@ const Executive = () => {
                       </div>
                     </div>
                   )}
-                  
-                                    {role !== 'President' && members.map((member) => (
-                    <Card 
-                      key={member.id} 
+
+                  {role !== 'President' && members.map((member) => (
+                    <Card
+                      key={member.id}
                       className="group hover:shadow-2xl transition-all duration-500 transform hover:scale-105 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-primary/20 overflow-hidden"
                     >
                       <CardContent className="p-8">
@@ -467,7 +460,7 @@ const Executive = () => {
 
                             <div className="flex items-center justify-center text-sm text-muted-foreground">
                               <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
-                              <a 
+                              <a
                                 href={`tel:${member.mobile}`}
                                 className="hover:text-primary transition-colors font-medium"
                               >
@@ -477,7 +470,7 @@ const Executive = () => {
 
                             <div className="flex items-center justify-center text-sm text-muted-foreground">
                               <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
-                              <a 
+                              <a
                                 href={`mailto:${member.email}`}
                                 className="hover:text-primary transition-colors truncate font-medium"
                                 title={member.email}

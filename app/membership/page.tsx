@@ -16,8 +16,6 @@ import {
   CheckCircle,
   AlertCircle,
   Shield,
-  Award,
-  BookOpen,
 } from "lucide-react";
 import {
   MembershipFormData,
@@ -26,7 +24,6 @@ import {
   DEFAULT_MEMBERSHIP_FORM_DATA,
   validateForm,
 } from "@/types/membership";
-import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 const Membership = () => {
@@ -130,13 +127,13 @@ const Membership = () => {
       } else {
         throw new Error(result.message || "Registration failed");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Registration error:", error);
       setSubmitStatus("error");
       
       // More detailed error message
       let errorMessage = "Registration failed. Please try again.";
-      if (error.message) {
+      if (error instanceof Error && error.message) {
         errorMessage = error.message;
       } else if (typeof error === 'string') {
         errorMessage = error;

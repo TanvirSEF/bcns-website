@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth-context";
-import { changePassword, updateProfile, uploadProfileImage, deleteProfileImage, getProfile } from "@/lib/api";
+import { changePassword, updateProfile, uploadProfileImage, deleteProfileImage } from "@/lib/api";
 import { toast } from "react-toastify";
 
 export default function ProfilePage() {
