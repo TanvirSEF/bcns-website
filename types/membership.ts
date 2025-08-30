@@ -8,6 +8,7 @@ export interface MembershipFormData {
   affiliation: string;
   phone: string;
   email: string;
+  password: string;
   mailingAddress: string;
   permanentAddress: string;
 
@@ -134,6 +135,7 @@ export const DEFAULT_MEMBERSHIP_FORM_DATA: MembershipFormData = {
   affiliation: "",
   phone: "",
   email: "",
+  password: "",
   mailingAddress: "",
   permanentAddress: "",
   mbbsYear: "",
@@ -351,11 +353,20 @@ export const validateEmail = (email: string): boolean => {
 };
 
 /**
- * Validates phone number format (basic validation)
+ * Validates phone number format (Bangladesh-friendly validation)
  */
 export const validatePhone = (phone: string): boolean => {
-  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-  return phoneRegex.test(phone.replace(/\s/g, ""));
+  // Remove spaces, dashes, and other formatting characters
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
+  
+  // Allow various formats:
+  // - Local: 01xxxxxxxxx (11 digits starting with 01)
+  // - International with +880: +88001xxxxxxxxx 
+  // - International without +: 88001xxxxxxxxx
+  // - General: any 10-15 digit number
+  const phoneRegex = /^(\+?880?)?0?1[0-9]{9}$|^[0-9]{10,15}$/;
+  
+  return phoneRegex.test(cleanPhone) && cleanPhone.length >= 10;
 };
 
 /**
@@ -449,6 +460,7 @@ export const validateForm = (data: MembershipFormData): FormValidationState => {
     "affiliation",
     "phone",
     "email",
+    "password",
     "mailingAddress",
     "permanentAddress",
   ];
@@ -474,6 +486,17 @@ export const validateForm = (data: MembershipFormData): FormValidationState => {
     const phoneValidation = validateField(data.phone, { phone: true });
     if (!phoneValidation.isValid) {
       errors.phone = phoneValidation.error!;
+    }
+  }
+
+  // Validate password strength
+  if (data.password) {
+    const passwordValidation = validateField(data.password, { 
+      required: true, 
+      minLength: 6 
+    });
+    if (!passwordValidation.isValid) {
+      errors.password = passwordValidation.error!;
     }
   }
 

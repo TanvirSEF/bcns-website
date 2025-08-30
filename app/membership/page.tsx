@@ -26,8 +26,11 @@ import {
   validateForm,
   validateFile,
 } from "@/types/membership";
+import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 const Membership = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<MembershipFormData>(
     DEFAULT_MEMBERSHIP_FORM_DATA
   );
@@ -36,9 +39,40 @@ const Membership = () => {
     errors: {},
     touched: {},
   });
-
+  const [formError, setFormError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmissionStatus>("idle");
+
+  // Simple data transformation - just organize the form data for backend
+  const createUserData = (data: MembershipFormData) => ({
+    // Basic info
+    name: data.name,
+    email: data.email,
+    password: data.password,
+    phone: data.phone,
+    affiliation: data.affiliation,
+    mailingAddress: data.mailingAddress,
+    permanentAddress: data.permanentAddress,
+    
+    // Education (structured)
+    educationQualifications: [
+      data.mbbsYear && { qualification: "MBBS", year: data.mbbsYear, institution: data.mbbsInstitution },
+      data.fcpsMdYear && { qualification: "FCPS/MD", year: data.fcpsMdYear, institution: data.fcpsMdInstitution },
+      data.mdFcpsYear && { qualification: "MD/FCPS", year: data.mdFcpsYear, institution: data.mdFcpsInstitution },
+      data.additionalYear && { qualification: data.additionalDegree || "Additional", year: data.additionalYear, institution: data.additionalInstitution }
+    ].filter(Boolean),
+    
+    // Training (structured)
+    training: [
+      data.training1Period && { period: data.training1Period, institute: data.training1Institute },
+      data.training2Period && { period: data.training2Period, institute: data.training2Institute },
+      data.training3Period && { period: data.training3Period, institute: data.training3Institute }
+    ].filter(Boolean),
+    
+    // Research interests
+    primaryResearchInterest: data.researchInterest1,
+    secondaryResearchInterest: data.researchInterest2,
+  });
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -77,32 +111,76 @@ const Membership = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate form before submission
+    // Validate form
     const formValidation = validateForm(formData);
     setValidation(formValidation);
 
     if (!formValidation.isValid) {
       setSubmitStatus("error");
+      setFormError(`Please fix the validation errors: ${Object.values(formValidation.errors).join(', ')}`);
       return;
     }
 
     setIsSubmitting(true);
     setSubmitStatus("submitting");
+    setFormError("");
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setSubmitStatus("success");
-
-      // Reset form after successful submission
-      setFormData(DEFAULT_MEMBERSHIP_FORM_DATA);
-      setValidation({
-        isValid: false,
-        errors: {},
-        touched: {},
+      // Create user data from form
+      const userData = createUserData(formData);
+      
+      // Register the user
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
       });
-    } catch {
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // If there's a profile picture, upload it
+        if (formData.photo) {
+          try {
+            // Login to get token for profile picture upload
+            const loginResponse = await api.login(formData.email, formData.password);
+            if (loginResponse.success && loginResponse.data.token) {
+              localStorage.setItem("auth_token", loginResponse.data.token);
+              await api.uploadProfileImage(formData.photo);
+              localStorage.removeItem("auth_token");
+            }
+          } catch (error) {
+            console.warn("Profile picture upload failed:", error);
+          }
+        }
+        
+        setSubmitStatus("success");
+        
+        // Reset form
+        setFormData(DEFAULT_MEMBERSHIP_FORM_DATA);
+        setValidation({ isValid: false, errors: {}, touched: {} });
+        setFormError("");
+
+        // Redirect to login page
+        setTimeout(() => {
+          router.push('/login?message=registration-success');
+        }, 3000);
+      } else {
+        throw new Error(result.message || "Registration failed");
+      }
+    } catch (error: any) {
+      console.error("Registration error:", error);
       setSubmitStatus("error");
+      
+      // More detailed error message
+      let errorMessage = "Registration failed. Please try again.";
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      setFormError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -265,6 +343,33 @@ const Membership = () => {
                           </p>
                         )}
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Password *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="password"
+                          name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          required
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background ${
+                            getFieldError("password") && isFieldTouched("password")
+                              ? "border-destructive focus:ring-destructive"
+                              : "border-border"
+                          }`}
+                          placeholder="Create a password (min 6 characters)"
+                        />
+                      </div>
+                      {getFieldError("password") && isFieldTouched("password") && (
+                        <p className="text-destructive text-sm mt-1 flex items-center">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          {getFieldError("password")}
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -616,10 +721,17 @@ const Membership = () => {
                     </div>
                     <div>
                       <h5 className="text-base font-semibold text-foreground mb-1">
-                        Application Submitted Successfully!
+                        Account Created Successfully!
                       </h5>
-                      <p className="text-muted-foreground text-sm">
-                        Thank you for your membership application. We will review your information and contact you soon.
+                      <p className="text-muted-foreground text-sm mb-2">
+                        Your membership account has been created. You can now login with:
+                      </p>
+                      <div className="bg-green-50 p-2 rounded text-sm">
+                        <p><strong>Email:</strong> {formData.email}</p>
+                        <p><strong>Password:</strong> Your chosen password</p>
+                      </div>
+                      <p className="text-muted-foreground text-xs mt-2">
+                        Redirecting to login page...
                       </p>
                     </div>
                   </CardContent>
@@ -637,7 +749,9 @@ const Membership = () => {
                         Submission Failed
                       </h5>
                       <p className="text-muted-foreground text-sm">
-                        {validation.isValid
+                        {formError 
+                          ? formError
+                          : validation.isValid
                           ? "There was an error submitting your application. Please try again."
                           : "Please fix the validation errors above before submitting."}
                       </p>
