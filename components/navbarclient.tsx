@@ -63,13 +63,7 @@ const navigationItems = [
     icon: Users,
     dropdownItems: [
       { name: "Executive Council", href: "/committee/executive", icon: Shield },
-      { name: "Board Members", href: "/committee/board", icon: Users },
-      { name: "Advisory Board", href: "/committee/advisory", icon: Award },
-      {
-        name: "Past Presidents",
-        href: "/committee/past-presidents",
-        icon: Calendar,
-      },
+      { name: "Convening Committee", href: "/committee/convening", icon: Users },
     ],
   },
   {
@@ -84,6 +78,7 @@ const navigationItems = [
     ],
   },
   { name: "Contact us", href: "/contact", icon: Phone },
+  { name: "Membership", href: "/membership", icon: Shield, requiresAuth: false },
   { name: "Our Members", href: "/members", icon: Users, requiresAuth: true },
 ];
 
@@ -146,16 +141,6 @@ export function NavbarClient() {
     >
       {isAuthenticated ? (
         <>
-          {!isMobile && (
-            <Button
-              asChild
-              className="w-full lg:w-auto bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              <Link href="/membership">
-                <Shield className="mr-2 h-4 w-4" /> Membership
-              </Link>
-            </Button>
-          )}
           <CustomDropdown
             align="end"
             trigger={
@@ -237,12 +222,7 @@ export function NavbarClient() {
               Profile
             </CustomDropdownItem>
 
-            {isMobile && (
-              <CustomDropdownItem href="/membership">
-                <Shield className="mr-2 h-4 w-4" />
-                Membership
-              </CustomDropdownItem>
-            )}
+
 
             <CustomDropdownSeparator />
 
@@ -478,10 +458,7 @@ export function NavbarClient() {
                       Profile
                     </CustomDropdownItem>
 
-                    <CustomDropdownItem href="/membership">
-                      <Shield className="mr-2 h-4 w-4" />
-                      Membership
-                    </CustomDropdownItem>
+
 
                     <CustomDropdownSeparator />
 
