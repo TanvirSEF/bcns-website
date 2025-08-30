@@ -247,11 +247,21 @@ export const api = {
 
   // Profile image upload helper
   uploadProfileImage: async (file: File) => {
+    // Validate file before sending
+    if (!file.type.startsWith("image/")) {
+      throw new Error("Invalid file type. Only images are allowed.");
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new Error("File size too large. Maximum 5MB allowed.");
+    }
+
     const token = getAuthToken();
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("profilePicture", file); // Match backend expectation
 
-    const response = await fetch(`${API_BASE}/upload-image`, {
+    const response = await fetch(`${API_BASE}/users/me/profile-picture`, {
       method: "POST",
       headers: { ...(token && { Authorization: `Bearer ${token}` }) },
       body: formData,
@@ -260,7 +270,25 @@ export const api = {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || data.error || "Upload failed");
+      throw new Error(data.message || data.error || "Profile picture upload failed");
+    }
+
+    return data;
+  },
+
+  // Profile image delete helper
+  deleteProfileImage: async () => {
+    const token = getAuthToken();
+
+    const response = await fetch(`${API_BASE}/users/me/profile-picture/delete`, {
+      method: "PATCH",
+      headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || data.error || "Profile picture deletion failed");
     }
 
     return data;
@@ -303,3 +331,4 @@ export const authenticate2FA = api.authenticate2FA;
 export const createZoomMeeting = api.createZoomMeeting;
 export const getActivityLogs = api.getActivityLogs;
 export const uploadProfileImage = api.uploadProfileImage;
+export const deleteProfileImage = api.deleteProfileImage;

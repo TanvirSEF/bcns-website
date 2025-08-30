@@ -13,6 +13,7 @@ import {
   X,
   Camera,
   Shield,
+  Trash2,
   Award,
   Briefcase,
   GraduationCap,
@@ -21,15 +22,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useRequireAuth } from "@/lib/auth-context";
-import { changePassword, updateProfile, uploadProfileImage } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { changePassword, updateProfile, uploadProfileImage, deleteProfileImage, getProfile } from "@/lib/api";
 import { toast } from "react-toastify";
 
 export default function ProfilePage() {
-  const { user, isLoading, updateUser } = useRequireAuth();
+  const { user, isLoading, updateUser, refreshUser } = useAuth();
   const [isEditing, setIsEditing] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [pwdSaving, setPwdSaving] = React.useState(false);
+  const [uploadingImage, setUploadingImage] = React.useState(false);
 
   const [pwd, setPwd] = React.useState({
     currentPassword: "",
@@ -63,6 +65,16 @@ export default function ProfilePage() {
     }
   }, [user]);
 
+  // Simple profile picture logic
+  const currentProfilePicture = editData.profilePictureUrl || user?.profilePictureUrl;
+
+  // Redirect to login if not authenticated  
+  React.useEffect(() => {
+    if (!isLoading && !user) {
+      window.location.href = '/login';
+    }
+  }, [isLoading, user]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -72,7 +84,7 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return null; // This will redirect to login via useRequireAuth
+    return null;
   }
 
   const handleSave = async () => {
@@ -116,13 +128,13 @@ export default function ProfilePage() {
       setEditData({
         name: user.name || "",
         email: user.email || "",
-        phone: "",
-        location: "",
-        bio: "",
+        phone: user.phone || "",
+        location: user.address || "",
+        bio: user.bio || "",
         specialization: "",
         experience: "",
         institution: "",
-        profilePictureUrl: "",
+        profilePictureUrl: user.profilePictureUrl || "",
       });
     }
     setIsEditing(false);
@@ -193,61 +205,139 @@ export default function ProfilePage() {
                 {/* Profile Picture */}
                 <div className="relative mx-auto mb-4">
                   <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mx-auto ring-4 ring-white/50 shadow-2xl">
-                    {editData.profilePictureUrl || user.profilePictureUrl ? (
+                    {currentProfilePicture && currentProfilePicture.trim() ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={
-                          editData.profilePictureUrl ||
-                          (user.profilePictureUrl as string)
-                        }
+                        src={currentProfilePicture}
                         alt="Profile"
                         className="h-full w-full object-cover"
+                        onError={(e) => {
+                          console.log("Profile image failed to load");
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
                       />
                     ) : (
                       <User className="h-14 w-14 text-blue-600" />
                     )}
                   </div>
                   {isEditing && (
-                    <label className="absolute bottom-1 right-1 h-8 w-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white hover:from-blue-600 hover:to-indigo-700 cursor-pointer shadow-xl transition-all duration-200">
-                      <Camera className="h-4 w-4" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          try {
-                            toast.info("Uploading image...");
-                            const response = await uploadProfileImage(file);
+                    <div className="absolute bottom-1 right-1 flex gap-1">
+                      {/* Upload button */}
+                      <label className={`h-8 w-8 rounded-full flex items-center justify-center text-white shadow-xl transition-all duration-200 ${
+                        uploadingImage 
+                          ? 'bg-gray-400 cursor-not-allowed' 
+                          : 'bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 cursor-pointer'
+                      }`}>
+                        {uploadingImage ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        ) : (
+                          <Camera className="h-4 w-4" />
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadingImage}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
 
-                            // New API returns data directly, not wrapped in success/data
-                            const url =
-                              response.imageUrl ||
-                              response.url ||
-                              response.data?.imageUrl;
-                            if (url) {
+                            // Reset the input so same file can be selected again
+                            e.target.value = "";
+
+                            setUploadingImage(true);
+                            try {
+                              toast.info("Uploading profile picture...");
+                              const response = await uploadProfileImage(file);
+
+                              // Extract URL from response
+                              const url =
+                                response.data?.imageUrl ||
+                                response.data?.profilePictureUrl ||
+                                response.imageUrl ||
+                                response.profilePictureUrl ||
+                                response.url;
+
+                              if (!url) {
+                                throw new Error("No image URL returned from server");
+                              }
+
+                              // Update local state first for immediate UI feedback
                               setEditData({
                                 ...editData,
                                 profilePictureUrl: url,
                               });
-                            }
-                            // Persist immediately so refresh keeps it
-                            if (url) {
+
+                              // Persist to backend
                               const saved = await updateProfile({
                                 profilePictureUrl: url,
                               });
-                              // New API returns data directly
+                              
+                              // Update global user state
                               updateUser(saved);
+                              
+                              toast.success("Profile picture updated successfully!");
+                            } catch (e) {
+                              console.error("Profile picture upload error:", e);
+                              const err = e as { message?: string };
+                              const errorMessage = err?.message || "Failed to upload profile picture";
+                              toast.error(errorMessage);
+                              
+                              // Reset to previous state on error
+                              if (user?.profilePictureUrl) {
+                                setEditData({
+                                  ...editData,
+                                  profilePictureUrl: user.profilePictureUrl,
+                                });
+                              }
+                            } finally {
+                              setUploadingImage(false);
                             }
-                            toast.success("Profile picture updated");
-                          } catch (e) {
-                            const err = e as { message?: string };
-                            toast.error(err?.message || "Image upload failed");
-                          }
-                        }}
-                      />
-                    </label>
+                          }}
+                        />
+                      </label>
+
+                      {/* Delete button - only show if user has a profile picture */}
+                      {currentProfilePicture && currentProfilePicture.trim() && (
+                        <button
+                          className={`h-8 w-8 rounded-full flex items-center justify-center text-white shadow-xl transition-all duration-200 ${
+                            uploadingImage 
+                              ? 'bg-gray-400 cursor-not-allowed' 
+                              : 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 cursor-pointer'
+                          }`}
+                          disabled={uploadingImage}
+                          onClick={async () => {
+                            if (uploadingImage) return;
+                            
+                            setUploadingImage(true);
+                            try {
+                              toast.info("Removing profile picture...");
+                              await deleteProfileImage();
+
+                              // Simple: Just refresh user data from backend
+                              await refreshUser();
+                              
+                              // Update local edit state to match
+                              setEditData(prev => ({
+                                ...prev,
+                                profilePictureUrl: "",
+                              }));
+                              
+                              toast.success("Profile picture removed successfully!");
+                            } catch (e) {
+                              console.error("Profile picture delete error:", e);
+                              const err = e as { message?: string };
+                              const errorMessage = err?.message || "Failed to remove profile picture";
+                              toast.error(errorMessage);
+                            } finally {
+                              setUploadingImage(false);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
 

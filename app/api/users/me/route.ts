@@ -65,7 +65,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
 
     const response = await fetch(`${config.backendUrl}/api/users/me`, {
-      method: "PUT",
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -74,7 +74,8 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!response.ok) {
-      throw new Error("Backend request failed");
+      const errorData = await response.text().catch(() => 'Backend request failed');
+      throw new Error(`Backend request failed: ${response.status} ${response.statusText} - ${errorData}`);
     }
 
     const data = await response.json();
