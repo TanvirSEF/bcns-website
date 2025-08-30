@@ -12,19 +12,19 @@ import {
   GraduationCap,
   Calendar,
   FileText,
-  Upload,
   Send,
   CheckCircle,
   AlertCircle,
+  Shield,
+  Award,
+  BookOpen,
 } from "lucide-react";
 import {
   MembershipFormData,
   SubmissionStatus,
   FormValidationState,
   DEFAULT_MEMBERSHIP_FORM_DATA,
-  MEMBERSHIP_FILE_CONFIG,
   validateForm,
-  validateFile,
 } from "@/types/membership";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
@@ -86,28 +86,6 @@ const Membership = () => {
     setValidation(newValidation);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData((prev) => ({ ...prev, photo: file }));
-
-    // Validate file if selected
-    if (file) {
-      const fileValidation = validateFile(file, MEMBERSHIP_FILE_CONFIG);
-      if (!fileValidation.isValid) {
-        setValidation((prev) => ({
-          ...prev,
-          errors: { ...prev.errors, photo: fileValidation.error! },
-        }));
-      } else {
-        setValidation((prev) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { photo, ...otherErrors } = prev.errors;
-          return { ...prev, errors: otherErrors };
-        });
-      }
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -126,10 +104,9 @@ const Membership = () => {
     setFormError("");
 
     try {
-      // Create user data from form
+      // Register the user
       const userData = createUserData(formData);
       
-      // Register the user
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -139,21 +116,6 @@ const Membership = () => {
       const result = await response.json();
       
       if (result.success) {
-        // If there's a profile picture, upload it
-        if (formData.photo) {
-          try {
-            // Login to get token for profile picture upload
-            const loginResponse = await api.login(formData.email, formData.password);
-            if (loginResponse.success && loginResponse.data.token) {
-              localStorage.setItem("auth_token", loginResponse.data.token);
-              await api.uploadProfileImage(formData.photo);
-              localStorage.removeItem("auth_token");
-            }
-          } catch (error) {
-            console.warn("Profile picture upload failed:", error);
-          }
-        }
-        
         setSubmitStatus("success");
         
         // Reset form
@@ -197,173 +159,170 @@ const Membership = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Form Title */}
-        <Card className="bg-primary text-primary-foreground border-0 shadow-lg mb-8">
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileText className="h-6 w-6 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold mb-2">
-              MEMBERSHIP APPLICATION FORM
-            </h1>
-            <p className="text-primary-foreground/80">
-              Complete all required fields to submit your application
-            </p>
-          </CardContent>
-        </Card>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-8 lg:py-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <div className="text-center mb-8 lg:mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
+            <Shield className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            Join BCNS Membership
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Become part of Bangladesh Child Neurology Society and contribute to advancing pediatric neurological care and research
+          </p>
+        </div>
 
         {/* Main Form */}
-        <Card className="bg-card border shadow-lg">
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-2xl rounded-2xl overflow-hidden">
           <CardContent className="p-6 lg:p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Personal Information Section */}
-              <div className="bg-muted/50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
-                    <User className="h-4 w-4 text-primary-foreground" />
+              <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-xl p-6 lg:p-8 border border-primary/20">
+                <div className="flex items-center mb-6">
+                  <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center mr-4">
+                    <User className="h-5 w-5 text-primary-foreground" />
                   </div>
-                  Personal Information
-                </h3>
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground">Personal Information</h3>
+                    <p className="text-sm text-muted-foreground">Tell us about yourself</p>
+                  </div>
+                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2 space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Name *
-                        </label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <input
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            required
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background ${
-                              getFieldError("name") && isFieldTouched("name")
-                                ? "border-destructive focus:ring-destructive"
-                                : "border-border"
-                            }`}
-                            placeholder="Enter your full name"
-                          />
-                        </div>
-                        {getFieldError("name") && isFieldTouched("name") && (
-                          <p className="text-destructive text-sm mt-1 flex items-center">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            {getFieldError("name")}
-                          </p>
-                        )}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Full Name *
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
+                            getFieldError("name") && isFieldTouched("name")
+                              ? "border-destructive focus:ring-destructive"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                          placeholder="Enter your full name"
+                        />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Affiliation *
-                        </label>
-                        <div className="relative">
-                          <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <input
-                            type="text"
-                            name="affiliation"
-                            value={formData.affiliation}
-                            onChange={handleInputChange}
-                            required
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background ${
-                              getFieldError("affiliation") &&
-                              isFieldTouched("affiliation")
-                                ? "border-destructive focus:ring-destructive"
-                                : "border-border"
-                            }`}
-                            placeholder="Your institution/hospital"
-                          />
-                        </div>
-                        {getFieldError("affiliation") &&
-                          isFieldTouched("affiliation") && (
-                            <p className="text-destructive text-sm mt-1 flex items-center">
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                              {getFieldError("affiliation")}
-                            </p>
-                          )}
-                      </div>
+                      {getFieldError("name") && isFieldTouched("name") && (
+                        <p className="text-destructive text-sm mt-1 flex items-center">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          {getFieldError("name")}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Phone *
-                        </label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            required
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background ${
-                              getFieldError("phone") && isFieldTouched("phone")
-                                ? "border-destructive focus:ring-destructive"
-                                : "border-border"
-                            }`}
-                            placeholder="Enter phone number"
-                          />
-                        </div>
-                        {getFieldError("phone") && isFieldTouched("phone") && (
-                          <p className="text-destructive text-sm mt-1 flex items-center">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            {getFieldError("phone")}
-                          </p>
-                        )}
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Email Address *
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
+                            getFieldError("email") && isFieldTouched("email")
+                              ? "border-destructive focus:ring-destructive"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                          placeholder="Enter email address"
+                        />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Email *
-                        </label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            required
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background ${
-                              getFieldError("email") && isFieldTouched("email")
-                                ? "border-destructive focus:ring-destructive"
-                                : "border-border"
-                            }`}
-                            placeholder="Enter email address"
-                          />
-                        </div>
-                        {getFieldError("email") && isFieldTouched("email") && (
-                          <p className="text-destructive text-sm mt-1 flex items-center">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            {getFieldError("email")}
-                          </p>
-                        )}
+                      {getFieldError("email") && isFieldTouched("email") && (
+                        <p className="text-destructive text-sm mt-1 flex items-center">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          {getFieldError("email")}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Phone Number *
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
+                            getFieldError("phone") && isFieldTouched("phone")
+                              ? "border-destructive focus:ring-destructive"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                          placeholder="Enter phone number"
+                        />
                       </div>
+                      {getFieldError("phone") && isFieldTouched("phone") && (
+                        <p className="text-destructive text-sm mt-1 flex items-center">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          {getFieldError("phone")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Institution/Affiliation *
+                      </label>
+                      <div className="relative">
+                        <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          name="affiliation"
+                          value={formData.affiliation}
+                          onChange={handleInputChange}
+                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
+                            getFieldError("affiliation") && isFieldTouched("affiliation")
+                              ? "border-destructive focus:ring-destructive"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                          placeholder="Your institution/hospital"
+                        />
+                      </div>
+                      {getFieldError("affiliation") && isFieldTouched("affiliation") && (
+                        <p className="text-destructive text-sm mt-1 flex items-center">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          {getFieldError("affiliation")}
+                        </p>
+                      )}
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">
                         Password *
                       </label>
-                      <div className="relative">
-                        <input
-                          type="password"
-                          name="password"
-                          value={formData.password}
-                          onChange={handleInputChange}
-                          required
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background ${
-                            getFieldError("password") && isFieldTouched("password")
-                              ? "border-destructive focus:ring-destructive"
-                              : "border-border"
-                          }`}
-                          placeholder="Create a password (min 6 characters)"
-                        />
-                      </div>
+                      <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
+                          getFieldError("password") && isFieldTouched("password")
+                            ? "border-destructive focus:ring-destructive"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                        placeholder="Create a password (min 6 characters)"
+                      />
                       {getFieldError("password") && isFieldTouched("password") && (
                         <p className="text-destructive text-sm mt-1 flex items-center">
                           <AlertCircle className="h-3 w-3 mr-1" />
@@ -371,268 +330,200 @@ const Membership = () => {
                         </p>
                       )}
                     </div>
+                  </div>
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        Mailing Address *
-                      </label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <textarea
-                          name="mailingAddress"
-                          value={formData.mailingAddress}
-                          onChange={handleInputChange}
-                          required
-                          rows={3}
-                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background ${
-                            getFieldError("mailingAddress") &&
-                            isFieldTouched("mailingAddress")
-                              ? "border-destructive focus:ring-destructive"
-                              : "border-border"
-                          }`}
-                          placeholder="Enter your mailing address"
-                        />
-                      </div>
-                      {getFieldError("mailingAddress") &&
-                        isFieldTouched("mailingAddress") && (
-                          <p className="text-destructive text-sm mt-1 flex items-center">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            {getFieldError("mailingAddress")}
-                          </p>
-                        )}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Mailing Address *
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <textarea
+                        name="mailingAddress"
+                        value={formData.mailingAddress}
+                        onChange={handleInputChange}
+                        required
+                        rows={3}
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
+                          getFieldError("mailingAddress") && isFieldTouched("mailingAddress")
+                            ? "border-destructive focus:ring-destructive"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                        placeholder="Enter your mailing address"
+                      />
                     </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        Permanent Address *
-                      </label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <textarea
-                          name="permanentAddress"
-                          value={formData.permanentAddress}
-                          onChange={handleInputChange}
-                          required
-                          rows={3}
-                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background ${
-                            getFieldError("permanentAddress") &&
-                            isFieldTouched("permanentAddress")
-                              ? "border-destructive focus:ring-destructive"
-                              : "border-border"
-                          }`}
-                          placeholder="Enter your permanent address"
-                        />
-                      </div>
-                      {getFieldError("permanentAddress") &&
-                        isFieldTouched("permanentAddress") && (
-                          <p className="text-destructive text-sm mt-1 flex items-center">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            {getFieldError("permanentAddress")}
-                          </p>
-                        )}
-                    </div>
+                    {getFieldError("mailingAddress") && isFieldTouched("mailingAddress") && (
+                      <p className="text-destructive text-sm mt-1 flex items-center">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        {getFieldError("mailingAddress")}
+                      </p>
+                    )}
                   </div>
 
-                  {/* Photo Upload Section */}
-                  <div className="lg:col-span-1">
-                    <div
-                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-all duration-300 bg-background hover:bg-muted/50 ${
-                        getFieldError("photo")
-                          ? "border-destructive bg-destructive/10"
-                          : "border-border hover:border-primary"
-                      }`}
-                    >
-                      <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Upload className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <h5 className="text-sm font-medium text-foreground mb-2">
-                        Passport Size Photo
-                      </h5>
-                      <p className="text-xs text-muted-foreground mb-3">
-                        Upload a recent passport size photo (Max: 5MB)
-                      </p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        id="photo-upload"
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Permanent Address *
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <textarea
+                        name="permanentAddress"
+                        value={formData.permanentAddress}
+                        onChange={handleInputChange}
+                        required
+                        rows={3}
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
+                          getFieldError("permanentAddress") && isFieldTouched("permanentAddress")
+                            ? "border-destructive focus:ring-destructive"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                        placeholder="Enter your permanent address"
                       />
-                      <label
-                        htmlFor="photo-upload"
-                        className="cursor-pointer bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-all duration-200"
-                      >
-                        Choose File
-                      </label>
-                      {formData.photo && (
-                        <div className="mt-3 p-2 bg-muted rounded border">
-                          <p className="text-xs text-foreground flex items-center">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            {formData.photo.name}
-                          </p>
-                        </div>
-                      )}
-                      {getFieldError("photo") && (
-                        <p className="text-xs text-destructive mt-2 flex items-center">
-                          <AlertCircle className="h-3 w-3 mr-1" />
-                          {getFieldError("photo")}
-                        </p>
-                      )}
                     </div>
+                    {getFieldError("permanentAddress") && isFieldTouched("permanentAddress") && (
+                      <p className="text-destructive text-sm mt-1 flex items-center">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        {getFieldError("permanentAddress")}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Education Qualification Section */}
-              <div className="bg-muted/50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
-                    <GraduationCap className="h-4 w-4 text-primary-foreground" />
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl p-6 lg:p-8 border border-blue-200/50 dark:border-blue-800/30">
+                <div className="flex items-center mb-6">
+                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                    <GraduationCap className="h-5 w-5 text-white" />
                   </div>
-                  Education Qualification
-                </h3>
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground">Education Qualifications</h3>
+                    <p className="text-sm text-muted-foreground">Your academic background</p>
+                  </div>
+                </div>
 
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-background rounded-lg p-3">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
                     <div className="font-semibold text-foreground">Qualification</div>
                     <div className="font-semibold text-foreground">Year</div>
-                    <div className="font-semibold text-foreground">College/Institution</div>
+                    <div className="font-semibold text-foreground">Institution</div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-background rounded-lg p-3">
-                    <div className="font-medium text-muted-foreground">MBBS</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
+                    <div className="font-medium text-blue-600 dark:text-blue-400">MBBS</div>
                     <input
                       type="text"
                       name="mbbsYear"
                       value={formData.mbbsYear}
                       onChange={handleInputChange}
-                      className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background ${
+                      className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm ${
                         getFieldError("mbbsYear")
                           ? "border-destructive"
-                          : "border-border"
+                          : "border-border hover:border-blue-300"
                       }`}
-                      placeholder="Year (YYYY)"
+                      placeholder="YYYY"
                     />
                     <input
                       type="text"
                       name="mbbsInstitution"
                       value={formData.mbbsInstitution}
                       onChange={handleInputChange}
-                      className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background"
-                      placeholder="Institution"
+                      className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-blue-300"
+                      placeholder="Institution name"
                     />
                   </div>
-                  {getFieldError("mbbsYear") && (
-                    <p className="text-destructive text-sm flex items-center">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Please enter a valid 4-digit year
-                    </p>
-                  )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-background rounded-lg p-3">
-                    <div className="font-medium text-muted-foreground">FCPS / MD</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
+                    <div className="font-medium text-blue-600 dark:text-blue-400">FCPS / MD</div>
                     <input
                       type="text"
                       name="fcpsMdYear"
                       value={formData.fcpsMdYear}
                       onChange={handleInputChange}
-                      className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background ${
+                      className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm ${
                         getFieldError("fcpsMdYear")
                           ? "border-destructive"
-                          : "border-border"
+                          : "border-border hover:border-blue-300"
                       }`}
-                      placeholder="Year (YYYY)"
+                      placeholder="YYYY"
                     />
                     <input
                       type="text"
                       name="fcpsMdInstitution"
                       value={formData.fcpsMdInstitution}
                       onChange={handleInputChange}
-                      className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background"
-                      placeholder="Institution"
+                      className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-blue-300"
+                      placeholder="Institution name"
                     />
                   </div>
-                  {getFieldError("fcpsMdYear") && (
-                    <p className="text-destructive text-sm flex items-center">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Please enter a valid 4-digit year
-                    </p>
-                  )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-background rounded-lg p-3">
-                    <div className="font-medium text-muted-foreground">MD / FCPS</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
+                    <div className="font-medium text-blue-600 dark:text-blue-400">MD / FCPS</div>
                     <input
                       type="text"
                       name="mdFcpsYear"
                       value={formData.mdFcpsYear}
                       onChange={handleInputChange}
-                      className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background ${
+                      className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm ${
                         getFieldError("mdFcpsYear")
                           ? "border-destructive"
-                          : "border-border"
+                          : "border-border hover:border-blue-300"
                       }`}
-                      placeholder="Year (YYYY)"
+                      placeholder="YYYY"
                     />
                     <input
                       type="text"
                       name="mdFcpsInstitution"
                       value={formData.mdFcpsInstitution}
                       onChange={handleInputChange}
-                      className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background"
-                      placeholder="Institution"
+                      className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-blue-300"
+                      placeholder="Institution name"
                     />
                   </div>
-                  {getFieldError("mdFcpsYear") && (
-                    <p className="text-destructive text-sm flex items-center">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Please enter a valid 4-digit year
-                    </p>
-                  )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-background rounded-lg p-3">
-                    <div className="font-medium text-muted-foreground">Additional Degree</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
+                    <div className="font-medium text-blue-600 dark:text-blue-400">Additional Degree</div>
                     <input
                       type="text"
                       name="additionalYear"
                       value={formData.additionalYear}
                       onChange={handleInputChange}
-                      className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background ${
+                      className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm ${
                         getFieldError("additionalYear")
                           ? "border-destructive"
-                          : "border-border"
+                          : "border-border hover:border-blue-300"
                       }`}
-                      placeholder="Year (YYYY)"
+                      placeholder="YYYY"
                     />
                     <input
                       type="text"
                       name="additionalInstitution"
                       value={formData.additionalInstitution}
                       onChange={handleInputChange}
-                      className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background"
-                      placeholder="Institution"
+                      className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-blue-300"
+                      placeholder="Institution name"
                     />
                   </div>
-                  {getFieldError("additionalYear") && (
-                    <p className="text-destructive text-sm flex items-center">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Please enter a valid 4-digit year
-                    </p>
-                  )}
                 </div>
               </div>
 
               {/* Training Section */}
-              <div className="bg-muted/50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
-                    <Calendar className="h-4 w-4 text-primary-foreground" />
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-xl p-6 lg:p-8 border border-green-200/50 dark:border-green-800/30">
+                <div className="flex items-center mb-6">
+                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                    <Calendar className="h-5 w-5 text-white" />
                   </div>
-                  Training
-                </h3>
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground">Professional Training</h3>
+                    <p className="text-sm text-muted-foreground">Your training experience</p>
+                  </div>
+                </div>
 
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-background rounded-lg p-3">
-                    <div className="font-semibold text-foreground">Sl. No.</div>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-green-100 dark:border-green-800/30">
+                    <div className="font-semibold text-foreground">Training #</div>
                     <div className="font-semibold text-foreground">Period</div>
                     <div className="font-semibold text-foreground">Institute</div>
                   </div>
@@ -640,9 +531,9 @@ const Membership = () => {
                   {[1, 2, 3].map((num) => (
                     <div
                       key={num}
-                      className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-background rounded-lg p-3"
+                      className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-green-100 dark:border-green-800/30"
                     >
-                      <div className="font-medium text-muted-foreground">{num}.</div>
+                      <div className="font-medium text-green-600 dark:text-green-400">{num}.</div>
                       <input
                         type="text"
                         name={`training${num}Period`}
@@ -652,7 +543,7 @@ const Membership = () => {
                           ] as string
                         }
                         onChange={handleInputChange}
-                        className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background"
+                        className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-green-300"
                         placeholder="Training period"
                       />
                       <input
@@ -664,7 +555,7 @@ const Membership = () => {
                           ] as string
                         }
                         onChange={handleInputChange}
-                        className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-background"
+                        className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-green-300"
                         placeholder="Training institute"
                       />
                     </div>
@@ -673,39 +564,42 @@ const Membership = () => {
               </div>
 
               {/* Research Interests Section */}
-              <div className="bg-muted/50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
-                    <FileText className="h-4 w-4 text-primary-foreground" />
+              <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 rounded-xl p-6 lg:p-8 border border-purple-200/50 dark:border-purple-800/30">
+                <div className="flex items-center mb-6">
+                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
+                    <FileText className="h-5 w-5 text-white" />
                   </div>
-                  Topic Interest (Field of Interest – Research)
-                </h3>
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground">Research Interests</h3>
+                    <p className="text-sm text-muted-foreground">Your areas of research focus</p>
+                  </div>
+                </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Research Interest 1
+                      Primary Research Interest
                     </label>
                     <textarea
                       name="researchInterest1"
                       value={formData.researchInterest1}
                       onChange={handleInputChange}
                       rows={3}
-                      className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background"
+                      className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm hover:border-purple-300"
                       placeholder="Describe your primary research interest"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Research Interest 2
+                      Secondary Research Interest
                     </label>
                     <textarea
                       name="researchInterest2"
                       value={formData.researchInterest2}
                       onChange={handleInputChange}
                       rows={3}
-                      className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background"
+                      className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm hover:border-purple-300"
                       placeholder="Describe your secondary research interest (optional)"
                     />
                   </div>
@@ -714,23 +608,23 @@ const Membership = () => {
 
               {/* Submit Status Messages */}
               {submitStatus === "success" && (
-                <Card className="bg-muted/50 border border-green-200">
-                  <CardContent className="p-4 flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
+                <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800/30">
+                  <CardContent className="p-6 flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <h5 className="text-base font-semibold text-foreground mb-1">
-                        Account Created Successfully!
+                      <h5 className="text-lg font-semibold text-foreground mb-2">
+                        Account Created Successfully! 🎉
                       </h5>
-                      <p className="text-muted-foreground text-sm mb-2">
-                        Your membership account has been created. You can now login with:
+                      <p className="text-muted-foreground mb-3">
+                        Your membership account has been created. You can now login with your credentials.
                       </p>
-                      <div className="bg-green-50 p-2 rounded text-sm">
+                      <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-sm">
                         <p><strong>Email:</strong> {formData.email}</p>
                         <p><strong>Password:</strong> Your chosen password</p>
                       </div>
-                      <p className="text-muted-foreground text-xs mt-2">
+                      <p className="text-muted-foreground text-sm mt-3">
                         Redirecting to login page...
                       </p>
                     </div>
@@ -739,16 +633,16 @@ const Membership = () => {
               )}
 
               {submitStatus === "error" && (
-                <Card className="bg-muted/50 border border-destructive/20">
-                  <CardContent className="p-4 flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-destructive/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      <AlertCircle className="h-4 w-4 text-destructive" />
+                <Card className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border border-red-200 dark:border-red-800/30">
+                  <CardContent className="p-6 flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
                     </div>
                     <div>
-                      <h5 className="text-base font-semibold text-foreground mb-1">
+                      <h5 className="text-lg font-semibold text-foreground mb-2">
                         Submission Failed
                       </h5>
-                      <p className="text-muted-foreground text-sm">
+                      <p className="text-muted-foreground">
                         {formError 
                           ? formError
                           : validation.isValid
@@ -761,16 +655,16 @@ const Membership = () => {
               )}
 
               {/* Submit Button */}
-              <div className="border-t border-border pt-6">
+              <div className="border-t border-border pt-8">
                 <Button
                   type="submit"
                   disabled={isSubmitting || !validation.isValid}
-                  className="w-full bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground py-4 px-6 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-3"
+                  className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary disabled:from-muted disabled:to-muted disabled:text-muted-foreground text-primary-foreground py-4 px-8 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none"
                 >
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
-                      <span>Submitting Application...</span>
+                      <span>Creating Your Account...</span>
                     </>
                   ) : (
                     <>
