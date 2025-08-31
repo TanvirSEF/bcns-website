@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { AuthProvider } from "@/lib/auth-context";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { cn } from "@/lib/utils";
@@ -30,11 +28,7 @@ export default function RootLayout({
       <body className={cn(geistSans.variable, "antialiased min-h-screen")}>
         <ErrorBoundary>
           <AuthProvider>
-            <div className="flex flex-col min-h-screen">
-              <Navbar />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
+            {children}
             <ToastContainer
               position="top-right"
               newestOnTop
