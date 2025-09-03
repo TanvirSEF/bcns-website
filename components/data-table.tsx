@@ -403,7 +403,7 @@ export function DataTable({
         </TabsContent>
 
         <TabsContent value="analytics" className="px-4 lg:px-6">
-          <div className="flex h-[400px] items-center justify-center rounded-md border border-dashed">
+          <div className="flex min-h-64 md:min-h-80 items-center justify-center rounded-md border border-dashed">
             <div className="text-center">
               <h3 className="text-lg font-medium">Analytics Dashboard</h3>
               <p className="text-sm text-muted-foreground mt-2">
@@ -414,7 +414,7 @@ export function DataTable({
         </TabsContent>
 
         <TabsContent value="reports" className="px-4 lg:px-6">
-          <div className="flex h-[400px] items-center justify-center rounded-md border border-dashed">
+          <div className="flex min-h-64 md:min-h-80 items-center justify-center rounded-md border border-dashed">
             <div className="text-center">
               <h3 className="text-lg font-medium">Reports Dashboard</h3>
               <p className="text-sm text-muted-foreground mt-2">
@@ -425,7 +425,7 @@ export function DataTable({
         </TabsContent>
 
         <TabsContent value="settings" className="px-4 lg:px-6">
-          <div className="flex h-[400px] items-center justify-center rounded-md border border-dashed">
+          <div className="flex min-h-64 md:min-h-80 items-center justify-center rounded-md border border-dashed">
             <div className="text-center">
               <h3 className="text-lg font-medium">Settings Dashboard</h3>
               <p className="text-sm text-muted-foreground mt-2">
