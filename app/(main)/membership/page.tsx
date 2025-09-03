@@ -25,6 +25,8 @@ import {
   validateForm,
 } from "@/types/membership";
 import { useRouter } from "next/navigation";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 const Membership = () => {
   const router = useRouter();
@@ -157,6 +159,7 @@ const Membership = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-8 lg:py-12">
+      <Navbar />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="text-center mb-8 lg:mb-12">
@@ -678,6 +681,7 @@ const Membership = () => {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 };

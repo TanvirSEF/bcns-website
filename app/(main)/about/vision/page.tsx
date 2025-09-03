@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { Sparkles, MapPinned, Landmark, Microscope, Users } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -13,6 +15,7 @@ export const revalidate = false; // Static at build time
 export default function VisionPage() {
   return (
     <div className="min-h-screen bg-white">
+      <Navbar />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-blue-800">
         <div className="absolute inset-0 opacity-20" aria-hidden>
@@ -125,6 +128,7 @@ export default function VisionPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

@@ -1,4 +1,6 @@
 import React from 'react';
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -307,6 +309,7 @@ const Executive = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-8 lg:py-12">
+      <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="text-center mb-16">
@@ -505,6 +508,7 @@ const Executive = () => {
           </Card>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

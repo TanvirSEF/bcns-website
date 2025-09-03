@@ -9,6 +9,8 @@ import { AlertCircle, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { loginUser } from "@/lib/api";
 import { User } from "@/types/api";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 interface LoginResponseData {
   user?: Record<string, unknown>;
@@ -129,6 +131,7 @@ function LoginPageContent() {
 
   return (
     <section className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white">
+      <Navbar />
       {/* Left brand panel (hidden on mobile) */}
       <div className="relative hidden lg:flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-blue-800">
         <div
@@ -255,6 +258,7 @@ function LoginPageContent() {
           </div>
         </Card>
       </div>
+      <Footer />
     </section>
   );
 }
