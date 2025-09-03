@@ -164,8 +164,8 @@ export default function PublicationsManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between p-6 bg-card rounded-lg border shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Publications Management</h1>
           <p className="text-muted-foreground">
@@ -179,7 +179,7 @@ export default function PublicationsManagement() {
               Create Publication
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Create New Publication</DialogTitle>
               <DialogDescription>
@@ -274,8 +274,8 @@ export default function PublicationsManagement() {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-lg">
+        <CardHeader className="bg-muted/50 border-b">
           <CardTitle>All Publications</CardTitle>
           <CardDescription>
             Manage and review academic publications
@@ -363,7 +363,7 @@ export default function PublicationsManagement() {
 
       {/* Edit Publication Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Publication</DialogTitle>
             <DialogDescription>

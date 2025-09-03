@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,10 +24,6 @@ export default function ActivityLogsManagement() {
   useEffect(() => {
     fetchLogs();
   }, []);
-
-  useEffect(() => {
-    filterLogs();
-  }, [logs, searchQuery, actionFilter, userFilter, dateFilter]);
 
   const fetchLogs = async () => {
     try {
@@ -106,7 +102,7 @@ export default function ActivityLogsManagement() {
     }
   };
 
-  const filterLogs = () => {
+  const filterLogs = useCallback(() => {
     let filtered = [...logs];
 
     // Search filter
@@ -158,7 +154,11 @@ export default function ActivityLogsManagement() {
     }
 
     setFilteredLogs(filtered);
-  };
+  }, [logs, searchQuery, actionFilter, userFilter, dateFilter]);
+
+  useEffect(() => {
+    filterLogs();
+  }, [filterLogs]);
 
   const getActionBadge = (action: string) => {
     const actionColors: { [key: string]: string } = {
@@ -232,8 +232,8 @@ export default function ActivityLogsManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between p-6 bg-card rounded-lg border shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Activity Logs</h1>
           <p className="text-muted-foreground">
@@ -247,8 +247,8 @@ export default function ActivityLogsManagement() {
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-lg">
+        <CardHeader className="bg-muted/50 border-b">
           <CardTitle>Filters</CardTitle>
           <CardDescription>
             Filter activity logs by various criteria
@@ -391,8 +391,8 @@ export default function ActivityLogsManagement() {
       </div>
 
       {/* Logs Table */}
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-lg">
+        <CardHeader className="bg-muted/50 border-b">
           <CardTitle>Activity Logs</CardTitle>
           <CardDescription>
             Detailed view of all system activities

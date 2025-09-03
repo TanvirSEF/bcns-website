@@ -159,8 +159,8 @@ export default function DocumentsManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between p-6 bg-card rounded-lg border shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Documents Management</h1>
           <p className="text-muted-foreground">
@@ -174,7 +174,7 @@ export default function DocumentsManagement() {
               Upload Document
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <DialogTitle>Upload New Document</DialogTitle>
               <DialogDescription>
@@ -246,8 +246,8 @@ export default function DocumentsManagement() {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-lg">
+        <CardHeader className="bg-muted/50 border-b">
           <CardTitle>All Documents</CardTitle>
           <CardDescription>
             Review and manage document submissions
@@ -353,7 +353,7 @@ export default function DocumentsManagement() {
 
       {/* Edit Document Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Edit Document</DialogTitle>
             <DialogDescription>

@@ -138,8 +138,8 @@ export default function EventsManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between p-6 bg-card rounded-lg border shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Events Management</h1>
           <p className="text-muted-foreground">
@@ -153,7 +153,7 @@ export default function EventsManagement() {
               Create Event
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <DialogTitle>Create New Event</DialogTitle>
               <DialogDescription>
@@ -216,8 +216,8 @@ export default function EventsManagement() {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-lg">
+        <CardHeader className="bg-muted/50 border-b">
           <CardTitle>All Events</CardTitle>
           <CardDescription>
             Manage and monitor all society events
@@ -294,7 +294,7 @@ export default function EventsManagement() {
 
       {/* Edit Event Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Edit Event</DialogTitle>
             <DialogDescription>

@@ -187,8 +187,8 @@ export default function SearchAndAnalytics() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between p-6 bg-card rounded-lg border shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Search & Analytics</h1>
           <p className="text-muted-foreground">
@@ -198,8 +198,8 @@ export default function SearchAndAnalytics() {
       </div>
 
       {/* Search Section */}
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-lg">
+        <CardHeader className="bg-muted/50 border-b">
           <CardTitle>Global Search</CardTitle>
           <CardDescription>
             Search across users, events, documents, publications, and polls
@@ -372,8 +372,8 @@ export default function SearchAndAnalytics() {
           </div>
 
           {/* Top Searches */}
-          <Card>
-            <CardHeader>
+          <Card className="border-2 shadow-lg">
+            <CardHeader className="bg-muted/50 border-b">
               <CardTitle>Top Search Terms</CardTitle>
               <CardDescription>
                 Most popular search queries by users
@@ -399,8 +399,8 @@ export default function SearchAndAnalytics() {
           </Card>
 
           {/* User Activity Chart */}
-          <Card>
-            <CardHeader>
+          <Card className="border-2 shadow-lg">
+            <CardHeader className="bg-muted/50 border-b">
               <CardTitle>User Activity Trend</CardTitle>
               <CardDescription>
                 Daily user activity over the last week
@@ -432,8 +432,8 @@ export default function SearchAndAnalytics() {
       )}
 
       {/* Quick Actions */}
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-lg">
+        <CardHeader className="bg-muted/50 border-b">
           <CardTitle>Quick Actions</CardTitle>
           <CardDescription>
             Common administrative tasks

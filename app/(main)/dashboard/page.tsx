@@ -41,7 +41,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-white via-slate-50 to-white overflow-x-hidden">
+    <div className="relative min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"

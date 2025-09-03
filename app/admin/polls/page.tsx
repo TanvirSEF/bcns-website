@@ -204,8 +204,8 @@ export default function PollsManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between p-6 bg-card rounded-lg border shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Polls Management</h1>
           <p className="text-muted-foreground">
@@ -219,7 +219,7 @@ export default function PollsManagement() {
               Create Poll
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Create New Poll</DialogTitle>
               <DialogDescription>
@@ -312,8 +312,8 @@ export default function PollsManagement() {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-lg">
+        <CardHeader className="bg-muted/50 border-b">
           <CardTitle>All Polls</CardTitle>
           <CardDescription>
             Manage and monitor poll results
@@ -430,7 +430,7 @@ export default function PollsManagement() {
 
       {/* Edit Poll Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Poll</DialogTitle>
             <DialogDescription>

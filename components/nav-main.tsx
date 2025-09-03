@@ -29,15 +29,15 @@ export function NavMain({
               tooltip="Quick Create"
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
             >
-              <Plus />
-              <span>Quick Create</span>
+              <Plus className="size-4" />
+              <span className="truncate text-sm">Quick Create</span>
             </SidebarMenuButton>
             <Button
               size="icon"
-              className="size-8 group-data-[collapsible=icon]:opacity-0"
+              className="size-8 group-data-[collapsible=icon]:opacity-0 shrink-0"
               variant="outline"
             >
-              <Mail />
+              <Mail className="size-4" />
               <span className="sr-only">Inbox</span>
             </Button>
           </SidebarMenuItem>
@@ -45,10 +45,10 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
+              <SidebarMenuButton asChild tooltip={item.title} className="min-w-0">
+                <a href={item.url} className="flex items-center gap-2 w-full">
+                  {item.icon && <item.icon className="shrink-0 size-4" />}
+                  <span className="truncate text-sm">{item.title}</span>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>

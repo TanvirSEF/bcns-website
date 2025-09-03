@@ -200,8 +200,8 @@ export default function ZoomMeetingsManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between p-6 bg-card rounded-lg border shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Zoom Meetings Management</h1>
           <p className="text-muted-foreground">
@@ -215,7 +215,7 @@ export default function ZoomMeetingsManagement() {
               Schedule Meeting
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Schedule New Zoom Meeting</DialogTitle>
               <DialogDescription>
@@ -368,8 +368,8 @@ export default function ZoomMeetingsManagement() {
       </div>
 
       {/* Meetings Table */}
-      <Card>
-        <CardHeader>
+      <Card className="border-2 shadow-lg">
+        <CardHeader className="bg-muted/50 border-b">
           <CardTitle>All Zoom Meetings</CardTitle>
           <CardDescription>
             Manage and monitor virtual meetings
@@ -486,7 +486,7 @@ export default function ZoomMeetingsManagement() {
 
       {/* Edit Meeting Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Zoom Meeting</DialogTitle>
             <DialogDescription>

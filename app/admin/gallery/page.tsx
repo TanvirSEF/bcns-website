@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Image, Plus, Edit, Trash2, Eye, Clock, User, FolderOpen, Camera } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Clock, User, FolderOpen, Camera, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 import { toast } from "react-toastify";
 import { Album, Photo } from "@/types/api";
 
@@ -220,8 +221,8 @@ export default function GalleryManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between p-6 bg-card rounded-lg border shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Gallery Management</h1>
           <p className="text-muted-foreground">
@@ -236,7 +237,7 @@ export default function GalleryManagement() {
                 Create Album
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-sm">
               <DialogHeader>
                 <DialogTitle>Create New Album</DialogTitle>
                 <DialogDescription>
@@ -295,7 +296,7 @@ export default function GalleryManagement() {
                   Upload Photo
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-sm">
                 <DialogHeader>
                   <DialogTitle>Upload Photo to {selectedAlbum.title}</DialogTitle>
                   <DialogDescription>
@@ -350,8 +351,8 @@ export default function GalleryManagement() {
       </div>
 
       {!selectedAlbum ? (
-        <Card>
-          <CardHeader>
+        <Card className="border-2 shadow-lg">
+          <CardHeader className="bg-muted/50 border-b">
             <CardTitle>Photo Albums</CardTitle>
             <CardDescription>
               Manage and organize photo collections
@@ -364,13 +365,15 @@ export default function GalleryManagement() {
                   <CardContent className="p-4">
                     <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center">
                       {album.coverPhoto ? (
-                        <img
+                        <Image
                           src={album.coverPhoto}
                           alt={album.title}
+                          width={400}
+                          height={225}
                           className="w-full h-full object-cover rounded-lg"
                         />
                       ) : (
-                        <Image className="h-12 w-12 text-muted-foreground" />
+                        <ImageIcon className="h-12 w-12 text-muted-foreground" />
                       )}
                     </div>
                     <div className="space-y-2">
@@ -433,8 +436,8 @@ export default function GalleryManagement() {
             </div>
           </div>
 
-          <Card>
-            <CardHeader>
+          <Card className="border-2 shadow-lg">
+            <CardHeader className="bg-muted/50 border-b">
               <CardTitle>Photos in {selectedAlbum.title}</CardTitle>
               <CardDescription>
                 Manage photos in this album
@@ -446,9 +449,11 @@ export default function GalleryManagement() {
                   <Card key={photo.id} className="overflow-hidden">
                     <CardContent className="p-0">
                       <div className="aspect-square bg-muted">
-                        <img
+                        <Image
                           src={photo.imageUrl}
                           alt={photo.title || "Photo"}
+                          width={300}
+                          height={300}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -487,7 +492,7 @@ export default function GalleryManagement() {
 
       {/* Edit Album Dialog */}
       <Dialog open={isEditAlbumDialogOpen} onOpenChange={setIsEditAlbumDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Edit Album</DialogTitle>
             <DialogDescription>

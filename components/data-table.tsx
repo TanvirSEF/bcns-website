@@ -251,7 +251,7 @@ export function DataTable({
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuContent align="end" className="w-56">
                 {table
                   .getAllColumns()
                   .filter((column) => column.getCanHide())
@@ -344,7 +344,7 @@ export function DataTable({
                     table.setPageSize(Number(value))
                   }}
                 >
-                  <SelectTrigger className="h-8 w-[70px]">
+                  <SelectTrigger className="h-8 w-16">
                     <SelectValue placeholder={table.getState().pagination.pageSize} />
                   </SelectTrigger>
                   <SelectContent side="top">
@@ -356,7 +356,7 @@ export function DataTable({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+              <div className="flex min-w-0 items-center justify-center text-sm font-medium">
                 Page {table.getState().pagination.pageIndex + 1} of{" "}
                 {table.getPageCount()}
               </div>
