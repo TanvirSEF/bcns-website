@@ -17,7 +17,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { getAllMembers } from "@/lib/api";
 import { User as UserType } from "@/types/api";
-import { Navbar } from "@/components/navbar";
+import { NavbarClient } from "@/components/navbarclient";
 import { Footer } from "@/components/footer";
 
 export default function MembersPage() {
@@ -72,7 +72,7 @@ export default function MembersPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
-        <Navbar />
+        <NavbarClient />
         <Card className="w-full max-w-md mx-4">
           <CardContent className="p-8 text-center">
             <Shield className="h-16 w-16 text-blue-600 mx-auto mb-4" />
@@ -94,7 +94,7 @@ export default function MembersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-      <Navbar />
+      <NavbarClient />
       {/* Enhanced Background decorative elements */}
       <div className="absolute top-0 left-0 h-96 w-96 rounded-full bg-blue-200/30 blur-3xl transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
       <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-indigo-200/30 blur-[60px] transform translate-x-1/2 translate-y-1/2 animate-pulse" />
