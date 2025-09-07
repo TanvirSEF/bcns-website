@@ -16,6 +16,10 @@ import {
   Database,
   FileBarChart,
   Building2,
+  Image,
+  BookOpen,
+  Video,
+  Activity,
 } from "lucide-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -55,19 +59,44 @@ const data = {
       icon: Users,
     },
     {
-      title: "Content",
-      url: "/admin/content",
-      icon: FileText,
-    },
-    {
       title: "Events",
       url: "/admin/events",
       icon: Calendar,
     },
     {
-      title: "Analytics",
-      url: "/admin/analytics",
+      title: "Documents",
+      url: "/admin/documents",
+      icon: FileText,
+    },
+    {
+      title: "Gallery",
+      url: "/admin/gallery",
+      icon: Image,
+    },
+    {
+      title: "Publications",
+      url: "/admin/publications",
+      icon: BookOpen,
+    },
+    {
+      title: "Polls",
+      url: "/admin/polls",
       icon: BarChart3,
+    },
+    {
+      title: "Zoom Meetings",
+      url: "/admin/zoom",
+      icon: Video,
+    },
+    {
+      title: "Activity Logs",
+      url: "/admin/logs",
+      icon: Activity,
+    },
+    {
+      title: "Search & Analytics",
+      url: "/admin/search",
+      icon: Search,
     },
   ],
   navSecondary: [
@@ -140,3 +169,4 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   )
 }
+

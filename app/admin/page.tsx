@@ -3,11 +3,17 @@ import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 
 export default function AdminDashboard() {
   return (
-    <>
+    <div className="space-y-8">
+      <div className="p-6 bg-card rounded-lg border shadow-sm">
+        <h1 className="text-3xl font-bold tracking-tight mb-4">Welcome to BCNS Admin Dashboard</h1>
+        <p className="text-muted-foreground">Manage your society&apos;s activities, members, and content from one central location.</p>
+      </div>
+      
       <SectionCards />
-      <div className="px-4 lg:px-6">
+      
+      <div className="p-6 bg-card rounded-lg border shadow-sm">
         <ChartAreaInteractive />
       </div>
-    </>
+    </div>
   )
 }

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import {
   Calendar,
   HeartPulse,
@@ -19,6 +21,7 @@ export const revalidate = false; // Static at build time
 export default function MissionPage() {
   return (
     <div className="min-h-screen bg-white">
+      <Navbar />
       {/* Hero / Title */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-blue-800">
         <div className="absolute inset-0 opacity-20" aria-hidden>
@@ -148,6 +151,7 @@ export default function MissionPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

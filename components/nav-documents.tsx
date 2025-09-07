@@ -38,42 +38,44 @@ export function NavDocuments({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Management</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/70 px-2">
+        Management
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon />
-                <span>{item.name}</span>
+            <SidebarMenuButton asChild className="min-w-0">
+              <a href={item.url} className="flex items-center gap-2 w-full">
+                <item.icon className="shrink-0 size-4" />
+                <span className="truncate text-sm">{item.name}</span>
               </a>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction
                   showOnHover
-                  className="data-[state=open]:bg-accent rounded-sm"
+                  className="data-[state=open]:bg-accent rounded-sm shrink-0"
                 >
-                  <MoreHorizontal />
+                  <MoreHorizontal className="size-4" />
                   <span className="sr-only">More</span>
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-24 rounded-lg"
+                className="w-28 rounded-lg"
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuItem>
-                  <Folder />
+                  <Folder className="size-4" />
                   <span>Open</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Share />
+                  <Share className="size-4" />
                   <span>Share</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-600">
-                  <Trash2 />
+                  <Trash2 className="size-4" />
                   <span>Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -81,9 +83,9 @@ export function NavDocuments({
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>More</span>
+          <SidebarMenuButton className="text-sidebar-foreground/70 min-w-0">
+            <MoreHorizontal className="text-sidebar-foreground/70 size-4 shrink-0" />
+            <span className="truncate text-sm">More</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

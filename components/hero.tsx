@@ -103,7 +103,7 @@ export function Hero() {
         <CarouselContent className="ml-0">
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="pl-0">
-              <div className="relative h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[720px] w-full">
+              <div className="relative min-h-[22rem] sm:min-h-[28rem] md:min-h-[34rem] lg:min-h-[40rem] xl:min-h-[45rem] w-full">
                 <Image
                   src={slide.image}
                   alt={slide.title}

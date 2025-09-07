@@ -38,11 +38,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
 import {
-  CustomDropdown,
-  CustomDropdownItem,
-  CustomDropdownSeparator,
-} from "@/components/ui/custom-dropdown";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navigationItems = [
   { name: "Home", href: "/", icon: null },
@@ -87,8 +91,7 @@ export function NavbarClient() {
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
-  const dropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
 
   const { isAuthenticated, user, logout } = useAuth();
 
@@ -103,26 +106,7 @@ export function NavbarClient() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleDropdownEnter = (itemName: string) => {
-    if (dropdownTimeoutRef.current) {
-      clearTimeout(dropdownTimeoutRef.current);
-    }
-    setOpenDropdown(itemName);
-  };
 
-  const handleDropdownLeave = () => {
-    dropdownTimeoutRef.current = setTimeout(() => {
-      setOpenDropdown(null);
-    }, 150);
-  };
-
-  React.useEffect(() => {
-    return () => {
-      if (dropdownTimeoutRef.current) {
-        clearTimeout(dropdownTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,9 +124,8 @@ export function NavbarClient() {
     >
       {isAuthenticated ? (
         <>
-          <CustomDropdown
-            align="end"
-            trigger={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 className={cn(
@@ -185,51 +168,58 @@ export function NavbarClient() {
                   </>
                 )}
               </Button>
-            }
-          >
-            <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
-              <div className="flex-shrink-0">
-                {user?.profilePictureUrl || user?.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={
-                      (user?.profilePictureUrl as string) ||
-                      (user?.avatar as string)
-                    }
-                    alt="Profile"
-                    className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
-                  />
-                ) : (
-                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
-                    <User className="h-5 w-5 text-blue-600" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-56 rounded-lg"
+              side="bottom"
+              align="end"
+              sideOffset={8}
+              alignOffset={-10}
+            >
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
+                  <div className="flex-shrink-0">
+                    {user?.profilePictureUrl || user?.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={
+                          (user?.profilePictureUrl as string) ||
+                          (user?.avatar as string)
+                        }
+                        alt="Profile"
+                        className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
+                        <User className="h-5 w-5 text-blue-600" />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div className="flex flex-col space-y-1 leading-none min-w-0 flex-1">
-                <p className="font-medium truncate">{user?.name}</p>
-                <p className="truncate text-sm text-gray-500">{user?.email}</p>
-              </div>
-            </div>
-
-            <CustomDropdownItem href="/dashboard">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              Dashboard
-            </CustomDropdownItem>
-
-            <CustomDropdownItem href="/profile">
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </CustomDropdownItem>
-
-
-
-            <CustomDropdownSeparator />
-
-            <CustomDropdownItem onClick={logout} variant="destructive">
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </CustomDropdownItem>
-          </CustomDropdown>
+                  <div className="flex flex-col space-y-1 leading-none min-w-0 flex-1">
+                    <p className="font-medium truncate">{user?.name}</p>
+                    <p className="truncate text-sm text-gray-500">{user?.email}</p>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href="/user-dashboard" className="flex items-center">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/user-dashboard/profile" className="flex items-center">
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout} className="text-red-600">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </>
       ) : (
         <>
@@ -334,47 +324,42 @@ export function NavbarClient() {
 
               <nav className="hidden lg:flex items-center space-x-2">
                 {visibleNavItems.map((item) => (
-                  <div
-                    key={item.name}
-                    className="relative"
-                    onMouseEnter={() =>
-                      item.hasDropdown && handleDropdownEnter(item.name)
-                    }
-                    onMouseLeave={handleDropdownLeave}
-                  >
+                  <div key={item.name} className="relative">
                     {item.hasDropdown ? (
-                      <>
-                        <div
-                          className={cn(
-                            "h-12 px-4 flex items-center cursor-pointer text-gray-700 hover:text-blue-600 font-medium rounded-lg",
-                            isActive(item.href!) && "text-blue-600"
-                          )}
-                        >
-                          {item.icon && <item.icon className="mr-2 h-4 w-4" />}
-                          {item.name}
-                          <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-200" />
-                        </div>
-                        {openDropdown === item.name && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                           <div
-                            className="absolute top-full left-0 w-64 bg-white shadow-2xl rounded-lg border border-gray-100 mt-2 p-2 animate-in fade-in-0 zoom-in-95"
-                            onMouseEnter={() => handleDropdownEnter(item.name)}
-                            onMouseLeave={handleDropdownLeave}
+                            className={cn(
+                              "h-12 px-4 flex items-center cursor-pointer text-gray-700 hover:text-blue-600 font-medium rounded-lg",
+                              isActive(item.href!) && "text-blue-600"
+                            )}
                           >
-                            {item.dropdownItems?.map((dropdownItem) => (
+                            {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+                            {item.name}
+                            <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-200" />
+                          </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          className="w-64 rounded-lg"
+                          side="bottom"
+                          align="start"
+                          sideOffset={4}
+                        >
+                          {item.dropdownItems?.map((dropdownItem) => (
+                            <DropdownMenuItem key={dropdownItem.name} asChild>
                               <Link
-                                key={dropdownItem.name}
                                 href={dropdownItem.href}
-                                className="w-full flex items-center text-gray-700 hover:text-blue-600 font-medium py-3 px-4 rounded-md hover:bg-blue-50"
+                                className="flex items-center w-full"
                               >
                                 {dropdownItem.icon && (
                                   <dropdownItem.icon className="mr-3 h-4 w-4 text-gray-400" />
                                 )}
                                 {dropdownItem.name}
                               </Link>
-                            ))}
-                          </div>
-                        )}
-                      </>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     ) : (
                       <Link
                         href={item.href!}
@@ -398,9 +383,8 @@ export function NavbarClient() {
               <div className="lg:hidden flex items-center gap-3">
                 {/* Mobile user profile - show next to hamburger */}
                 {isAuthenticated && user && (
-                  <CustomDropdown
-                    align="end"
-                    trigger={
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
                         className="h-8 w-8 rounded-full border-2 border-blue-600 p-0 overflow-hidden"
@@ -419,53 +403,60 @@ export function NavbarClient() {
                           <User className="h-4 w-4" />
                         )}
                       </Button>
-                    }
-                  >
-                    <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
-                      <div className="flex-shrink-0">
-                        {user?.profilePictureUrl || user?.avatar ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={
-                              (user?.profilePictureUrl as string) ||
-                              (user?.avatar as string)
-                            }
-                            alt="Profile"
-                            className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
-                            <User className="h-5 w-5 text-blue-600" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-56 rounded-lg"
+                      side="bottom"
+                      align="end"
+                      sideOffset={8}
+                      alignOffset={-10}
+                    >
+                      <DropdownMenuLabel className="p-0 font-normal">
+                        <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
+                          <div className="flex-shrink-0">
+                            {user?.profilePictureUrl || user?.avatar ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={
+                                  (user?.profilePictureUrl as string) ||
+                                  (user?.avatar as string)
+                                }
+                                alt="Profile"
+                                className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
+                                <User className="h-5 w-5 text-blue-600" />
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      <div className="flex flex-col space-y-1 leading-none min-w-0 flex-1">
-                        <p className="font-medium truncate">{user?.name}</p>
-                        <p className="truncate text-sm text-gray-500">
-                          {user?.email}
-                        </p>
-                      </div>
-                    </div>
-
-                    <CustomDropdownItem href="/dashboard">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </CustomDropdownItem>
-
-                    <CustomDropdownItem href="/profile">
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </CustomDropdownItem>
-
-
-
-                    <CustomDropdownSeparator />
-
-                    <CustomDropdownItem onClick={logout} variant="destructive">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
-                    </CustomDropdownItem>
-                  </CustomDropdown>
+                          <div className="flex flex-col space-y-1 leading-none min-w-0 flex-1">
+                            <p className="font-medium truncate">{user?.name}</p>
+                            <p className="truncate text-sm text-gray-500">
+                              {user?.email}
+                            </p>
+                          </div>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href="/user-dashboard" className="flex items-center">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/user-dashboard/profile" className="flex items-center">
+                          <User className="mr-2 h-4 w-4" />
+                          Profile
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={logout} className="text-red-600">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
 
                 <Sheet

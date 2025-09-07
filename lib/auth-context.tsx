@@ -79,27 +79,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize auth state
   useEffect(() => {
-    try {
-      const token = hasToken();
-      const storedUser = getUserFromStorage();
-
-      if (token && storedUser) {
-        setUser(storedUser);
-      } else if (token && !storedUser) {
-        // Clean up invalid token
+    const initializeAuth = async () => {
+      try {
+        const token = hasToken();
+        
+        if (token) {
+          // If we have a token, fetch fresh user data from API
+          try {
+            const userData = await getProfile();
+            setUser(userData);
+            setUserData(userData);
+          } catch (error) {
+            console.error("Failed to fetch user profile:", error);
+            // If API call fails, try to use stored user data as fallback
+            const storedUser = getUserFromStorage();
+            if (storedUser) {
+              setUser(storedUser);
+            } else {
+              // If no stored user and API fails, clear everything
+              removeToken();
+              setUser(null);
+            }
+          }
+        } else {
+          setUser(null);
+        }
+      } catch {
+        // If there's any error in initialization, clear everything
+        setUser(null);
         removeToken();
-        setUser(null);
-      } else {
-        setUser(null);
+        removeUserData();
+      } finally {
+        setIsLoading(false);
       }
-    } catch {
-      // If there's any error in initialization, clear everything
-      setUser(null);
-      removeToken();
-      removeUserData();
-    } finally {
-      setIsLoading(false);
-    }
+    };
+
+    initializeAuth();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = (userData: User, token: string) => {

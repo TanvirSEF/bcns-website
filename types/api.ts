@@ -12,6 +12,42 @@ export interface User {
   profilePictureUrl?: string;
   createdAt?: string;
   updatedAt?: string;
+  
+  // Additional fields from membership form
+  affiliation?: string;
+  mailingAddress?: string;
+  permanentAddress?: string;
+  
+  // Education qualifications
+  educationQualifications?: Array<{
+    qualification: string;
+    year: string;
+    institution: string;
+  }>;
+  
+  // Training
+  training?: Array<{
+    period: string;
+    institute: string;
+  }>;
+  
+  // Research interests
+  primaryResearchInterest?: string;
+  secondaryResearchInterest?: string;
+  
+  // Dashboard metrics (these would come from backend calculations)
+  membershipStatus?: string;
+  membershipExpiry?: string;
+  eventsAttended?: number;
+  eventsThisMonth?: number;
+  publicationsRead?: number;
+  publicationsThisWeek?: number;
+  networkConnections?: number;
+  newConnections?: number;
+  
+  // Professional info
+  specialization?: string;
+  institution?: string;
 }
 
 export interface Event {

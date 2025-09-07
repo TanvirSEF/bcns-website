@@ -1,6 +1,8 @@
 import dynamic from "next/dynamic";
 import { Hero } from "@/components/hero";
 import { EventsAnnouncements } from "@/components/events-announcements";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 // Lazy load below-the-fold components for better performance
 const CoreActivities = dynamic(
@@ -57,12 +59,14 @@ export const revalidate = 3600; // Revalidate every hour
 export default function Home() {
   return (
     <div className="min-h-screen">
+      <Navbar />
       <Hero />
       <EventsAnnouncements />
       <CoreActivities />
       <MembershipBenefits />
       <LatestPublications />
       <PhotoGalleryPreview />
+      <Footer />
     </div>
   );
 }

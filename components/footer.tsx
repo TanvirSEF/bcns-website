@@ -12,6 +12,7 @@ import {
   Calendar,
   FileText,
   Award,
+  Sparkles,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -179,12 +180,12 @@ export function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-gray-800">
         <div className="container mx-auto px-4 py-4 sm:py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
-            <div className="text-xs sm:text-sm text-gray-400 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+            <div className="text-xs sm:text-sm text-gray-400 text-center sm:text-left break-words max-w-full px-2">
               © {currentYear} Bangladesh Child Neurology Society (BCNS). All
               rights reserved.
             </div>
-            <div className="flex items-center space-y-2 sm:space-y-0 sm:space-x-4 lg:space-x-6 text-xs sm:text-sm flex-wrap justify-center sm:justify-end">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4 lg:gap-6 text-xs sm:text-sm">
               <Link
                 href="/privacy"
                 className="text-gray-400 hover:text-white transition-colors duration-200"
@@ -203,6 +204,19 @@ export function Footer() {
               >
                 Sitemap
               </Link>
+              <a
+                href="https://zephlotech.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 rounded-full px-3 py-1 bg-white/5 hover:bg-white/10 ring-1 ring-white/10 transition-all duration-200 backdrop-blur text-gray-200 shrink-0"
+                aria-label="Developed by Zephlo Tech"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-blue-300 group-hover:text-blue-200" />
+                <span className="hidden sm:inline text-gray-300">Developed by</span>
+                <span className="font-semibold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                  Zephlo Tech
+                </span>
+              </a>
             </div>
           </div>
         </div>
