@@ -1,3 +1,5 @@
+"use client";
+
 import { TrendingUp, Users, Calendar, BookOpen, Award, Activity, Clock, Heart } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";

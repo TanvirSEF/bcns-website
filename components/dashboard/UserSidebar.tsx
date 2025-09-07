@@ -39,7 +39,7 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
     user: {
       name: user?.name || "Member User",
       email: user?.email || "member@bcns.org.bd",
-      avatar: "/images/logo.png",
+      avatar: user?.profilePictureUrl || "/images/logo.png",
     },
     navMain: [
       {

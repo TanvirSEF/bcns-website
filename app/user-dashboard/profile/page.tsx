@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useRequireAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import { toast } from "react-toastify";
 
 export default function UserProfilePage() {
   const { user, isLoading, isAuthorized, updateUser } = useRequireAuth();
@@ -38,11 +39,15 @@ export default function UserProfilePage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "+880 1234 567890",
-    address: "Dhaka, Bangladesh",
-    specialization: "Pediatric Neurology",
-    institution: "Dhaka Medical College Hospital",
-    bio: "Dedicated pediatric neurologist with 10+ years of experience in child neurology and developmental disorders.",
+    phone: "",
+    affiliation: "",
+    mailingAddress: "",
+    permanentAddress: "",
+    specialization: "",
+    institution: "",
+    bio: "",
+    primaryResearchInterest: "",
+    secondaryResearchInterest: "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
@@ -55,11 +60,15 @@ export default function UserProfilePage() {
         ...prev,
         name: user.name || "",
         email: user.email || "",
-        phone: user.phone || "+880 1234 567890",
-        address: user.address || "Dhaka, Bangladesh",
-        specialization: user.specialization || "Pediatric Neurology",
-        institution: user.institution || "Dhaka Medical College Hospital",
-        bio: user.bio || "Dedicated pediatric neurologist with 10+ years of experience in child neurology and developmental disorders.",
+        phone: user.phone || "",
+        affiliation: user.affiliation || "",
+        mailingAddress: user.mailingAddress || "",
+        permanentAddress: user.permanentAddress || "",
+        specialization: user.specialization || "",
+        institution: user.institution || "",
+        bio: user.bio || "",
+        primaryResearchInterest: user.primaryResearchInterest || "",
+        secondaryResearchInterest: user.secondaryResearchInterest || "",
       }));
     }
   }, [user]);
@@ -93,10 +102,14 @@ export default function UserProfilePage() {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        address: formData.address,
+        affiliation: formData.affiliation,
+        mailingAddress: formData.mailingAddress,
+        permanentAddress: formData.permanentAddress,
         specialization: formData.specialization,
         institution: formData.institution,
         bio: formData.bio,
+        primaryResearchInterest: formData.primaryResearchInterest,
+        secondaryResearchInterest: formData.secondaryResearchInterest,
       };
 
       // Call API to update profile
@@ -106,63 +119,91 @@ export default function UserProfilePage() {
       updateUser(updatedUser);
       
       setIsEditing(false);
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error saving profile:", error);
-      alert("Failed to update profile. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to update profile. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
   const handlePasswordChange = async () => {
     if (formData.newPassword !== formData.confirmPassword) {
-      alert("New passwords don't match!");
+      toast.error("New passwords don't match!");
       return;
     }
     if (formData.newPassword.length < 6) {
-      alert("New password must be at least 6 characters long!");
+      toast.error("New password must be at least 6 characters long!");
       return;
     }
+    
     try {
       // Call API to change password
       await api.changePassword(formData.currentPassword, formData.newPassword);
       
       setShowPasswordChange(false);
       setFormData(prev => ({ ...prev, currentPassword: "", newPassword: "", confirmPassword: "" }));
-      alert("Password changed successfully!");
+      toast.success("Password changed successfully!");
     } catch (error) {
       console.error("Error changing password:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to change password. Please try again.";
-      alert(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
   const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        alert("File size must be less than 5MB");
-        return;
-      }
-      if (!file.type.startsWith('image/')) {
-        alert("Please select an image file");
-        return;
-      }
-      try {
-        // Call API to upload profile picture
-        const response = await api.uploadProfileImage(file);
-        
-        // Update user data with new profile picture
-        if (response.data && response.data.profilePictureUrl) {
-          updateUser({ profilePictureUrl: response.data.profilePictureUrl });
-        }
-        
-        alert("Profile picture uploaded successfully!");
-      } catch (error) {
-        console.error("Error uploading profile picture:", error);
-        const errorMessage = error instanceof Error ? error.message : "Failed to upload profile picture. Please try again.";
-        alert(errorMessage);
-      }
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast.error("File size must be less than 5MB");
+      return;
     }
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Show loading toast
+    const toastId = toast.loading("Uploading profile picture...");
+    
+    try {
+      // Call API to upload profile picture
+      const response = await api.uploadProfileImage(file);
+      
+      // Update user data with new profile picture
+      const newProfilePictureUrl = response.data?.profilePictureUrl || response.data?.imageUrl;
+      
+      if (newProfilePictureUrl) {
+        // Update user context with new profile picture
+        updateUser({ profilePictureUrl: newProfilePictureUrl });
+        toast.update(toastId, { 
+          render: "Profile picture uploaded successfully!", 
+          type: "success", 
+          isLoading: false,
+          autoClose: 3000
+        });
+        
+        // Force refresh user data to ensure sidebar updates
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        throw new Error("No profile picture URL returned from server");
+      }
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload profile picture. Please try again.";
+      toast.update(toastId, { 
+        render: errorMessage, 
+        type: "error", 
+        isLoading: false,
+        autoClose: 5000
+      });
+    }
+    
+    // Clear the input so the same file can be uploaded again if needed
+    event.target.value = '';
   };
 
   return (
@@ -180,7 +221,10 @@ export default function UserProfilePage() {
             <CardHeader className="text-center">
               <div className="relative mx-auto">
                 <Avatar className="h-32 w-32 mx-auto">
-                  <AvatarImage src={user?.profilePictureUrl || "/images/logo.png"} alt={user?.name || "User"} />
+                  <AvatarImage 
+                    src={user?.profilePictureUrl || user?.avatar || "/images/logo.png"} 
+                    alt={user?.name || "User"}
+                  />
                   <AvatarFallback className="text-2xl bg-emerald-100 text-emerald-700">
                     {user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2) : "U"}
                   </AvatarFallback>
@@ -209,19 +253,19 @@ export default function UserProfilePage() {
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <Phone className="h-4 w-4" />
-                <span>{formData.phone}</span>
+                <span>{formData.phone || "Not provided"}</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <MapPin className="h-4 w-4" />
-                <span>{formData.address}</span>
+                <span>{formData.mailingAddress || "Not provided"}</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <Calendar className="h-4 w-4" />
-                <span>Member since 2020</span>
+                <span>Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : "2020"}</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <Award className="h-4 w-4" />
-                <span>Professional Member</span>
+                <span>{user?.membershipStatus || "Professional Member"}</span>
               </div>
             </CardContent>
           </Card>
@@ -234,22 +278,22 @@ export default function UserProfilePage() {
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Events Attended</span>
-                <span className="font-medium">12</span>
+                <span className="font-medium">{user?.eventsAttended || 0}</span>
               </div>
               <Separator />
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Publications Read</span>
-                <span className="font-medium">28</span>
+                <span className="font-medium">{user?.publicationsRead || 0}</span>
               </div>
               <Separator />
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Network Connections</span>
-                <span className="font-medium">47</span>
+                <span className="font-medium">{user?.networkConnections || 0}</span>
               </div>
               <Separator />
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">CPD Points</span>
-                <span className="font-medium">85</span>
+                <span className="text-sm text-gray-600">Training Programs</span>
+                <span className="font-medium">{user?.training?.length || 0}</span>
               </div>
             </CardContent>
           </Card>
@@ -309,12 +353,35 @@ export default function UserProfilePage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
+                  <Label htmlFor="affiliation">Institution/Affiliation</Label>
                   <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    id="affiliation"
+                    value={formData.affiliation}
+                    onChange={(e) => handleInputChange("affiliation", e.target.value)}
                     disabled={!isEditing}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="mailingAddress">Mailing Address</Label>
+                  <Textarea
+                    id="mailingAddress"
+                    value={formData.mailingAddress}
+                    onChange={(e) => handleInputChange("mailingAddress", e.target.value)}
+                    disabled={!isEditing}
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="permanentAddress">Permanent Address</Label>
+                  <Textarea
+                    id="permanentAddress"
+                    value={formData.permanentAddress}
+                    onChange={(e) => handleInputChange("permanentAddress", e.target.value)}
+                    disabled={!isEditing}
+                    rows={3}
                   />
                 </div>
               </div>
@@ -362,6 +429,87 @@ export default function UserProfilePage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Research Interests */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Research Interests</CardTitle>
+              <CardDescription>
+                Your areas of research focus and interests.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="primaryResearchInterest">Primary Research Interest</Label>
+                <Textarea
+                  id="primaryResearchInterest"
+                  value={formData.primaryResearchInterest}
+                  onChange={(e) => handleInputChange("primaryResearchInterest", e.target.value)}
+                  disabled={!isEditing}
+                  rows={3}
+                  placeholder="Describe your primary research interest"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="secondaryResearchInterest">Secondary Research Interest</Label>
+                <Textarea
+                  id="secondaryResearchInterest"
+                  value={formData.secondaryResearchInterest}
+                  onChange={(e) => handleInputChange("secondaryResearchInterest", e.target.value)}
+                  disabled={!isEditing}
+                  rows={3}
+                  placeholder="Describe your secondary research interest (optional)"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Education & Training */}
+          {user?.educationQualifications && user.educationQualifications.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Education Qualifications</CardTitle>
+                <CardDescription>
+                  Your academic background and qualifications.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {user.educationQualifications.map((edu, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <span className="font-medium">{edu.qualification}</span>
+                        <span className="text-gray-600 ml-2">({edu.year})</span>
+                      </div>
+                      <span className="text-sm text-gray-600">{edu.institution}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Training */}
+          {user?.training && user.training.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Professional Training</CardTitle>
+                <CardDescription>
+                  Your training and professional development experience.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {user.training.map((training, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="font-medium">{training.period}</span>
+                      <span className="text-sm text-gray-600">{training.institute}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Security Settings */}
           <Card>

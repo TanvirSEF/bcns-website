@@ -171,9 +171,10 @@ export function NavbarClient() {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               className="w-56 rounded-lg"
-              side={isMobile ? "bottom" : "right"}
+              side="bottom"
               align="end"
-              sideOffset={4}
+              sideOffset={8}
+              alignOffset={-10}
             >
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
@@ -201,13 +202,13 @@ export function NavbarClient() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard" className="flex items-center">
+                <Link href="/user-dashboard" className="flex items-center">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/profile" className="flex items-center">
+                <Link href="/user-dashboard/profile" className="flex items-center">
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </Link>
@@ -407,7 +408,8 @@ export function NavbarClient() {
                       className="w-56 rounded-lg"
                       side="bottom"
                       align="end"
-                      sideOffset={4}
+                      sideOffset={8}
+                      alignOffset={-10}
                     >
                       <DropdownMenuLabel className="p-0 font-normal">
                         <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
