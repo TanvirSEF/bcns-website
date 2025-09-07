@@ -1,0 +1,301 @@
+{
+  "committeeMembers": [
+    {
+      "id": 1,
+      "name": "Prof. Dr. Muhammad Mizanur Rahman",
+      "designation": "Ex-chairman",
+      "institute": "Former chairman, Paediatric Neurology, Bangladesh Medical University (BMU)",
+      "mobile": "01714035439",
+      "email": "mizanur_rahman_1955@yahoo.com",
+      "image": "/images/president.jpg",
+      "role": "President",
+      "priority": 1
+    },
+    {
+      "id": 2,
+      "name": "Prof. Dr. Syeda Tabassum Alam",
+      "designation": "Prof. & Director",
+      "institute": "Professor & Director, Paediatric Neurology, IPNA, Bangladesh Medical University (BMU)",
+      "mobile": "01712033536",
+      "email": "dr.tabassum.0171@gmail.com",
+      "image": "/images/Vice President1.jpg",
+      "role": "Vice President",
+      "priority": 2
+    },
+    {
+      "id": 3,
+      "name": "Dr Yeamin Shahariar Chowdhury",
+      "designation": "Associate Professor",
+      "institute": "Associate Professor, Pediatric Neurology, National Institute of Neurosciences & Hospital (NINS&H)",
+      "mobile": "01711438602",
+      "email": "yamindr@yahoo.com",
+      "image": "/images/Vice President2.jpg",
+      "role": "Vice President",
+      "priority": 2
+    },
+    {
+      "id": 4,
+      "name": "Dr. Kazi Ashraful Islam",
+      "designation": "Assistant Professor",
+      "institute": "Assistant Professor, Paediatric Neurology, IPNA, Bangladesh Medical University (BMU)",
+      "mobile": "01912178024",
+      "email": "ashrafimc@gmail.com",
+      "image": "/images/Vice President3.jpg",
+      "role": "Vice President",
+      "priority": 2
+    },
+    {
+      "id": 5,
+      "name": "Dr. ARM Shakhawat Hossain",
+      "designation": "Junior Consultant",
+      "institute": "Junior Consultant, Paediatric Neurology, Infectious Disease Hospital",
+      "mobile": "01745267516",
+      "email": "armsakhawathk@gmail.com",
+      "image": "/images/vicepresident4.png",
+      "role": "Vice President",
+      "priority": 2
+    },
+    {
+      "id": 6,
+      "name": "Dr. Mohammad Monir Hossain",
+      "designation": "Assistant Professor",
+      "institute": "Assistant Professor, Paediatric Neurology, National Institute of Neurosciences & Hospital (NINS&H)",
+      "mobile": "01711261736",
+      "email": "monir91@gmail.com",
+      "image": "/images/monir.jpg",
+      "role": "General Secretary",
+      "priority": 3
+    },
+    {
+      "id": 7,
+      "name": "Dr. Masuma Akhter",
+      "designation": "Senior Consultant",
+      "institute": "Senior Consultant, OSD, Directorate General of Health Services (DGHS)",
+      "mobile": "01728818549",
+      "email": "masumasbmc27@gmail.com",
+      "image": "/images/masuma.jpg",
+      "role": "Joint Secretary",
+      "priority": 4
+    },
+    {
+      "id": 8,
+      "name": "Dr. Sheikh Masiur Rahman",
+      "designation": "Assistant professor",
+      "institute": "Assistant professor, Paediatric Neurology, Khulna Medical College",
+      "mobile": "01713463996",
+      "email": "masiur40cmc@gmail.com",
+      "image": "/images/masinur.jpg",
+      "role": "Joint Secretary",
+      "priority": 4
+    },
+    {
+      "id": 9,
+      "name": "Dr. A. B. M. Mukib",
+      "designation": "Junior Consultant",
+      "institute": "Junior Consultant, Pediatric Neurology, National Institute of Neurosciences & Hospital (NINS&H)",
+      "mobile": "01780190959",
+      "email": "mukib56@gmail.com",
+      "image": "/images/mukib.jpg",
+      "role": "Treasurer",
+      "priority": 5
+    },
+    {
+      "id": 10,
+      "name": "Dr. Mushtab Shira Mow",
+      "designation": "Assistant professor",
+      "institute": "Assistant professor, Pediatric Neurology, National Institute of Neurosciences & Hospital (NINS&H)",
+      "mobile": "01711024427",
+      "email": "mushtabshira@gmail.com",
+      "image": "/images/mow.jpg",
+      "role": "Organizing Secretary",
+      "priority": 6
+    },
+    {
+      "id": 11,
+      "name": "Dr. Noor-A-Sabah Liza",
+      "designation": "Junior Consultant",
+      "institute": "Junior Consultant, Pediatric Neurology, Sir Salimullah Medical College Mitford Hospital (SSMC)",
+      "mobile": "01911418558",
+      "email": "dr.sabah10@gmail.com",
+      "image": "/images/liza.jpg",
+      "role": "Office Secretary",
+      "priority": 7
+    },
+    {
+      "id": 12,
+      "name": "Dr. Tania Saad",
+      "designation": "Assistant Professor",
+      "institute": "Assistant Professor, Pediatric Neurology, Dhaka Medical College Hospital (DMC&H)",
+      "mobile": "01712036316",
+      "email": "taniasaad24@gmail.com",
+      "image": "/images/tania.jpg",
+      "role": "Science Secretary",
+      "priority": 8
+    },
+    {
+      "id": 13,
+      "name": "Dr. Laila Areju Man Banu",
+      "designation": "Assistant Professor",
+      "institute": "Assistant Professor, Pediatric Neurology, Shaheed Suhrawardy Medical College (SHMC)",
+      "mobile": "01711451867",
+      "email": "drlailak54dmc@gmail.com",
+      "image": "/images/banu.png",
+      "role": "Publicity and Public Relations Secretary",
+      "priority": 9
+    },
+    {
+      "id": 14,
+      "name": "Dr. Humaira Rafika Quadri",
+      "designation": "Associate Professor",
+      "institute": "Associate Professor, Pediatric Neurology, Bangladesh Shishu Hospital & Institute (BSH)",
+      "mobile": "01732-202931",
+      "email": "dr.humaira@gmail.com",
+      "image": "/images/rafika.jpg",
+      "role": "Publications and Cultural Secretary",
+      "priority": 10
+    },
+    {
+      "id": 15,
+      "name": "Prof. Dr. Shaheen Akter",
+      "designation": "Ex Director",
+      "institute": "Ex Director, Paediatric Neurology, IPNA, Bangladesh Medical University (BMU)",
+      "mobile": "01713011759",
+      "email": "shaheenk33@gmail.com",
+      "image": "/images/shaeen.jpg",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 16,
+      "name": "Prof. Dr. Narayan Saha",
+      "designation": "Professor",
+      "institute": "Professor, Pediatric Neurology, National Institute of Neurosciences & Hospital (NINS&H)",
+      "mobile": "01711851672",
+      "email": "9ljanm@gmail.com",
+      "image": "/images/narayen.png",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 17,
+      "name": "Prof. Dr. Ariful Islam",
+      "designation": "Professor and Head",
+      "institute": "Professor and Head, Pediatric Neurology, National Institute of Neurosciences & Hospital (NINS&H)",
+      "mobile": "01819162856",
+      "email": "arifulislam865@gmail.com",
+      "image": "/images/arifur.jpg",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 18,
+      "name": "Brig. Gen. Anjuman Ara Beauty",
+      "designation": "Professor (Rtd)",
+      "institute": "Professor (Rtd), Pediatric Neurology, Combined Military Hospital (CMH), Dhaka",
+      "mobile": "01769014632",
+      "email": "anjuman_beauty@yahoo.com",
+      "image": "/images/beauty.png",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 19,
+      "name": "Prof. Dr. Kaniz Fatema",
+      "designation": "Chairman & Professor",
+      "institute": "Chairman & Professor, Paediatric Neurology, IPNA, Bangladesh Medical University (BMU)",
+      "mobile": "01713097751",
+      "email": "mailmonami@gmail.com",
+      "image": "/images/kaniz.png",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 20,
+      "name": "Dr. Mohammad Zahir Uddin",
+      "designation": "Assistant Professor",
+      "institute": "Assistant Professor, Paediatric Neurology, Mymansigh Medical College",
+      "mobile": "01712236364",
+      "email": "zahir4263@gmail.com",
+      "image": "/images/zahiruddin.png",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 21,
+      "name": "Dr. Shameem Ara Begum",
+      "designation": "Assistant Professor",
+      "institute": "Assistant Professor, Pediatric Neurology, National Institute of Neurosciences & Hospital (NINS&H)",
+      "mobile": "01816348843",
+      "email": "bshameemara@yahoo.com",
+      "image": "/images/shameem.png",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 22,
+      "name": "Dr. Sabrina Farah Mouree",
+      "designation": "Assistant Professor",
+      "institute": "Assistant Professor, Pediatric Neurology, Institute of Child and Mother Health (ICMH)",
+      "mobile": "01799398581",
+      "email": "sfmouree@gmail.com",
+      "image": "/images/mouree.png",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 23,
+      "name": "Dr. Showli Sarker",
+      "designation": "Associate Professor",
+      "institute": "Associate Professor, Pediatric Neurology, Bangladesh Shishu Hospital & Institute (BSH)",
+      "mobile": "01714377794",
+      "email": "sarkershaoli@gmail.com",
+      "image": "/images/showli.png",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 24,
+      "name": "Dr. Dipa Saha",
+      "designation": "Associate Professor",
+      "institute": "Associate Professor, Pediatric Neurology, Ad-din Women's Medical College (AWMC)",
+      "mobile": "0171733789",
+      "email": "dipasaha182@gmail.com",
+      "image": "/images/dipa.png",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 25,
+      "name": "Dr. Md. Alauddin",
+      "designation": "Assistant Professor",
+      "institute": "Assistant Professor, Chittagong Medical College Hospital (CMC)",
+      "mobile": "0176617276",
+      "email": "akhokon2006@gmail.com",
+      "image": "/images/alauddin.jpg",
+      "role": "Member",
+      "priority": 11
+    },
+    {
+      "id": 26,
+      "name": "Prof. Dr. Ahmed Murtaza Choudhury",
+      "designation": "Professor",
+      "institute": "Professor, Pediatric Neurology, Dr. M R Khan Shishu Hospital",
+      "mobile": "0171147186",
+      "email": "murtazabd@gmail.com",
+      "image": "/images/murtaza.jpg",
+      "role": "Advisor",
+      "priority": 12
+    },
+    {
+      "id": 27,
+      "name": "Prof. Dr. Mahmood Ahmed Chowdhury Arzu",
+      "designation": "Professor",
+      "institute": "Professor, Pediatric Neurology, Chattogram Maa-O-Shishu Hospital",
+      "mobile": "01711761158",
+      "email": "dr.arzu1960@gmail.com",
+      "image": "/images/Arzu.png",
+      "role": "Advisor",
+      "priority": 12
+    }
+  ]
+}
