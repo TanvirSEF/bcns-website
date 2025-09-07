@@ -8,8 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAuth } from "@/lib/auth-context";
 
 export function UserSectionCards() {
+  const { user } = useAuth();
   return (
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <Card className="bg-white shadow-sm border-0 ring-1 ring-gray-200 hover:ring-emerald-300 transition-all duration-200">
@@ -20,11 +22,13 @@ export function UserSectionCards() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-gray-900">Active</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {user?.membershipStatus || "Active"}
+          </div>
           <div className="flex items-center space-x-2 mt-3">
             <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 border-emerald-200">
               <TrendingUp className="h-3 w-3 mr-1" />
-              Valid until 2025
+              {user?.membershipExpiry || "Valid until 2025"}
             </Badge>
           </div>
         </CardContent>
@@ -38,11 +42,13 @@ export function UserSectionCards() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-gray-900">12</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {user?.eventsAttended || 12}
+          </div>
           <div className="flex items-center space-x-2 mt-3">
             <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
               <TrendingUp className="h-3 w-3 mr-1" />
-              +3 this month
+              +{user?.eventsThisMonth || 3} this month
             </Badge>
           </div>
         </CardContent>
@@ -56,11 +62,13 @@ export function UserSectionCards() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-gray-900">28</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {user?.publicationsRead || 28}
+          </div>
           <div className="flex items-center space-x-2 mt-3">
             <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
               <TrendingUp className="h-3 w-3 mr-1" />
-              +5 this week
+              +{user?.publicationsThisWeek || 5} this week
             </Badge>
           </div>
         </CardContent>
@@ -74,11 +82,13 @@ export function UserSectionCards() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-gray-900">47</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {user?.networkConnections || 47}
+          </div>
           <div className="flex items-center space-x-2 mt-3">
             <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
               <TrendingUp className="h-3 w-3 mr-1" />
-              +2 new
+              +{user?.newConnections || 2} new
             </Badge>
           </div>
         </CardContent>

@@ -27,11 +27,11 @@ export function UserNavMain({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              tooltip="Quick Actions"
+              tooltip="Dashboard"
               className="bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white active:bg-emerald-700 active:text-white min-w-8 duration-200 ease-linear"
             >
               <Plus />
-              <span>Quick Actions</span>
+              <span>Dashboard</span>
             </SidebarMenuButton>
             <Button
               size="icon"

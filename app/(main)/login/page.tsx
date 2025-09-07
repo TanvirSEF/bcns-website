@@ -88,7 +88,7 @@ function LoginPageContent() {
 
         // Small delay to show success message, then redirect
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/user-dashboard");
         }, 500);
       } else {
         setError(

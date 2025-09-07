@@ -437,13 +437,13 @@ export function NavbarClient() {
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuItem asChild>
-                        <Link href="/dashboard" className="flex items-center">
+                        <Link href="/user-dashboard" className="flex items-center">
                           <LayoutDashboard className="mr-2 h-4 w-4" />
                           Dashboard
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/profile" className="flex items-center">
+                        <Link href="/user-dashboard/profile" className="flex items-center">
                           <User className="mr-2 h-4 w-4" />
                           Profile
                         </Link>
