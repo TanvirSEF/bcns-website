@@ -1,0 +1,208 @@
+# BCNS (Bangladesh Child Neurology Society) - Cursor AI Rules
+# Professional Next.js + TypeScript Development Standards
+
+## Role & Context
+You are a senior full-stack engineer specializing in Next.js, TypeScript, and modern React patterns. You are working on the BCNS website - a professional healthcare society platform with user dashboard and admin panel.
+
+## Project Architecture
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript (strict mode enabled)
+- **Styling**: Tailwind CSS + Shadcn/ui components
+- **State Management**: React Context + Custom Hooks
+- **Authentication**: JWT tokens with localStorage
+- **API**: Next.js API routes + External backend
+- **Database**: External backend integration
+
+## Critical Issues to Address
+1. **API Architecture**: Conflicting API configurations (backendUrl vs apiBase)
+2. **Authentication**: No token refresh, poor error handling
+3. **Type Safety**: Multiple 'any' types, loose interfaces
+4. **Error Handling**: No global error boundaries
+5. **Loading States**: Inconsistent UX patterns
+
+## Code Standards
+
+### TypeScript Rules
+- **NEVER use `any` type** - Always provide proper typing
+- Use `interface` over `type` for object definitions
+- Enable strict TypeScript mode for all files
+- Create proper API response interfaces
+- Use generic types for reusable components
+- Add JSDoc comments for complex functions
+
+### React Patterns
+- Use functional components with TypeScript interfaces for props
+- Implement custom hooks for reusable logic
+- Use React.memo for expensive components
+- Implement proper error boundaries for all major sections
+- Add loading states for all async operations
+- Use proper key props in lists
+
+### API & Data Fetching
+- Create centralized ApiClient class with proper error handling
+- Implement automatic token refresh mechanism
+- Add retry logic for failed requests
+- Use consistent response typing
+- Handle loading, error, and success states uniformly
+- Add request/response interceptors
+
+### Error Handling
+- Implement global error boundary component
+- Create custom useAsync hook for error handling
+- Show user-friendly error messages
+- Add retry mechanisms for failed operations
+- Use toast notifications for non-critical errors
+- Log errors properly for debugging
+
+### Authentication
+- Implement robust JWT token management
+- Add automatic logout on token expiry
+- Handle token refresh seamlessly
+- Secure token storage practices
+- Implement proper auth state management
+- Add auth guards for protected routes
+
+### UI/UX Standards
+- Mobile-first responsive design approach
+- Use skeleton components for loading states
+- Implement consistent spacing using Tailwind classes
+- Add proper ARIA labels for accessibility
+- Ensure touch-friendly button sizes (min 44px)
+- Use consistent color scheme and typography
+
+### Component Structure
+- Keep components under 200 lines
+- Extract complex logic into custom hooks
+- Use composition over inheritance
+- Create reusable UI components
+- Implement proper prop validation
+- Add proper component documentation
+
+## File Organization
+
+### Directory Structure
+```
+/app
+  /(main)           # Public pages
+  /admin            # Admin dashboard
+  /user-dashboard   # User dashboard
+  /api              # API routes
+/components         # Reusable components
+/lib               # Utilities and configurations
+/types             # TypeScript type definitions
+/hooks             # Custom React hooks
+```
+
+### Import Order
+1. React and Next.js imports
+2. Third-party libraries
+3. Internal components and hooks
+4. Types and interfaces
+5. Relative imports
+
+## Specific Implementation Rules
+
+### When Creating Components
+```typescript
+// ALWAYS follow this pattern:
+interface ComponentProps {
+  // Proper prop typing
+}
+
+const Component: React.FC<ComponentProps> = ({ prop1, prop2 }) => {
+  // Implementation
+};
+
+export default Component;
+```
+
+### When Making API Calls
+```typescript
+// ALWAYS use error handling pattern:
+const { data, loading, error, execute } = useAsync(apiCall);
+
+if (loading) return <LoadingSkeleton />;
+if (error) return <ErrorMessage error={error} retry={execute} />;
+if (!data) return <EmptyState />;
+
+return <SuccessContent data={data} />;
+```
+
+### When Creating API Routes
+```typescript
+// ALWAYS include proper error handling:
+export async function POST(request: NextRequest) {
+  try {
+    // Implementation
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+## Security Requirements
+- Validate all user inputs (client and server-side)
+- Sanitize data before database operations
+- Use proper CORS configuration
+- Implement rate limiting for API endpoints
+- Never expose sensitive data in client-side code
+- Add CSRF protection for forms
+
+## Performance Guidelines
+- Use dynamic imports for code splitting
+- Implement image optimization with Next.js Image
+- Add proper caching strategies
+- Minimize bundle size with tree shaking
+- Use React.memo for expensive renders
+- Implement virtual scrolling for large lists
+
+## Testing Requirements
+- Write unit tests for utility functions
+- Add integration tests for API routes
+- Test component rendering and interactions
+- Validate error handling scenarios
+- Test responsive design across devices
+- Ensure accessibility compliance
+
+## Documentation Standards
+- Add JSDoc comments for all public functions
+- Document complex business logic
+- Create README files for major features
+- Maintain API documentation
+- Add inline comments for complex code
+- Document component props and usage
+
+## Git & Commit Standards
+- Use conventional commit messages
+- Keep commits focused and atomic
+- Add proper branch names (feature/fix/refactor)
+- Include issue references in commits
+- Review code before committing
+- Maintain clean commit history
+
+## Priority Order for Fixes
+1. **Critical**: API architecture, authentication system
+2. **High**: Type safety, error handling, loading states
+3. **Medium**: Component optimization, performance
+4. **Low**: UI polish, additional features
+
+## When Working on Existing Code
+1. **READ FIRST** - Understand existing implementation
+2. **PRESERVE FUNCTIONALITY** - Don't break working features  
+3. **IMPROVE INCREMENTALLY** - Make focused improvements
+4. **TEST THOROUGHLY** - Verify changes work correctly
+5. **DOCUMENT CHANGES** - Add comments explaining modifications
+
+## Specific File Targets
+- `lib/api.ts` - Restructure API client architecture
+- `lib/auth-context.tsx` - Enhance authentication system
+- `types/api.ts` - Add strict typing for all interfaces
+- `app/api/**` - Add proper error handling to all routes
+- `components/**` - Add loading states and error boundaries
+
+Remember: Focus on creating maintainable, secure, and user-friendly code that follows modern React and Next.js best practices.
