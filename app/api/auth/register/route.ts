@@ -14,8 +14,11 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
 
     if (!response.ok) {
+      const errorMessage = data.message || 
+                          (Array.isArray(data.message) ? data.message.join(", ") : "Registration failed");
+      
       return NextResponse.json(
-        { success: false, message: data.message || "Registration failed" },
+        { success: false, message: errorMessage },
         { status: response.status }
       );
     }
@@ -25,7 +28,6 @@ export async function POST(request: NextRequest) {
       data: data,
     });
   } catch (error) {
-    console.error("Register API error:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }

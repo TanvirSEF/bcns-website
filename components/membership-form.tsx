@@ -39,36 +39,48 @@ export function MembershipForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmissionStatus>("idle");
 
-  // Simple data transformation - just organize the form data for backend
-  const createUserData = (data: MembershipFormData) => ({
-    // Basic info
-    name: data.name,
-    email: data.email,
-    password: data.password,
-    phone: data.phone,
-    affiliation: data.affiliation,
-    mailingAddress: data.mailingAddress,
-    permanentAddress: data.permanentAddress,
-    
-    // Education (structured)
-    educationQualifications: [
-      data.mbbsYear && { qualification: "MBBS", year: data.mbbsYear, institution: data.mbbsInstitution },
-      data.fcpsMdYear && { qualification: "FCPS/MD", year: data.fcpsMdYear, institution: data.fcpsMdInstitution },
-      data.mdFcpsYear && { qualification: "MD/FCPS", year: data.mdFcpsYear, institution: data.mdFcpsInstitution },
-      data.additionalYear && { qualification: data.additionalDegree || "Additional", year: data.additionalYear, institution: data.additionalInstitution }
-    ].filter(Boolean),
-    
-    // Training (structured)
-    training: [
-      data.training1Period && { period: data.training1Period, institute: data.training1Institute },
-      data.training2Period && { period: data.training2Period, institute: data.training2Institute },
-      data.training3Period && { period: data.training3Period, institute: data.training3Institute }
-    ].filter(Boolean),
-    
-    // Research interests
-    primaryResearchInterest: data.researchInterest1,
-    secondaryResearchInterest: data.researchInterest2,
-  });
+  // Simple data transformation - organize the form data for backend API
+  const createUserData = (data: MembershipFormData) => {
+    // Ensure we have at least one education qualification
+    const educationQualifications = [
+      data.mbbsYear && { qualification: "MBBS", year: data.mbbsYear, institution: data.mbbsInstitution || "Not specified" },
+      data.fcpsMdYear && { qualification: "FCPS/MD", year: data.fcpsMdYear, institution: data.fcpsMdInstitution || "Not specified" },
+      data.mdFcpsYear && { qualification: "MD/FCPS", year: data.mdFcpsYear, institution: data.mdFcpsInstitution || "Not specified" },
+      data.additionalYear && { qualification: data.additionalDegree || "Additional", year: data.additionalYear, institution: data.additionalInstitution || "Not specified" }
+    ].filter(Boolean);
+
+    // Ensure we have at least one training entry
+    const training = [
+      data.training1Period && { period: data.training1Period, institute: data.training1Institute || "Not specified" },
+      data.training2Period && { period: data.training2Period, institute: data.training2Institute || "Not specified" },
+      data.training3Period && { period: data.training3Period, institute: data.training3Institute || "Not specified" }
+    ].filter(Boolean);
+
+    return {
+      // Basic info - all required fields
+      name: data.name || "",
+      email: data.email || "",
+      password: data.password || "",
+      phone: data.phone || "",
+      affiliation: data.affiliation || "",
+      mailingAddress: data.mailingAddress || "",
+      permanentAddress: data.permanentAddress || "",
+      
+      // Education (structured) - ensure at least empty array
+      educationQualifications: educationQualifications.length > 0 ? educationQualifications : [
+        { qualification: "MBBS", year: "Not specified", institution: "Not specified" }
+      ],
+      
+      // Training (structured) - ensure at least empty array  
+      training: training.length > 0 ? training : [
+        { period: "Not specified", institute: "Not specified" }
+      ],
+      
+      // Research interests - required field
+      primaryResearchInterest: data.researchInterest1 || "General pediatric neurology",
+      secondaryResearchInterest: data.researchInterest2 || "",
+    };
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -127,7 +139,6 @@ export function MembershipForm() {
         throw new Error(result.message || "Registration failed");
       }
     } catch (error: unknown) {
-      console.error("Registration error:", error);
       setSubmitStatus("error");
       
       // More detailed error message
