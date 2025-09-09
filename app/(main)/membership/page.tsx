@@ -6,9 +6,9 @@ import { MembershipForm } from "@/components/membership-form";
 
 const Membership = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-8 lg:py-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <NavbarClient />
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         {/* Hero Section */}
         <div className="text-center mb-8 lg:mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
