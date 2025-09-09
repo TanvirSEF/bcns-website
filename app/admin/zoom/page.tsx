@@ -5,12 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Video, Plus, Edit, Trash2, ExternalLink, Clock, User, Calendar, Copy, Users } from "lucide-react";
+import { Video, Plus, Edit, Trash2, ExternalLink, Clock, Calendar, Copy, Users } from "lucide-react";
 import { toast } from "react-toastify";
 import { ZoomMeeting } from "@/types/api";
 
@@ -122,12 +121,12 @@ export default function ZoomMeetingsManagement() {
     }
   };
 
-  const handleDeleteMeeting = async (meetingId: string) => {
+  const handleDeleteMeeting = async (_meetingId: string) => {
     if (!confirm("Are you sure you want to delete this zoom meeting?")) return;
     
     try {
       // TODO: Replace with actual API call
-      // await deleteZoomMeeting(meetingId);
+      // await deleteZoomMeeting(_meetingId);
       
       toast.success("Zoom meeting deleted successfully");
       fetchMeetings();

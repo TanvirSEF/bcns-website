@@ -4,11 +4,10 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, BarChart3, TrendingUp, Users, FileText, Calendar, Eye, Download, Filter, Globe, Activity } from "lucide-react";
+import { Search, BarChart3, Users, FileText, Calendar, Eye, Download } from "lucide-react";
 import { toast } from "react-toastify";
 
 interface SearchResult {
@@ -37,7 +36,7 @@ export default function SearchAndAnalytics() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchType, setSearchType] = useState<string>("all");
-  const [dateRange, setDateRange] = useState<string>("all");
+  const [,] = useState<string>("all");
 
   useEffect(() => {
     fetchAnalytics();

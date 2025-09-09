@@ -15,7 +15,6 @@ import {
   Send,
   CheckCircle,
   AlertCircle,
-  Shield,
 } from "lucide-react";
 import {
   MembershipFormData,

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Heart, BookOpen, Calendar, Users, ExternalLink, Trash2 } from "lucide-react"
@@ -83,9 +83,8 @@ const getTypeColor = (type: string) => {
 }
 
 export default function UserFavoritesPage() {
-  const handleRemoveFavorite = (id: number) => {
+  const handleRemoveFavorite = (_id: number) => {
     // TODO: Implement remove favorite functionality
-    console.log("Removing favorite:", id)
   }
 
   return (

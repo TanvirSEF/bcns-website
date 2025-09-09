@@ -9,7 +9,6 @@ import {
   ChevronsRight,
   CircleCheck,
   MoreHorizontal,
-  GripVertical,
   Columns,
   Loader2,
   Plus,
@@ -22,7 +21,6 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  Row,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -40,8 +38,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,

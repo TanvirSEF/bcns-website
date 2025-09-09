@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { BarChart3, Plus, Edit, Trash2, Eye, Clock, User, Vote, Calendar, CheckCircle } from "lucide-react";
+import { BarChart3, Plus, Edit, Trash2, Vote, Calendar } from "lucide-react";
 import { toast } from "react-toastify";
 import { Poll } from "@/types/api";
 
@@ -120,12 +120,12 @@ export default function PollsManagement() {
     }
   };
 
-  const handleDeletePoll = async (pollId: string) => {
+  const handleDeletePoll = async (_pollId: string) => {
     if (!confirm("Are you sure you want to delete this poll?")) return;
-    
+
     try {
       // TODO: Replace with actual API call
-      // await deletePoll(pollId);
+      // await deletePoll(_pollId);
       
       toast.success("Poll deleted successfully");
       fetchPolls();
@@ -138,7 +138,7 @@ export default function PollsManagement() {
     setEditingPoll(poll);
     setFormData({
       question: poll.question,
-      options: poll.options,
+      options: [...poll.options],
       isActive: poll.isActive,
       endDate: poll.endDate || "",
     });

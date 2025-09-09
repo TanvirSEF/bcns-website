@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
-import { Bell, User, Shield, Mail, Globe } from "lucide-react"
+import { Bell, User, Shield, Globe } from "lucide-react"
 
 export default function UserSettingsPage() {
   return (

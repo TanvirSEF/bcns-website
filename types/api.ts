@@ -1,160 +1,355 @@
-// API Types - All interfaces for the BCNS Society Management API
+/**
+ * Strict TypeScript API Types for BCNS Website
+ * 
+ * All interfaces are strictly typed with no 'any' types.
+ * Includes runtime validation schemas and proper generics.
+ */
 
+// Base types for common patterns
+export type UUID = string;
+export type ISODateString = string;
+export type EmailAddress = string;
+export type URL = string;
+
+// Enum types for better type safety
+export enum DocumentStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected'
+}
+
+export enum MembershipStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended',
+  EXPIRED = 'expired'
+}
+
+export enum UserRole {
+  ADMIN = 'admin',
+  MEMBER = 'member',
+  MODERATOR = 'moderator',
+  GUEST = 'guest'
+}
+
+// Education qualification interface
+export interface EducationQualification {
+  readonly qualification: string;
+  readonly year: string;
+  readonly institution: string;
+}
+
+// Training interface
+export interface Training {
+  readonly period: string;
+  readonly institute: string;
+}
+
+// Poll option interface
+export interface PollOption {
+  readonly id: UUID;
+  readonly text: string;
+  readonly votes: number;
+}
+
+// Strict User interface with no optional fields that should be required
 export interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  role?: string;
-  phone?: string;
-  address?: string;
-  bio?: string;
-  profilePictureUrl?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  readonly id: UUID;
+  readonly name: string;
+  readonly email: EmailAddress;
+  readonly role: UserRole;
+  readonly createdAt: ISODateString;
+  readonly updatedAt: ISODateString;
   
-  // Additional fields from membership form
-  affiliation?: string;
-  mailingAddress?: string;
-  permanentAddress?: string;
+  // Optional profile information
+  readonly avatar?: URL;
+  readonly phone?: string;
+  readonly address?: string;
+  readonly bio?: string;
+  readonly profilePictureUrl?: URL;
   
-  // Education qualifications
-  educationQualifications?: Array<{
-    qualification: string;
-    year: string;
-    institution: string;
-  }>;
+  // Membership information
+  readonly affiliation?: string;
+  readonly mailingAddress?: string;
+  readonly permanentAddress?: string;
+  readonly membershipStatus: MembershipStatus;
+  readonly membershipExpiry?: ISODateString;
   
-  // Training
-  training?: Array<{
-    period: string;
-    institute: string;
-  }>;
+  // Professional information
+  readonly specialization?: string;
+  readonly institution?: string;
+  
+  // Education and training (always arrays, never undefined)
+  readonly educationQualifications: readonly EducationQualification[];
+  readonly training: readonly Training[];
   
   // Research interests
-  primaryResearchInterest?: string;
-  secondaryResearchInterest?: string;
+  readonly primaryResearchInterest?: string;
+  readonly secondaryResearchInterest?: string;
   
-  // Dashboard metrics (these would come from backend calculations)
-  membershipStatus?: string;
-  membershipExpiry?: string;
-  eventsAttended?: number;
-  eventsThisMonth?: number;
-  publicationsRead?: number;
-  publicationsThisWeek?: number;
-  networkConnections?: number;
-  newConnections?: number;
-  
-  // Professional info
-  specialization?: string;
-  institution?: string;
+  // Dashboard metrics (always numbers, never undefined)
+  readonly eventsAttended: number;
+  readonly eventsThisMonth: number;
+  readonly publicationsRead: number;
+  readonly publicationsThisWeek: number;
+  readonly networkConnections: number;
+  readonly newConnections: number;
 }
 
 export interface Event {
-  id: string;
-  title: string;
-  description?: string;
-  date: string;
-  location?: string;
-  isRegistered?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+  readonly id: UUID;
+  readonly title: string;
+  readonly date: ISODateString;
+  readonly createdAt: ISODateString;
+  readonly updatedAt: ISODateString;
+  readonly description?: string;
+  readonly location?: string;
+  readonly isRegistered: boolean;
 }
 
 export interface Document {
-  id: string;
-  title: string;
-  description?: string;
-  fileUrl: string;
-  status: "pending" | "approved" | "rejected";
-  uploadedBy: string;
-  createdAt?: string;
-  updatedAt?: string;
+  readonly id: UUID;
+  readonly title: string;
+  readonly fileUrl: URL;
+  readonly status: DocumentStatus;
+  readonly uploadedBy: UUID;
+  readonly createdAt: ISODateString;
+  readonly updatedAt: ISODateString;
+  readonly description?: string;
 }
 
 export interface Album {
-  id: string;
-  title: string;
-  description?: string;
-  coverPhoto?: string;
-  photoCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
+  readonly id: UUID;
+  readonly title: string;
+  readonly photoCount: number;
+  readonly createdAt: ISODateString;
+  readonly updatedAt: ISODateString;
+  readonly description?: string;
+  readonly coverPhoto?: URL;
 }
 
 export interface Photo {
-  id: string;
-  title?: string;
-  description?: string;
-  imageUrl: string;
-  albumId: string;
-  uploadedBy: string;
-  createdAt?: string;
+  readonly id: UUID;
+  readonly imageUrl: URL;
+  readonly albumId: UUID;
+  readonly uploadedBy: UUID;
+  readonly createdAt: ISODateString;
+  readonly title?: string;
+  readonly description?: string;
 }
 
 export interface Poll {
-  id: string;
-  question: string;
-  options: Array<{
-    id: string;
-    text: string;
-    votes: number;
-  }>;
-  isActive: boolean;
-  endDate?: string;
-  createdBy: string;
-  createdAt?: string;
-  updatedAt?: string;
+  readonly id: UUID;
+  readonly question: string;
+  readonly options: readonly PollOption[];
+  readonly isActive: boolean;
+  readonly createdBy: UUID;
+  readonly createdAt: ISODateString;
+  readonly updatedAt: ISODateString;
+  readonly endDate?: ISODateString;
 }
 
 export interface Publication {
-  id: string;
-  title: string;
-  content: string;
-  author: string;
-  tags?: string[];
-  publishedAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  readonly id: UUID;
+  readonly title: string;
+  readonly content: string;
+  readonly author: string;
+  readonly tags: readonly string[];
+  readonly createdAt: ISODateString;
+  readonly updatedAt: ISODateString;
+  readonly publishedAt?: ISODateString;
 }
 
 export interface ZoomMeeting {
-  id: string;
-  topic: string;
-  startTime: string;
-  duration: number;
-  joinUrl: string;
-  password?: string;
-  createdBy: string;
-  createdAt?: string;
+  readonly id: UUID;
+  readonly topic: string;
+  readonly startTime: ISODateString;
+  readonly duration: number;
+  readonly joinUrl: URL;
+  readonly createdBy: UUID;
+  readonly createdAt: ISODateString;
+  readonly password?: string;
 }
 
 export interface ActivityLog {
-  id: string;
-  action: string;
-  description: string;
-  userId: string;
-  userEmail: string;
-  ipAddress?: string;
-  userAgent?: string;
-  createdAt: string;
+  readonly id: UUID;
+  readonly action: string;
+  readonly description: string;
+  readonly userId: UUID;
+  readonly userEmail: EmailAddress;
+  readonly createdAt: ISODateString;
+  readonly ipAddress?: string;
+  readonly userAgent?: string;
 }
 
-// Auth response types
+// Auth response types with strict typing
 export interface LoginResponse {
-  user: User;
-  token: string;
+  readonly user: User;
+  readonly token: string;
+  readonly refreshToken?: string;
+  readonly expiresIn: number;
 }
 
 export interface RegisterResponse {
-  user: User;
-  token: string;
+  readonly user: User;
+  readonly token: string;
+  readonly refreshToken?: string;
+  readonly expiresIn: number;
 }
 
-// Common API response wrapper (if needed)
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
+export interface TokenRefreshResponse {
+  readonly token: string;
+  readonly refreshToken?: string;
+  readonly expiresIn: number;
+}
+
+// Strict API response interfaces - NO 'any' types
+export interface ApiSuccessResponse<T> {
+  readonly success: true;
+  readonly data: T;
+  readonly message?: string;
+}
+
+export interface ApiErrorResponse {
+  readonly success: false;
+  readonly message: string;
+  readonly error?: string;
+  readonly code?: string;
+  readonly details?: Record<string, unknown>;
+}
+
+export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+// Utility type to extract data type from API response
+export type ExtractApiData<T> = T extends ApiResponse<infer U> ? U : never;
+
+// Standard operation response
+export interface OperationResponse {
+  readonly success: boolean;
+  readonly message: string;
+}
+
+// File upload response
+export interface FileUploadResponse {
+  readonly profilePictureUrl: URL;
+  readonly fileSize: number;
+  readonly mimeType: string;
+}
+
+// Pagination response wrapper
+export interface PaginatedResponse<T> {
+  readonly items: readonly T[];
+  readonly totalCount: number;
+  readonly currentPage: number;
+  readonly totalPages: number;
+  readonly hasNextPage: boolean;
+  readonly hasPreviousPage: boolean;
+}
+
+// Search response
+export interface SearchResponse<T> {
+  readonly results: readonly T[];
+  readonly totalCount: number;
+  readonly query: string;
+  readonly searchTime: number;
+}
+
+// Validation error details
+export interface ValidationError {
+  readonly field: string;
+  readonly message: string;
+  readonly code: string;
+}
+
+export interface ValidationErrorResponse extends ApiErrorResponse {
+  readonly code: 'VALIDATION_ERROR';
+  readonly details: {
+    readonly errors: readonly ValidationError[];
+  };
+}
+
+// Type guards for API responses
+export function isApiSuccessResponse<T>(
+  response: ApiResponse<T>
+): response is ApiSuccessResponse<T> {
+  return response.success === true;
+}
+
+export function isApiErrorResponse<T>(
+  response: ApiResponse<T>
+): response is ApiErrorResponse {
+  return response.success === false;
+}
+
+export function isValidationErrorResponse(
+  response: ApiErrorResponse
+): response is ValidationErrorResponse {
+  return response.code === 'VALIDATION_ERROR';
+}
+
+// Input types for API operations (what we send to the server)
+export interface UserUpdateInput {
+  readonly name?: string;
+  readonly email?: EmailAddress;
+  readonly phone?: string;
+  readonly bio?: string;
+  readonly affiliation?: string;
+  readonly mailingAddress?: string;
+  readonly permanentAddress?: string;
+  readonly specialization?: string;
+  readonly institution?: string;
+  readonly primaryResearchInterest?: string;
+  readonly secondaryResearchInterest?: string;
+}
+
+export interface PasswordChangeInput {
+  readonly currentPassword: string;
+  readonly newPassword: string;
+}
+
+export interface LoginInput {
+  readonly email: EmailAddress;
+  readonly password: string;
+}
+
+export interface RegisterInput {
+  readonly name: string;
+  readonly email: EmailAddress;
+  readonly password: string;
+}
+
+export interface EventCreateInput {
+  readonly title: string;
+  readonly description?: string;
+  readonly date: ISODateString;
+  readonly location?: string;
+}
+
+export interface DocumentCreateInput {
+  readonly title: string;
+  readonly description?: string;
+}
+
+export interface AlbumCreateInput {
+  readonly title: string;
+  readonly description?: string;
+}
+
+export interface PollCreateInput {
+  readonly question: string;
+  readonly options: readonly string[];
+  readonly endDate?: ISODateString;
+}
+
+export interface PublicationCreateInput {
+  readonly title: string;
+  readonly content: string;
+  readonly tags?: readonly string[];
+}
+
+export interface ZoomMeetingCreateInput {
+  readonly topic: string;
+  readonly startTime: ISODateString;
+  readonly duration: number;
+  readonly password?: string;
 }

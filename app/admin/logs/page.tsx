@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, Search, Filter, Download, Eye, Clock, User, Globe, Monitor } from "lucide-react";
+import { Activity, Search, Download, Eye, Clock, User, Globe, Monitor } from "lucide-react";
 import { toast } from "react-toastify";
 import { ActivityLog } from "@/types/api";
 

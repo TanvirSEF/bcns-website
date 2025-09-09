@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
         });
       } catch (error) {
         // Ignore backend logout errors
-        console.log("Backend logout failed:", error);
+        // Backend logout failed, but continue with client logout
       }
     }
 

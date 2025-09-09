@@ -36,7 +36,7 @@ const Executive = () => {
     if (!acc[member.role]) {
       acc[member.role] = [];
     }
-    acc[member.role].push(member);
+    acc[member.role]!.push(member);
     return acc;
   }, {} as Record<string, CommitteeMember[]>);
 

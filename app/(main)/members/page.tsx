@@ -37,8 +37,8 @@ export default function MembersPage() {
         const response = await getAllMembers();
 
         // New API returns data directly, not wrapped in success/data
-        setMembers(response || []);
-        setFilteredMembers(response || []);
+        setMembers([...(response || [])]);
+        setFilteredMembers([...(response || [])]);
       } catch (err) {
         console.error("Members Page - Error fetching members:", err);
         setError("Failed to load members. Please try again later.");
