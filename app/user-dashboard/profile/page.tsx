@@ -22,13 +22,17 @@ import {
   X,
   Eye,
   EyeOff,
-  Lock
+  Lock,
+  Loader2
 } from "lucide-react";
 import { useRequireAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import { useAsyncSubmit } from "@/hooks/use-async";
+import { ApiError } from "@/lib/api-client";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { toast } from "react-toastify";
 
-export default function UserProfilePage() {
+function ProfilePageContent() {
   const { user, isLoading, isAuthorized, updateUser } = useRequireAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -52,6 +56,82 @@ export default function UserProfilePage() {
     newPassword: "",
     confirmPassword: ""
   });
+
+  // Profile update with proper async handling
+  const { loading: updateLoading, execute: executeUpdate } = useAsyncSubmit(
+    async (updateData: Partial<typeof formData>) => {
+      const updatedUser = await api.users.updateProfile(updateData);
+      updateUser(updatedUser);
+      setIsEditing(false);
+      return updatedUser;
+    },
+    {
+      onSuccess: () => {
+        toast.success("Profile updated successfully!");
+      },
+      onError: (error) => {
+        const message = error instanceof ApiError 
+          ? error.getUserFriendlyMessage()
+          : "Failed to update profile. Please try again.";
+        toast.error(message);
+      }
+    }
+  );
+
+  // Password change with proper async handling
+  const { loading: passwordLoading, execute: executePasswordChange } = useAsyncSubmit(
+    async (passwordData: { currentPassword: string; newPassword: string }) => {
+      await api.users.changePassword(passwordData);
+      setShowPasswordChange(false);
+      setFormData(prev => ({ 
+        ...prev, 
+        currentPassword: "", 
+        newPassword: "", 
+        confirmPassword: "" 
+      }));
+    },
+    {
+      onSuccess: () => {
+        toast.success("Password changed successfully!");
+      },
+      onError: (error) => {
+        const message = error instanceof ApiError 
+          ? error.getUserFriendlyMessage()
+          : "Failed to change password. Please try again.";
+        toast.error(message);
+      }
+    }
+  );
+
+  // Profile picture upload with progress
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const { loading: uploadLoading, execute: executeUpload } = useAsyncSubmit(
+    async (file: File) => {
+      const response = await api.users.uploadProfilePicture(file, (progress) => {
+        setUploadProgress(progress);
+      });
+      
+      const newProfilePictureUrl = response.profilePictureUrl;
+      if (newProfilePictureUrl) {
+        updateUser({ profilePictureUrl: newProfilePictureUrl });
+      }
+      
+      setUploadProgress(0);
+      return response;
+    },
+    {
+      onSuccess: () => {
+        toast.success("Profile picture uploaded successfully!");
+      },
+      onError: (error) => {
+        const message = error instanceof ApiError 
+          ? error.getUserFriendlyMessage()
+          : "Failed to upload profile picture. Please try again.";
+        toast.error(message);
+        setUploadProgress(0);
+      }
+    }
+  );
 
   // Update form data when user data is loaded
   React.useEffect(() => {
@@ -96,35 +176,22 @@ export default function UserProfilePage() {
   };
 
   const handleSave = async () => {
-    try {
-      // Prepare data for API call
-      const updateData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        affiliation: formData.affiliation,
-        mailingAddress: formData.mailingAddress,
-        permanentAddress: formData.permanentAddress,
-        specialization: formData.specialization,
-        institution: formData.institution,
-        bio: formData.bio,
-        primaryResearchInterest: formData.primaryResearchInterest,
-        secondaryResearchInterest: formData.secondaryResearchInterest,
-      };
+    // Prepare data for API call
+    const updateData = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      affiliation: formData.affiliation,
+      mailingAddress: formData.mailingAddress,
+      permanentAddress: formData.permanentAddress,
+      specialization: formData.specialization,
+      institution: formData.institution,
+      bio: formData.bio,
+      primaryResearchInterest: formData.primaryResearchInterest,
+      secondaryResearchInterest: formData.secondaryResearchInterest,
+    };
 
-      // Call API to update profile
-      const updatedUser = await api.updateProfile(updateData);
-      
-      // Update user data in context
-      updateUser(updatedUser);
-      
-      setIsEditing(false);
-      toast.success("Profile updated successfully!");
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to update profile. Please try again.";
-      toast.error(errorMessage);
-    }
+    await executeUpdate(updateData);
   };
 
   const handlePasswordChange = async () => {
@@ -137,18 +204,10 @@ export default function UserProfilePage() {
       return;
     }
     
-    try {
-      // Call API to change password
-      await api.changePassword(formData.currentPassword, formData.newPassword);
-      
-      setShowPasswordChange(false);
-      setFormData(prev => ({ ...prev, currentPassword: "", newPassword: "", confirmPassword: "" }));
-      toast.success("Password changed successfully!");
-    } catch (error) {
-      console.error("Error changing password:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to change password. Please try again.";
-      toast.error(errorMessage);
-    }
+    await executePasswordChange({
+      currentPassword: formData.currentPassword,
+      newPassword: formData.newPassword,
+    });
   };
 
   const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,43 +223,7 @@ export default function UserProfilePage() {
       return;
     }
 
-    // Show loading toast
-    const toastId = toast.loading("Uploading profile picture...");
-    
-    try {
-      // Call API to upload profile picture
-      const response = await api.uploadProfileImage(file);
-      
-      // Update user data with new profile picture
-      const newProfilePictureUrl = response.data?.profilePictureUrl || response.data?.imageUrl;
-      
-      if (newProfilePictureUrl) {
-        // Update user context with new profile picture
-        updateUser({ profilePictureUrl: newProfilePictureUrl });
-        toast.update(toastId, { 
-          render: "Profile picture uploaded successfully!", 
-          type: "success", 
-          isLoading: false,
-          autoClose: 3000
-        });
-        
-        // Force refresh user data to ensure sidebar updates
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        throw new Error("No profile picture URL returned from server");
-      }
-    } catch (error) {
-      console.error("Error uploading profile picture:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to upload profile picture. Please try again.";
-      toast.update(toastId, { 
-        render: errorMessage, 
-        type: "error", 
-        isLoading: false,
-        autoClose: 5000
-      });
-    }
+    await executeUpload(file);
     
     // Clear the input so the same file can be uploaded again if needed
     event.target.value = '';
@@ -229,16 +252,26 @@ export default function UserProfilePage() {
                     {user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2) : "U"}
                   </AvatarFallback>
                 </Avatar>
-                <label htmlFor="profile-picture" className="absolute bottom-0 right-0 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-2 cursor-pointer transition-colors">
-                  <Camera className="h-4 w-4" />
+                <label htmlFor="profile-picture" className={`absolute bottom-0 right-0 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-2 cursor-pointer transition-colors ${uploadLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  {uploadLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
                   <input
                     id="profile-picture"
                     type="file"
                     accept="image/*"
                     className="hidden"
                     onChange={handleProfilePictureUpload}
+                    disabled={uploadLoading}
                   />
                 </label>
+                {uploadLoading && uploadProgress > 0 && (
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-600">
+                    {Math.round(uploadProgress)}%
+                  </div>
+                )}
               </div>
               <CardTitle className="mt-4">{user?.name || "User"}</CardTitle>
               <CardDescription>{formData.specialization}</CardDescription>
@@ -317,9 +350,16 @@ export default function UserProfilePage() {
                 variant="outline"
                 size="sm"
                 onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                disabled={updateLoading}
               >
-                {isEditing ? <Save className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
-                {isEditing ? "Save" : "Edit"}
+                {updateLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : isEditing ? (
+                  <Save className="h-4 w-4 mr-2" />
+                ) : (
+                  <Edit className="h-4 w-4 mr-2" />
+                )}
+                {updateLoading ? "Saving..." : isEditing ? "Save" : "Edit"}
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -603,8 +643,19 @@ export default function UserProfilePage() {
                         </Button>
                       </div>
                     </div>
-                    <Button onClick={handlePasswordChange} className="w-full">
-                      Update Password
+                    <Button 
+                      onClick={handlePasswordChange} 
+                      className="w-full"
+                      disabled={passwordLoading}
+                    >
+                      {passwordLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        "Update Password"
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -614,5 +665,18 @@ export default function UserProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UserProfilePage() {
+  return (
+    <ErrorBoundary 
+      level="page"
+      onError={(error, errorInfo) => {
+        console.error('Profile page error:', error, errorInfo);
+      }}
+    >
+      <ProfilePageContent />
+    </ErrorBoundary>
   );
 }

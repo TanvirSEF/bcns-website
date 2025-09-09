@@ -8,8 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Plus, Edit, Trash2, Users, MapPin, Clock } from "lucide-react";
+import { Calendar, Plus, Edit, Trash2, MapPin, Clock } from "lucide-react";
 import { toast } from "react-toastify";
 import { Event } from "@/types/api";
 
@@ -47,6 +46,7 @@ export default function EventsManagement() {
           location: "Dhaka Medical College",
           createdAt: "2024-01-01",
           updatedAt: "2024-01-01",
+          isRegistered: false,
         },
         {
           id: "2",
@@ -56,6 +56,7 @@ export default function EventsManagement() {
           location: "BSMMU",
           createdAt: "2024-01-01",
           updatedAt: "2024-01-01",
+          isRegistered: true,
         },
       ]);
     } catch (error) {
@@ -96,12 +97,12 @@ export default function EventsManagement() {
     }
   };
 
-  const handleDeleteEvent = async (eventId: string) => {
+  const handleDeleteEvent = async (_eventId: string) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
-    
+
     try {
       // TODO: Replace with actual API call
-      // await deleteEvent(eventId);
+      // await deleteEvent(_eventId);
       
       toast.success("Event deleted successfully");
       fetchEvents();

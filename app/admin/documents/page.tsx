@@ -10,21 +10,21 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Plus, Edit, Trash2, Download, Eye, Clock, User, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Edit, Trash2, Download, Eye, Clock, User, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "react-toastify";
-import { Document } from "@/types/api";
+import { Document, DocumentStatus } from "@/types/api";
 
 export default function DocumentsManagement() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const [, setEditingDocument] = useState<Document | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     fileUrl: "",
-    status: "pending" as "pending" | "approved" | "rejected",
+    status: DocumentStatus.PENDING,
   });
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function DocumentsManagement() {
           title: "Annual Report 2023",
           description: "Complete annual report of BCNS activities",
           fileUrl: "/documents/annual-report-2023.pdf",
-          status: "approved",
+          status: DocumentStatus.APPROVED,
           uploadedBy: "admin@bcns.org.bd",
           createdAt: "2024-01-01",
           updatedAt: "2024-01-01",
@@ -55,7 +55,7 @@ export default function DocumentsManagement() {
           title: "Research Proposal - Pediatric Neurology",
           description: "Research proposal for pediatric neurology study",
           fileUrl: "/documents/research-proposal.pdf",
-          status: "pending",
+          status: DocumentStatus.PENDING,
           uploadedBy: "dr.smith@bcns.org.bd",
           createdAt: "2024-01-15",
           updatedAt: "2024-01-15",
@@ -65,7 +65,7 @@ export default function DocumentsManagement() {
           title: "Conference Guidelines",
           description: "Guidelines for organizing BCNS conferences",
           fileUrl: "/documents/conference-guidelines.pdf",
-          status: "approved",
+          status: DocumentStatus.APPROVED,
           uploadedBy: "admin@bcns.org.bd",
           createdAt: "2024-01-10",
           updatedAt: "2024-01-10",
@@ -85,17 +85,17 @@ export default function DocumentsManagement() {
       
       toast.success("Document created successfully");
       setIsCreateDialogOpen(false);
-      setFormData({ title: "", description: "", fileUrl: "", status: "pending" });
+      setFormData({ title: "", description: "", fileUrl: "", status: DocumentStatus.PENDING });
       fetchDocuments();
     } catch (error) {
       toast.error("Failed to create document");
     }
   };
 
-  const handleUpdateStatus = async (documentId: string, status: "approved" | "rejected") => {
+  const handleUpdateStatus = async (_documentId: string, status: DocumentStatus.APPROVED | DocumentStatus.REJECTED) => {
     try {
       // TODO: Replace with actual API call
-      // await updateDocumentStatus(documentId, status);
+      // await updateDocumentStatus(_documentId, status);
       
       toast.success(`Document ${status} successfully`);
       fetchDocuments();
@@ -104,12 +104,12 @@ export default function DocumentsManagement() {
     }
   };
 
-  const handleDeleteDocument = async (documentId: string) => {
+  const handleDeleteDocument = async (_documentId: string) => {
     if (!confirm("Are you sure you want to delete this document?")) return;
     
     try {
       // TODO: Replace with actual API call
-      // await deleteDocument(documentId);
+      // await deleteDocument(_documentId);
       
       toast.success("Document deleted successfully");
       fetchDocuments();
@@ -129,13 +129,13 @@ export default function DocumentsManagement() {
     setIsEditDialogOpen(true);
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: DocumentStatus) => {
     switch (status) {
-      case "approved":
+      case DocumentStatus.APPROVED:
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Approved</Badge>;
-      case "rejected":
+      case DocumentStatus.REJECTED:
         return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Rejected</Badge>;
-      case "pending":
+      case DocumentStatus.PENDING:
         return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pending</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
@@ -222,7 +222,7 @@ export default function DocumentsManagement() {
                 </Label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value: "pending" | "approved" | "rejected") => 
+                  onValueChange={(value: DocumentStatus) => 
                     setFormData({ ...formData, status: value })
                   }
                 >
@@ -230,9 +230,9 @@ export default function DocumentsManagement() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value={DocumentStatus.PENDING}>Pending</SelectItem>
+                    <SelectItem value={DocumentStatus.APPROVED}>Approved</SelectItem>
+                    <SelectItem value={DocumentStatus.REJECTED}>Rejected</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -308,12 +308,12 @@ export default function DocumentsManagement() {
                       >
                         <Download className="h-4 w-4" />
                       </Button>
-                      {document.status === "pending" && (
+                      {document.status === DocumentStatus.PENDING && (
                         <>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleUpdateStatus(document.id, "approved")}
+                            onClick={() => handleUpdateStatus(document.id, DocumentStatus.APPROVED)}
                             className="text-green-600 hover:text-green-700"
                           >
                             <CheckCircle className="h-4 w-4" />
@@ -321,7 +321,7 @@ export default function DocumentsManagement() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleUpdateStatus(document.id, "rejected")}
+                            onClick={() => handleUpdateStatus(document.id, DocumentStatus.REJECTED)}
                             className="text-red-600 hover:text-red-700"
                           >
                             <XCircle className="h-4 w-4" />
@@ -400,7 +400,7 @@ export default function DocumentsManagement() {
               </Label>
               <Select
                 value={formData.status}
-                onValueChange={(value: "pending" | "approved" | "rejected") => 
+                onValueChange={(value: DocumentStatus) => 
                   setFormData({ ...formData, status: value })
                 }
               >
@@ -408,9 +408,9 @@ export default function DocumentsManagement() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value={DocumentStatus.PENDING}>Pending</SelectItem>
+                  <SelectItem value={DocumentStatus.APPROVED}>Approved</SelectItem>
+                  <SelectItem value={DocumentStatus.REJECTED}>Rejected</SelectItem>
                 </SelectContent>
               </Select>
             </div>

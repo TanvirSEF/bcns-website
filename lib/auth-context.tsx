@@ -1,23 +1,30 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/api";
-import { getProfile, logoutUser } from "./api";
+import { authApi } from "./api";
+import { ApiError } from "./api-client";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData: User, token: string) => void;
+  error: ApiError | Error | null;
+  login: (userData: User, token: string, expiresIn?: number, refreshToken?: string) => void;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
   getToken: () => string | null;
+  isTokenExpired: () => boolean;
+  getTokenExpiration: () => Date | null;
+  clearError: () => void;
   checkAuthStatus: () => {
     hasToken: boolean;
     hasStoredUser: boolean;
     currentUser: boolean;
+    isExpired: boolean;
+    expiresAt: Date | null;
   };
 }
 
@@ -26,28 +33,38 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<ApiError | Error | null>(null);
 
-  // Token management utilities
+  // Simple token management utilities
   const getToken = (): string | null => {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("auth_token");
   };
 
-  const setToken = (token: string): void => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("auth_token", token);
-    }
+  const isTokenExpired = (): boolean => {
+    if (typeof window === "undefined") return true;
+    
+    const token = localStorage.getItem("auth_token");
+    const expiresAt = localStorage.getItem("token_expires_at");
+    
+    if (!token || !expiresAt) return true;
+    
+    const expiration = parseInt(expiresAt, 10);
+    return Date.now() >= expiration;
   };
 
-  const removeToken = (): void => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("auth_token");
-    }
+  const getTokenExpiration = (): Date | null => {
+    if (typeof window === "undefined") return null;
+    
+    const expiresAt = localStorage.getItem("token_expires_at");
+    if (!expiresAt) return null;
+    
+    return new Date(parseInt(expiresAt, 10));
   };
 
-  const hasToken = (): boolean => {
-    return !!getToken();
-  };
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   // User data management utilities
   const getUserFromStorage = (): User | null => {
@@ -77,105 +94,153 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Simple token storage utilities
+  const setTokenData = (token: string, expiresIn?: number): void => {
+    if (typeof window === "undefined") return;
+    
+    
+    localStorage.setItem("auth_token", token);
+    
+    // Calculate expiration time
+    const expirationTime = expiresIn 
+      ? Date.now() + (expiresIn * 1000)
+      : Date.now() + (60 * 60 * 1000); // Default 1 hour
+    
+    localStorage.setItem("token_expires_at", expirationTime.toString());
+  };
+
+  const clearTokenData = (): void => {
+    if (typeof window === "undefined") return;
+    
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("token_expires_at");
+  };
+
   // Initialize auth state
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = hasToken();
+        setError(null);
+        const hasValidToken = !isTokenExpired();
+        const storedUser = getUserFromStorage();
         
-        if (token) {
-          // If we have a token, fetch fresh user data from API
+        if (hasValidToken && storedUser) {
+          // We have a valid token and stored user data
+          setUser(storedUser);
+        } else if (hasValidToken) {
+          // We have a token but no user data, try to fetch it
           try {
-            const userData = await getProfile();
+            const userData = await authApi.getProfile();
             setUser(userData);
             setUserData(userData);
           } catch (error) {
-            console.error("Failed to fetch user profile:", error);
-            // If API call fails, try to use stored user data as fallback
-            const storedUser = getUserFromStorage();
-            if (storedUser) {
-              setUser(storedUser);
-            } else {
-              // If no stored user and API fails, clear everything
-              removeToken();
-              setUser(null);
-            }
+            // Clear invalid token
+            clearTokenData();
+            removeUserData();
+            setUser(null);
+            setError(error instanceof Error ? error : new Error('Failed to load user data'));
           }
         } else {
+          // No valid token, clear everything
           setUser(null);
+          removeUserData();
+          clearTokenData();
         }
-      } catch {
-        // If there's any error in initialization, clear everything
+      } catch (error) {
         setUser(null);
-        removeToken();
         removeUserData();
+        clearTokenData();
+        setError(error instanceof Error ? error : new Error('Failed to initialize authentication'));
       } finally {
         setIsLoading(false);
       }
     };
 
     initializeAuth();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  const login = (userData: User, token: string) => {
+  const login = useCallback((
+    userData: User, 
+    token: string, 
+    expiresIn?: number, 
+    _refreshToken?: string
+  ) => {
     try {
+      setError(null);
       setUser(userData);
-      setToken(token);
+      
+      // Store token data
+      setTokenData(token, expiresIn);
+      
+      // Store user data locally
       setUserData(userData);
     } catch (error) {
-      console.error("Auth Context - Storage failed:", error);
+      setError(error instanceof Error ? error : new Error('Login failed'));
       // If storage fails, at least set the user in memory
       setUser(userData);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     setIsLoading(true);
+    
     try {
-      await logoutUser();
-    } catch {
+      // Try to call logout API
+      await authApi.logout();
+    } catch (error) {
       // Continue with logout even if API call fails
     } finally {
+      // Always clear local state regardless of API call result
       setUser(null);
-      removeToken();
       removeUserData();
+      clearTokenData();
+      setError(null);
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
-      const userData = await getProfile();
+      setError(null);
+      const userData = await authApi.getProfile();
       setUser(userData);
       setUserData(userData);
-    } catch {
-      // If refresh fails, logout the user
-      await logout();
+    } catch (error) {
+      setError(error instanceof Error ? error : new Error('Failed to refresh user data'));
+      
+      // If refresh fails due to auth error, logout the user
+      if (error instanceof ApiError && error.status === 401) {
+        await logout();
+      }
     }
-  };
+  }, [logout]);
 
-  const updateUser = (userData: Partial<User>) => {
+  const updateUser = useCallback((userData: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
       setUserData(updatedUser);
     }
-  };
+  }, [user]);
 
-  const checkAuthStatus = () => {
-    const token = hasToken();
+  const checkAuthStatus = useCallback(() => {
+    const hasToken = !!getToken();
+    const isExpired = isTokenExpired();
     const storedUser = getUserFromStorage();
+    const expiresAt = getTokenExpiration();
 
     return {
-      hasToken: token,
+      hasToken,
       hasStoredUser: !!storedUser,
       currentUser: !!user,
+      isExpired,
+      expiresAt,
     };
-  };
+  }, [user]);
 
-  const isAuthenticated = !!user && !isLoading;
+  const isAuthenticated = !!user && !isLoading && !isTokenExpired();
 
   return (
     <AuthContext.Provider
@@ -183,11 +248,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isAuthenticated,
         isLoading,
+        error,
         login,
         logout,
         refreshUser,
         updateUser,
         getToken,
+        isTokenExpired,
+        getTokenExpiration,
+        clearError,
         checkAuthStatus,
       }}
     >

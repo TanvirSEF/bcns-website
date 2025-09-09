@@ -7,9 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, Clock, User, FolderOpen, Camera, Image as ImageIcon } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, FolderOpen, Camera, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import { Album, Photo } from "@/types/api";
@@ -55,6 +53,7 @@ export default function GalleryManagement() {
           coverPhoto: "/images/event1.png",
           photoCount: 25,
           createdAt: "2024-01-01",
+          updatedAt: "2024-01-01",
         },
         {
           id: "2",
@@ -63,6 +62,7 @@ export default function GalleryManagement() {
           coverPhoto: "/images/event2.png",
           photoCount: 18,
           createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
         },
         {
           id: "3",
@@ -71,6 +71,7 @@ export default function GalleryManagement() {
           coverPhoto: "/images/event3.png",
           photoCount: 12,
           createdAt: "2024-01-20",
+          updatedAt: "2024-01-20",
         },
       ]);
     } catch (error) {
@@ -143,12 +144,12 @@ export default function GalleryManagement() {
     }
   };
 
-  const handleDeleteAlbum = async (albumId: string) => {
+  const handleDeleteAlbum = async (_albumId: string) => {
     if (!confirm("Are you sure you want to delete this album? All photos will be lost.")) return;
-    
+
     try {
       // TODO: Replace with actual API call
-      // await deleteAlbum(albumId);
+      // await deleteAlbum(_albumId);
       
       toast.success("Album deleted successfully");
       fetchAlbums();
@@ -173,12 +174,12 @@ export default function GalleryManagement() {
     }
   };
 
-  const handleDeletePhoto = async (photoId: string) => {
+  const handleDeletePhoto = async (_photoId: string) => {
     if (!confirm("Are you sure you want to delete this photo?")) return;
-    
+
     try {
       // TODO: Replace with actual API call
-      // await deletePhoto(photoId);
+      // await deletePhoto(_photoId);
       
       toast.success("Photo deleted successfully");
       if (selectedAlbum) {

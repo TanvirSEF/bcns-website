@@ -12,7 +12,6 @@ import {
   BarChart3,
   Settings,
   HelpCircle,
-  Search,
   Database,
   FileBarChart,
   Building2,

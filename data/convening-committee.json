@@ -1,0 +1,238 @@
+{
+  "convener": [
+    {
+      "id": 1,
+      "name": "Prof. Dr. Mohammad Mizanur Rahman",
+      "designation": "Former chairman",
+      "institute": "Bangladesh Medical University (BMU)",
+      "mobile": "01714035439",
+      "email": "mizanur_rahman_1955@yahoo.com",
+      "image": "/images/president.jpg",
+      "role": "Convener"
+    }
+  ],
+  "memberSecretary": [
+    {
+      "id": 1,
+      "name": "Prof. Dr. Shaheen Akter",
+      "designation": "Professor of Paediatric Neurology, Founder and Former Director, Member Secretary, Executive Board Member",
+      "institute": "Institute of Paediatric Neurodisorder and Autism (IPNA),Bangladesh Medical University (BMU), Bangladesh.Bangladesh Child Neurology Society (BCNS), International Child Neurology Association (ICNA)",
+      "mobile": "01713011759",
+      "email": "shaheenk33@gmail.com",
+      "image": "/images/shaeen.jpg",
+      "role": "Member Secretary"
+    }
+  ],
+  "members": [
+    {
+      "id": 1,
+      "name": "Prof. Dr. Narayan Saha",
+      "designation": "Professor, Paediatric Neurology",
+      "institute": "National Institute of Neurosciences and Hospital",
+      "mobile": "01711851672",
+      "email": "91janm@gmail.com",
+      "image": "/images/narayen.png",
+      "role": "Member"
+    },
+    {
+      "id": 2,
+      "name": "Prof. Dr. Ariful Islam",
+      "designation": "Professor, Paediatric Neurology",
+      "institute": "National Institute of Neurosciences and Hospital",
+      "mobile": "01819162856",
+      "email": "arifulislam865@gmail.com",
+      "image": "/images/arifur.jpg",
+      "role": "Member"
+    },
+    {
+      "id": 3,
+      "name": "Brig. Gen. Anjuman Ara Beauty",
+      "designation": "Professor (Rtd), Pediatric Neurology",
+      "institute": "Combined Military Hospital (CMH)",
+      "mobile": "01769014632",
+      "email": "anjuman_beauty@yahoo.com",
+      "image": "/images/anjuman.png",
+      "role": "Member"
+    },
+    {
+      "id": 4,
+      "name": "Dr. Mustafa Mahbub",
+      "designation": "Professor (Rtd)",
+      "institute": "Bangladesh Shishu Hospital & Institute (BSHI)",
+      "mobile": "01713209096",
+      "email": "mm231956@gmail.com",
+      "image": null,
+      "role": "Member"
+    },
+    {
+      "id": 5,
+      "name": "Prof. Dr. SK. Azimul Hoque",
+      "designation": "Professor, Pediatric Neurology",
+      "institute": "Sylhet MAG Osmani Medical College Hospital",
+      "mobile": "01753300003",
+      "email": "skazimhoq@gmail.com",
+      "image": null,
+      "role": "Member"
+    },
+    {
+      "id": 6,
+      "name": "Prof. Dr. Syeda Tabassum Alam",
+      "designation": "Professor Director",
+      "institute": " Institute of Neurosciences and Autism, Bangladesh Medical University,Bangladesh Medical University",
+      "mobile": "01712033536",
+      "email": "dr.tabassum.0171@gmail.com",
+      "image": "/images/Vice President1.jpg",
+      "role": "Member"
+    },
+    {
+      "id": 7,
+      "name": "Dr Yeamin Shahariar Chowdhury,",
+      "designation": "Associate Professor, Secretary General",
+      "institute": "National Institute of Neurosciences and Hospital,Bangladesh Paediatric Association",
+      "mobile": "01711438602",
+      "email": "yamindr@yahoo.com",
+      "image": "/images/Vice President2.jpg",
+      "role": "Member"
+    },
+    {
+      "id": 8,
+      "name": "Dr. Kazi Ashraful Islam",
+      "designation": "Assistant Professor",
+      "institute": "Institute of Neurodisorder and Autism,Bangladesh Medical University",
+      "mobile": "01912178024",
+      "email": "ashrafrmc@gmail.com",
+      "image": "/images/alauddin.jpg",
+      "role": "Member"
+    },
+    {
+      "id": 9,
+      "name": "Prof. Dr. Kaniz Fatema",
+      "designation": "Chairman & Professor",
+      "institute": "Bangladesh Medical University (BMU),IPNA, Pediatric Neurology",
+      "mobile": "01713097751",
+      "email": "mailmonami@gmail.com",
+      "image": "/images/kaniz.png",
+      "role": "Member"
+    },
+    {
+      "id": 10,
+      "name": "Dr. Shameem Ara Begum",
+      "designation": "Assistant Professor",
+      "institute": "National Institute of Neurosciences and Hospital,Pediatric Neurology",
+      "mobile": "01816348843",
+      "email": "bshameemara@yahoo.com",
+      "image": "/images/shameem ara.png",
+      "role": "Member"
+    },
+    {
+      "id": 11,
+      "name": "Prof. Dr. Gopen Kumar Kundu",
+      "designation": "Professor",
+      "institute": "Bangladesh Medical University (BMU),Pediatric Neurology",
+      "mobile": "0171800768",
+      "email": "gopen.kundu@gmail.com",
+      "image": "/images/gopen.png",
+      "role": "Member"
+    },
+    {
+      "id": 12,
+      "name": "Prof. Dr. Wahida Khatun",
+      "designation": "Retired, Head of the Dept.",
+      "institute": "Institute of Child and Mother Health (ICMH),Pediatric Neurology,Institute of Neurosciences and Autism,Bangladesh Medical University",
+      "mobile": "01715042153",
+      "email": "wahidakhanam229@gmail.com",
+      "image": null,
+      "role": "Member"
+    },
+    {
+      "id": 13,
+      "name": "Dr. Shayla Imam Kanta",
+      "designation": "Associate Professor",
+      "institute": "Bangladesh Shishu Hospital,Pediatric Neurology",
+      "mobile": "01712160876",
+      "email": "shaylakanta@gmail.com",
+      "image": "/images/shayla.png",
+      "role": "Member"
+    },
+    {
+      "id": 14,
+      "name": "Prof. Dr. Ahmed Murtaza Chowdhury",
+      "designation": "Professor",
+      "institute": "Dr. M R Khan Shishu Hospital,Pediatric Neurology",
+      "mobile": "0171147186",
+      "email": "murtazabd@gmail.com",
+      "image": "/images/murtaza.jpg",
+      "role": "Member"
+    },
+    {
+      "id": 15,
+      "name": "Dr. Naznin Akhter Rubi",
+      "designation": "Associate Professor",
+      "institute": "Khulna Medical College & Hospital,Pediatric Neurology",
+      "mobile": "01712552740",
+      "email": "nazninruby73@gmail.com",
+      "image": "/images/naznin.png",
+      "role": "Member"
+    },
+    {
+      "id": 16,
+      "name": "Dr. Bithi Debnath",
+      "designation": "Associate Professor",
+      "institute": "National Institute of Neurosciences & Hospital (NINSH),Pediatric Neurology",
+      "mobile": "01711236107",
+      "email": "bithidebnath@gmail.com",
+      "image": "/images/bithi.png",
+      "role": "Member"
+    },
+    {
+      "id": 17,
+      "name": "Dr. Tania Saad",
+      "designation": "Assistant Professor",
+      "institute": "National Institute of Neurosciences & Hospital (NINSH),Pediatric Neurology",
+      "mobile": "01712036316",
+      "email": "taniasaad24@gmail.com",
+      "image": "/images/tania.jpg",
+      "role": "Member"
+    },
+    {
+      "id": 18,
+      "name": "Dr. Mohammad Monir Hossain",
+      "designation": "Assistant Professor",
+      "institute": "National Institute of Neurosciences and Hospital,Pediatric Neurology",
+      "mobile": "01711261736",
+      "email": "monir91@gmail.com",
+      "image": "/images/monir.jpg",
+      "role": "Member"
+    },
+    {
+      "id": 19,
+      "name": "Dr. Nazmul Haque",
+      "designation": "Assistant Professor",
+      "institute": "National Institute of Neurosciences & Hospital (NINSH),Pediatric Neurology",
+      "mobile": "01860008498",
+      "email": "nazmulk51@gmail.com",
+      "image": null,
+      "role": "Member"
+    },
+    {
+      "id": 20,
+      "name": "Dr. Bikash Chandra Paul",
+      "designation": "Assistant Professor",
+      "institute": "Bangladesh Medical University (BMU),Pediatric Neurology, IPNA",
+      "mobile": "01627851471",
+      "email": "bcpaul@gmail.com",
+      "image": "/images/bikush.png",
+      "role": "Member"
+    },
+    {
+      "id": 21,
+      "name": "Dr. Sanjida Ahmed",
+      "designation": "Assistant Professor",
+      "institute": "Bangladesh Medical University (BMU),Pediatric Neurology, IPNA",
+      "mobile": "01723319386",
+      "email": "sanjida.lipi@yahoo.com",
+      "image": "/images/sanjida.png",
+      "role": "Member"
+    }
+  ]
+}

@@ -7,21 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { loginUser } from "@/lib/api";
-import { User } from "@/types/api";
+import { authApi } from "@/lib/api";
+import { LoginInput } from "@/types/api";
 import { NavbarClient } from "@/components/navbarclient";
 import { Footer } from "@/components/footer";
 
-interface LoginResponseData {
-  user?: Record<string, unknown>;
-  token?: string;
-  access_token?: string;
-  accessToken?: string;
-  data?: {
-    user?: Record<string, unknown>;
-    token?: string;
-  };
-}
+// Remove the old interface - we'll use the proper types from API
 
 function LoginPageContent() {
   const router = useRouter();
@@ -61,29 +52,18 @@ function LoginPageContent() {
     setSuccess("");
 
     try {
-      const response = await loginUser(emailAddress.trim(), passwordValue);
+      const credentials: LoginInput = {
+        email: emailAddress.trim(),
+        password: passwordValue
+      };
 
-      if (response.success && response.data) {
-        // Handle different possible response structures
-        const responseData = response.data as unknown as LoginResponseData;
+      const response = await authApi.login(credentials);
 
-        const user =
-          responseData.user || responseData.data?.user || responseData;
-        const token =
-          responseData.token ||
-          responseData.access_token ||
-          responseData.accessToken ||
-          responseData.data?.token;
-
-        if (!user || !token) {
-          setError("Login response is incomplete. Please try again.");
-          return;
-        }
-
+      if (response.user && response.token) {
         // Update auth context (this will handle storage)
-        login(user as User, token);
+        login(response.user, response.token, response.expiresIn);
 
-        // Show success message briefly then redirect immediately
+        // Show success message briefly then redirect
         setSuccess("Login successful! Redirecting...");
 
         // Small delay to show success message, then redirect
@@ -91,31 +71,34 @@ function LoginPageContent() {
           router.push("/user-dashboard");
         }, 500);
       } else {
-        setError(
-          response.message || "Invalid email or password. Please try again."
-        );
+        setError("Login response is incomplete. Please try again.");
       }
     } catch (error: unknown) {
       // Handle different types of errors
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-
-      if (errorMessage.includes("fetch")) {
-        setError("Network error. Please check your connection and try again.");
-      } else if (
-        errorMessage.includes("401") ||
-        errorMessage.toLowerCase().includes("unauthorized")
-      ) {
-        setError("Invalid email or password. Please check your credentials.");
-      } else if (errorMessage.includes("429")) {
-        setError(
-          "Too many login attempts. Please wait a few minutes and try again."
-        );
-      } else if (errorMessage.includes("500")) {
-        setError("Server error. Please try again later.");
-      } else {
-        setError(errorMessage || "Login failed. Please try again.");
+      let errorMessage = "Login failed. Please try again.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("fetch") || error.message.includes("Network")) {
+          errorMessage = "Network error. Please check your connection and try again.";
+        } else if (
+          error.message.includes("401") ||
+          error.message.toLowerCase().includes("unauthorized") ||
+          error.message.toLowerCase().includes("invalid") ||
+          error.message.toLowerCase().includes("credentials")
+        ) {
+          errorMessage = "Invalid email or password. Please check your credentials.";
+        } else if (error.message.includes("429")) {
+          errorMessage = "Too many login attempts. Please wait a few minutes and try again.";
+        } else if (error.message.includes("500")) {
+          errorMessage = "Server error. Please try again later.";
+        } else if (error.message.includes("timeout")) {
+          errorMessage = "Request timeout. Please try again.";
+        } else {
+          errorMessage = error.message || "Login failed. Please try again.";
+        }
       }
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Plus, Edit, Trash2, Eye, Clock, User, Tag, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, User, Calendar } from "lucide-react";
 import { toast } from "react-toastify";
 import { Publication } from "@/types/api";
 
@@ -110,12 +110,12 @@ export default function PublicationsManagement() {
     }
   };
 
-  const handleDeletePublication = async (publicationId: string) => {
+  const handleDeletePublication = async (_publicationId: string) => {
     if (!confirm("Are you sure you want to delete this publication?")) return;
     
     try {
       // TODO: Replace with actual API call
-      // await deletePublication(publicationId);
+      // await deletePublication(_publicationId);
       
       toast.success("Publication deleted successfully");
       fetchPublications();
@@ -130,7 +130,7 @@ export default function PublicationsManagement() {
       title: publication.title,
       content: publication.content,
       author: publication.author,
-      tags: publication.tags || [],
+      tags: [...(publication.tags || [])],
       publishedAt: publication.publishedAt || "",
     });
     setIsEditDialogOpen(true);

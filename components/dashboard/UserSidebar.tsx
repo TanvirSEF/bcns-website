@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-  LayoutDashboard,
   User,
   Calendar,
   BookOpen,
@@ -11,7 +10,6 @@ import {
   MessageSquare,
   Settings,
   HelpCircle,
-  Bell,
   Heart,
   Building2,
   Activity,

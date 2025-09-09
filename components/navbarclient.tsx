@@ -91,8 +91,6 @@ export function NavbarClient() {
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isScrolled, setIsScrolled] = React.useState(false);
-
-
   const { isAuthenticated, user, logout } = useAuth();
 
   const isActive = (href: string) => {

@@ -49,12 +49,17 @@ export function UserNavUser({
     try {
       // Use the auth context logout function which handles API call and cleanup
       await authLogout();
-      // Redirect to login page
-      router.push('/login');
+      
+      // Add a small delay to ensure state updates propagate
+      setTimeout(() => {
+        router.push('/login');
+      }, 100);
+      
     } catch (error) {
-      console.error('Logout error:', error);
       // Even if logout fails, redirect to login
-      router.push('/login');
+      setTimeout(() => {
+        router.push('/login');
+      }, 100);
     }
   };
 
