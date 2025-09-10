@@ -1,17 +1,12 @@
 /**
- * Strict TypeScript API Types for BCNS Website
- * 
- * All interfaces are strictly typed with no 'any' types.
- * Includes runtime validation schemas and proper generics.
+ * TypeScript API Types for BCNS Website
  */
 
-// Base types for common patterns
 export type UUID = string;
 export type ISODateString = string;
 export type EmailAddress = string;
 export type URL = string;
 
-// Enum types for better type safety
 export enum DocumentStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
@@ -32,27 +27,23 @@ export enum UserRole {
   GUEST = 'guest'
 }
 
-// Education qualification interface
 export interface EducationQualification {
   readonly qualification: string;
   readonly year: string;
   readonly institution: string;
 }
 
-// Training interface
 export interface Training {
   readonly period: string;
   readonly institute: string;
 }
 
-// Poll option interface
 export interface PollOption {
   readonly id: UUID;
   readonly text: string;
   readonly votes: number;
 }
 
-// Strict User interface with no optional fields that should be required
 export interface User {
   readonly id: UUID;
   readonly name: string;
@@ -61,33 +52,27 @@ export interface User {
   readonly createdAt: ISODateString;
   readonly updatedAt: ISODateString;
   
-  // Optional profile information
   readonly avatar?: URL;
   readonly phone?: string;
   readonly address?: string;
   readonly bio?: string;
   readonly profilePictureUrl?: URL;
   
-  // Membership information
   readonly affiliation?: string;
   readonly mailingAddress?: string;
   readonly permanentAddress?: string;
   readonly membershipStatus: MembershipStatus;
   readonly membershipExpiry?: ISODateString;
   
-  // Professional information
   readonly specialization?: string;
   readonly institution?: string;
   
-  // Education and training (always arrays, never undefined)
   readonly educationQualifications: readonly EducationQualification[];
   readonly training: readonly Training[];
   
-  // Research interests
   readonly primaryResearchInterest?: string;
   readonly secondaryResearchInterest?: string;
   
-  // Dashboard metrics (always numbers, never undefined)
   readonly eventsAttended: number;
   readonly eventsThisMonth: number;
   readonly publicationsRead: number;
@@ -182,7 +167,6 @@ export interface ActivityLog {
   readonly userAgent?: string;
 }
 
-// Auth response types with strict typing
 export interface LoginResponse {
   readonly user: User;
   readonly token: string;
@@ -316,6 +300,37 @@ export interface RegisterInput {
   readonly name: string;
   readonly email: EmailAddress;
   readonly password: string;
+}
+
+export interface SendOTPInput {
+  readonly name: string;
+  readonly email: EmailAddress;
+  readonly password: string;
+}
+
+export interface VerifyOTPInput {
+  readonly name: string;
+  readonly email: EmailAddress;
+  readonly password: string;
+  readonly otp: string;
+}
+
+export interface ResendOTPInput {
+  readonly email: EmailAddress;
+}
+
+export interface SendOTPResponse {
+  readonly success: boolean;
+  readonly message: string;
+  readonly email: EmailAddress;
+}
+
+export interface VerifyOTPResponse {
+  readonly user: User;
+  readonly token: string | null;
+  readonly refreshToken?: string | null;
+  readonly expiresIn: number;
+  readonly requiresLogin?: boolean;
 }
 
 export interface EventCreateInput {

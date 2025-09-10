@@ -31,6 +31,8 @@ function LoginPageContent() {
     const message = searchParams.get('message');
     if (message === 'registration-success') {
       setSuccess("Account created successfully! Please login with your credentials.");
+    } else if (message === 'otp-verified') {
+      setSuccess("Email verified successfully! You can now login with your credentials.");
     }
   }, [searchParams]);
 

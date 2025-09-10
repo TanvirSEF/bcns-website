@@ -1,9 +1,5 @@
 /**
- * Professional API Layer for BCNS Website
- * 
- * This file provides a clean, type-safe interface to all backend API endpoints.
- * It uses the ApiClient class for consistent error handling, token management,
- * and automatic retries.
+ * API Layer for BCNS Website
  */
 
 import apiClient from './api-client';
@@ -25,11 +21,13 @@ import {
   PasswordChangeInput,
   LoginInput,
   RegisterInput,
+  SendOTPInput,
+  VerifyOTPInput,
+  ResendOTPInput,
+  SendOTPResponse,
+  VerifyOTPResponse,
 } from '@/types/api';
 
-/**
- * Handle API response and extract data
- */
 function handleApiResponse<T>(response: unknown): T {
   if (typeof response !== 'object' || response === null) {
     throw new Error('Invalid API response');
@@ -37,7 +35,6 @@ function handleApiResponse<T>(response: unknown): T {
   
   const apiResponse = response as Record<string, unknown>;
   
-  // Check if it's a wrapped API response with success field
   if ('success' in apiResponse) {
     if (apiResponse.success === false) {
       const errorMessage = (apiResponse.message as string) || 'API request failed';
@@ -48,18 +45,10 @@ function handleApiResponse<T>(response: unknown): T {
       return apiResponse.data as T;
     }
   }
-  
-  // Return response as-is if not wrapped
   return response as T;
 }
 
-/**
- * Authentication API endpoints with strict typing and validation
- */
 export const authApi = {
-  /**
-   * Login user with email and password
-   */
   login: async (credentials: LoginInput): Promise<LoginResponse> => {
     const response = await apiClient.post<LoginResponse>(
       '/auth/login',
@@ -70,51 +59,70 @@ export const authApi = {
     return handleApiResponse<LoginResponse>(response);
   },
 
-  /**
-   * Register new user
-   */
-  register: async (userData: RegisterInput): Promise<RegisterResponse> => {
-    const response = await apiClient.post<RegisterResponse>(
-      '/auth/register',
-      userData,
-      { skipAuth: true }
-    );
-    
-    return handleApiResponse<RegisterResponse>(response);
+  // DEPRECATED: Use OTP flow instead
+  register: async (_userData: RegisterInput): Promise<RegisterResponse> => {
+    throw new Error('Direct registration is no longer supported. Please use OTP verification flow.');
   },
 
-  /**
-   * Logout current user
-   */
   logout: async (): Promise<void> => {
     await apiClient.post('/auth/logout');
     apiClient.logout(); // Clear local token
   },
 
-  /**
-   * Get current user profile
-   */
   getProfile: async (): Promise<User> => {
     const response = await apiClient.get<User>('/users/me');
     return handleApiResponse<User>(response);
   },
+
+  sendRegistrationOTP: async (userData: SendOTPInput): Promise<SendOTPResponse> => {
+    // Backend only expects email for send-otp
+    const response = await apiClient.post<SendOTPResponse>(
+      '/auth/send-otp',
+      { email: userData.email },
+      { skipAuth: true }
+    );
+    
+    return handleApiResponse<SendOTPResponse>(response);
+  },
+
+  verifyOTP: async (email: string, otp: string): Promise<{ success: boolean; message: string; data: { email: string; otpValid: boolean } }> => {
+    const response = await apiClient.post<{ success: boolean; message: string; data: { email: string; otpValid: boolean } }>(
+      '/auth/verify-otp',
+      { email, otp },
+      { skipAuth: true }
+    );
+    
+    // For verifyOTP, we need the full response, not just the data
+    return response as { success: boolean; message: string; data: { email: string; otpValid: boolean } };
+  },
+
+  verifyRegistrationOTP: async (verificationData: VerifyOTPInput): Promise<VerifyOTPResponse> => {
+    const response = await apiClient.post<VerifyOTPResponse>(
+      '/auth/verify-registration',
+      verificationData,
+      { skipAuth: true }
+    );
+    
+    return handleApiResponse<VerifyOTPResponse>(response);
+  },
+
+  resendRegistrationOTP: async (resendData: ResendOTPInput): Promise<SendOTPResponse> => {
+    const response = await apiClient.post<SendOTPResponse>(
+      '/auth/resend-otp',
+      resendData,
+      { skipAuth: true }
+    );
+    
+    return handleApiResponse<SendOTPResponse>(response);
+  },
 };
 
-/**
- * User management API endpoints with strict typing and validation
- */
 export const userApi = {
-  /**
-   * Update user profile
-   */
   updateProfile: async (data: UserUpdateInput): Promise<User> => {
     const response = await apiClient.put<User>('/users/me', data);
     return handleApiResponse<User>(response);
   },
 
-  /**
-   * Change user password
-   */
   changePassword: async (passwordData: PasswordChangeInput): Promise<OperationResponse> => {
     const response = await apiClient.put<OperationResponse>(
       '/users/me/change-password',
@@ -124,9 +132,6 @@ export const userApi = {
     return handleApiResponse<OperationResponse>(response);
   },
 
-  /**
-   * Upload profile picture
-   */
   uploadProfilePicture: async (
     file: File,
     onProgress?: (progress: number) => void
@@ -141,9 +146,6 @@ export const userApi = {
     return handleApiResponse<FileUploadResponse>(response);
   },
 
-  /**
-   * Delete profile picture
-   */
   deleteProfilePicture: async (): Promise<OperationResponse> => {
     const response = await apiClient.patch<OperationResponse>(
       '/users/me/profile-picture/delete'
@@ -152,9 +154,6 @@ export const userApi = {
     return handleApiResponse<OperationResponse>(response);
   },
 
-  /**
-   * Get all members (admin only)
-   */
   getMembers: async (): Promise<readonly User[]> => {
     const response = await apiClient.get<readonly User[]>('/members');
     
@@ -162,20 +161,32 @@ export const userApi = {
   },
 };
 
-/**
- * Main API object that combines all endpoints
- */
 export const api = {
   auth: authApi,
   users: userApi,
 };
 
-// Backward compatibility exports with strict typing (for existing code)
+// Backward compatibility exports
 export const loginUser = (email: string, password: string): Promise<LoginResponse> => 
   authApi.login({ email, password });
 
-export const registerUser = (name: string, email: string, password: string): Promise<RegisterResponse> => 
-  authApi.register({ name, email, password });
+// DEPRECATED: Use OTP flow instead
+export const registerUser = (_name: string, _email: string, _password: string): Promise<RegisterResponse> => {
+  throw new Error('Direct registration is deprecated. Use sendRegistrationOTP() and verifyRegistrationOTP() instead.');
+};
+
+// OTP functions
+export const sendRegistrationOTP = (name: string, email: string, password: string): Promise<SendOTPResponse> =>
+  authApi.sendRegistrationOTP({ name, email, password });
+
+export const verifyOTP = (email: string, otp: string): Promise<{ success: boolean; message: string; data: { email: string; otpValid: boolean } }> =>
+  authApi.verifyOTP(email, otp);
+
+export const verifyRegistrationOTP = (name: string, email: string, password: string, otp: string): Promise<VerifyOTPResponse> =>
+  authApi.verifyRegistrationOTP({ name, email, password, otp });
+
+export const resendRegistrationOTP = (email: string): Promise<SendOTPResponse> =>
+  authApi.resendRegistrationOTP({ email });
 
 export const logoutUser = authApi.logout;
 export const getProfile = authApi.getProfile;
@@ -190,7 +201,7 @@ export const getAllMembers = userApi.getMembers;
 export const uploadProfileImage = userApi.uploadProfilePicture;
 export const deleteProfileImage = userApi.deleteProfilePicture;
 
-// Strictly typed placeholder exports for other APIs (to be implemented)
+// Placeholder exports (to be implemented)
 export const getEvents = (): Promise<readonly Event[]> => Promise.resolve([]);
 export const createEvent = (): Promise<Event> => Promise.reject(new Error('Not implemented'));
 export const getEvent = (): Promise<Event> => Promise.reject(new Error('Not implemented'));
@@ -236,7 +247,6 @@ export const authenticate2FA = (): Promise<OperationResponse> =>
 export const createZoomMeeting = (): Promise<ZoomMeeting> => Promise.reject(new Error('Not implemented'));
 export const getActivityLogs = (): Promise<readonly ActivityLog[]> => Promise.resolve([]);
 
-// Export the API client instance for direct access if needed
 export { apiClient };
 
 export default api;

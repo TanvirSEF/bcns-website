@@ -34,11 +34,7 @@ export default function DocumentsManagement() {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await getAllDocuments();
-      // setDocuments(response);
-      
-      // Mock data for now
+      // Mock data
       setDocuments([
         {
           id: "1",
@@ -80,8 +76,7 @@ export default function DocumentsManagement() {
 
   const handleCreateDocument = async () => {
     try {
-      // TODO: Replace with actual API call
-      // await createDocument(formData);
+      // API call will be implemented
       
       toast.success("Document created successfully");
       setIsCreateDialogOpen(false);
@@ -94,8 +89,7 @@ export default function DocumentsManagement() {
 
   const handleUpdateStatus = async (_documentId: string, status: DocumentStatus.APPROVED | DocumentStatus.REJECTED) => {
     try {
-      // TODO: Replace with actual API call
-      // await updateDocumentStatus(_documentId, status);
+      // API call will be implemented
       
       toast.success(`Document ${status} successfully`);
       fetchDocuments();
@@ -108,8 +102,7 @@ export default function DocumentsManagement() {
     if (!confirm("Are you sure you want to delete this document?")) return;
     
     try {
-      // TODO: Replace with actual API call
-      // await deleteDocument(_documentId);
+      // API call will be implemented
       
       toast.success("Document deleted successfully");
       fetchDocuments();

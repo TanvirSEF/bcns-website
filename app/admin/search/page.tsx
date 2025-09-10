@@ -44,11 +44,7 @@ export default function SearchAndAnalytics() {
 
   const fetchAnalytics = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await getAnalytics();
-      // setAnalyticsData(response);
-      
-      // Mock data for now
+      // Mock data
       setAnalyticsData({
         totalUsers: 156,
         totalEvents: 24,
