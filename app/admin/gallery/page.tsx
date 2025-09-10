@@ -83,11 +83,7 @@ export default function GalleryManagement() {
 
   const fetchPhotos = async (albumId: string) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await getAlbumPhotos(albumId);
-      // setPhotos(response);
-      
-      // Mock data for now
+      // Mock data
       setPhotos([
         {
           id: "1",
@@ -115,8 +111,7 @@ export default function GalleryManagement() {
 
   const handleCreateAlbum = async () => {
     try {
-      // TODO: Replace with actual API call
-      // await createAlbum(albumFormData);
+      // API call will be implemented
       
       toast.success("Album created successfully");
       setIsCreateAlbumDialogOpen(false);
@@ -131,8 +126,7 @@ export default function GalleryManagement() {
     if (!editingAlbum) return;
     
     try {
-      // TODO: Replace with actual API call
-      // await updateAlbum(editingAlbum.id, albumFormData);
+      // API call will be implemented
       
       toast.success("Album updated successfully");
       setIsEditAlbumDialogOpen(false);

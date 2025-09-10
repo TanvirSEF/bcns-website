@@ -80,8 +80,7 @@ export default function ZoomMeetingsManagement() {
 
   const handleCreateMeeting = async () => {
     try {
-      // TODO: Replace with actual API call
-      // await createZoomMeeting(formData);
+      // API call will be implemented
       
       toast.success("Zoom meeting created successfully");
       setIsCreateDialogOpen(false);
@@ -102,8 +101,7 @@ export default function ZoomMeetingsManagement() {
     if (!editingMeeting) return;
     
     try {
-      // TODO: Replace with actual API call
-      // await updateZoomMeeting(editingMeeting.id, formData);
+      // API call will be implemented
       
       toast.success("Zoom meeting updated successfully");
       setIsEditDialogOpen(false);
@@ -125,8 +123,7 @@ export default function ZoomMeetingsManagement() {
     if (!confirm("Are you sure you want to delete this zoom meeting?")) return;
     
     try {
-      // TODO: Replace with actual API call
-      // await deleteZoomMeeting(_meetingId);
+      // API call will be implemented
       
       toast.success("Zoom meeting deleted successfully");
       fetchMeetings();

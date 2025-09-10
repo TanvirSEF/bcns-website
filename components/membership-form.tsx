@@ -39,48 +39,6 @@ export function MembershipForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmissionStatus>("idle");
 
-  // Simple data transformation - organize the form data for backend API
-  const createUserData = (data: MembershipFormData) => {
-    // Ensure we have at least one education qualification
-    const educationQualifications = [
-      data.mbbsYear && { qualification: "MBBS", year: data.mbbsYear, institution: data.mbbsInstitution || "Not specified" },
-      data.fcpsMdYear && { qualification: "FCPS/MD", year: data.fcpsMdYear, institution: data.fcpsMdInstitution || "Not specified" },
-      data.mdFcpsYear && { qualification: "MD/FCPS", year: data.mdFcpsYear, institution: data.mdFcpsInstitution || "Not specified" },
-      data.additionalYear && { qualification: data.additionalDegree || "Additional", year: data.additionalYear, institution: data.additionalInstitution || "Not specified" }
-    ].filter(Boolean);
-
-    // Ensure we have at least one training entry
-    const training = [
-      data.training1Period && { period: data.training1Period, institute: data.training1Institute || "Not specified" },
-      data.training2Period && { period: data.training2Period, institute: data.training2Institute || "Not specified" },
-      data.training3Period && { period: data.training3Period, institute: data.training3Institute || "Not specified" }
-    ].filter(Boolean);
-
-    return {
-      // Basic info - all required fields
-      name: data.name || "",
-      email: data.email || "",
-      password: data.password || "",
-      phone: data.phone || "",
-      affiliation: data.affiliation || "",
-      mailingAddress: data.mailingAddress || "",
-      permanentAddress: data.permanentAddress || "",
-      
-      // Education (structured) - ensure at least empty array
-      educationQualifications: educationQualifications.length > 0 ? educationQualifications : [
-        { qualification: "MBBS", year: "Not specified", institution: "Not specified" }
-      ],
-      
-      // Training (structured) - ensure at least empty array  
-      training: training.length > 0 ? training : [
-        { period: "Not specified", institute: "Not specified" }
-      ],
-      
-      // Research interests - required field
-      primaryResearchInterest: data.researchInterest1 || "General pediatric neurology",
-      secondaryResearchInterest: data.researchInterest2 || "",
-    };
-  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -112,13 +70,16 @@ export function MembershipForm() {
     setFormError("");
 
     try {
-      // Register the user
-      const userData = createUserData(formData);
-      
-      const response = await fetch('/api/auth/register', {
+      // Send OTP for registration (backend only needs email)
+      const response = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ 
+          email: formData.email,
+          // Store name and password for later use in verification
+          name: formData.name,
+          password: formData.password 
+        }),
       });
 
       const result = await response.json();
@@ -126,17 +87,18 @@ export function MembershipForm() {
       if (result.success) {
         setSubmitStatus("success");
         
-        // Reset form
-        setFormData(DEFAULT_MEMBERSHIP_FORM_DATA);
-        setValidation({ isValid: false, errors: {}, touched: {} });
-        setFormError("");
-
-        // Redirect to login page
+        // Redirect to OTP verification page with user data
+        const params = new URLSearchParams({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        });
+        
         setTimeout(() => {
-          router.push('/login?message=registration-success');
-        }, 3000);
+          router.push(`/verify-email?${params.toString()}`);
+        }, 2000);
       } else {
-        throw new Error(result.message || "Registration failed");
+        throw new Error(result.message || "Failed to send verification code");
       }
     } catch (error: unknown) {
       setSubmitStatus("error");
@@ -606,17 +568,19 @@ export function MembershipForm() {
                 </div>
                 <div>
                   <h5 className="text-lg font-semibold text-foreground mb-2">
-                    Account Created Successfully! 🎉
+                    Verification Code Sent! 📧
                   </h5>
                   <p className="text-muted-foreground mb-3">
-                    Your membership account has been created. You can now login with your credentials.
+                    We&apos;ve sent a 6-digit verification code to your email address. Please check your inbox and enter the code to complete your registration.
                   </p>
                   <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-sm">
                     <p><strong>Email:</strong> {formData.email}</p>
-                    <p><strong>Password:</strong> Your chosen password</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Check your spam folder if you don&apos;t see the email
+                    </p>
                   </div>
                   <p className="text-muted-foreground text-sm mt-3">
-                    Redirecting to login page...
+                    Redirecting to verification page...
                   </p>
                 </div>
               </CardContent>
@@ -655,17 +619,18 @@ export function MembershipForm() {
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
-                  <span>Creating Your Account...</span>
+                  <span>Sending Verification Code...</span>
                 </>
               ) : (
                 <>
                   <Send className="h-5 w-5" />
-                  <span>Submit Membership Application</span>
+                  <span>Send Verification Code</span>
                 </>
               )}
             </Button>
             <p className="text-center text-sm text-muted-foreground mt-4">
-              By submitting this form, you agree to our membership terms and conditions.
+              By submitting this form, you agree to our membership terms and conditions. 
+              A verification code will be sent to your email to complete registration.
             </p>
           </div>
         </form>

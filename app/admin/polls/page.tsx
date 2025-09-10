@@ -35,11 +35,7 @@ export default function PollsManagement() {
   const fetchPolls = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await getPolls();
-      // setPolls(response);
-      
-      // Mock data for now
+      // Mock data
       setPolls([
         {
           id: "1",
@@ -81,8 +77,7 @@ export default function PollsManagement() {
 
   const handleCreatePoll = async () => {
     try {
-      // TODO: Replace with actual API call
-      // await createPoll(formData);
+      // API call will be implemented
       
       toast.success("Poll created successfully");
       setIsCreateDialogOpen(false);
@@ -102,8 +97,7 @@ export default function PollsManagement() {
     if (!editingPoll) return;
     
     try {
-      // TODO: Replace with actual API call
-      // await updatePoll(editingPoll.id, formData);
+      // API call will be implemented
       
       toast.success("Poll updated successfully");
       setIsEditDialogOpen(false);
@@ -124,8 +118,7 @@ export default function PollsManagement() {
     if (!confirm("Are you sure you want to delete this poll?")) return;
 
     try {
-      // TODO: Replace with actual API call
-      // await deletePoll(_pollId);
+      // API call will be implemented
       
       toast.success("Poll deleted successfully");
       fetchPolls();
