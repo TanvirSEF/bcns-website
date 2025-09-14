@@ -40,7 +40,7 @@ const data = {
   user: {
     name: "Admin User",
     email: "admin@bcns.org.bd",
-    avatar: "/images/logo.png",
+    avatar: "/images/logov2.jpg",
   },
   navMain: [
     {

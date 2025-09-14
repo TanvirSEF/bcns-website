@@ -22,7 +22,8 @@ export function Footer() {
   const companyLinks = [
     { name: "About Us", href: "/about", icon: Building2 },
     { name: "Our Mission", href: "/about/mission", icon: Award },
-    { name: "Leadership", href: "/about/leadership", icon: Users },
+    { name: "Our Vision", href: "/about/vision", icon: Award },
+    { name: "Our Goals", href: "/about/goals", icon: Award },
     { name: "Privacy Policy", href: "/privacy", icon: FileText },
   ];
 
@@ -71,13 +72,13 @@ export function Footer() {
   return (
     <footer className="bg-gray-900 text-white overflow-hidden">
       {/* Main Footer Content */}
-      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
           {/* Company */}
           <div className="space-y-4 sm:space-y-6">
             <div className="flex items-center space-x-2 sm:space-x-3">
               <Image
-                src="/images/logo.png"
+                src="/images/logov2.jpg"
                 alt="BCNS Logo"
                 width={100}
                 height={100}
@@ -159,17 +160,19 @@ export function Footer() {
               <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center space-x-2 sm:space-x-3 text-gray-300">
                   <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm truncate">+880 1711261736</span>
+                  <span className="text-xs sm:text-sm">+880 1711261736</span>
                 </div>
                 <div className="flex items-center space-x-2 sm:space-x-3 text-gray-300">
                   <Mail className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm truncate">office@bcns.org.bd</span>
+                  <span className="text-xs sm:text-sm break-all">office@bcns.org.bd</span>
                 </div>
-                <div className="flex items-center space-x-2 sm:space-x-3 text-gray-300">
-                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm truncate">
-                    Dhaka Medical College Hospital
-                  </span>
+                <div className="flex items-start space-x-2 sm:space-x-3 text-gray-300">
+                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs sm:text-sm leading-relaxed block">
+                      Room no. 703, Block- F, Floor- 7, IPNA, BMU, Dhaka-1000
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -179,7 +182,7 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-gray-800">
-        <div className="container mx-auto px-4 py-4 sm:py-6">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
             <div className="text-xs sm:text-sm text-gray-400 text-center sm:text-left break-words max-w-full px-2">
               © {currentYear} Bangladesh Child Neurology Society (BCNS). All
@@ -197,12 +200,6 @@ export function Footer() {
                 className="text-gray-400 hover:text-white transition-colors duration-200"
               >
                 Terms of Service
-              </Link>
-              <Link
-                href="/sitemap"
-                className="text-gray-400 hover:text-white transition-colors duration-200"
-              >
-                Sitemap
               </Link>
               <a
                 href="https://zephlotech.com/"
