@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { Sparkles, MapPinned, Landmark, Microscope, Users } from "lucide-react";
+import { Sparkles, MapPinned, Landmark, Microscope, Users, HeartPulse, GraduationCap } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Our Vision for Child Neurology in Bangladesh | BCNS",
+  title: "Our Vision | Bangladesh Child Neurology Society (BCNS)",
   description:
-    "Explore the vision of BCNS. We envision a future where every child in Bangladesh has access to expert neurological care and where our society is a global leader in pediatric neurology research.",
+    "To foster optimal care of all children with neurological and neurodevelopmental disorders and build up professionals and resources through education, training and research.",
 };
 
 // Static generation for better performance
@@ -28,13 +28,10 @@ export default function VisionPage() {
               <Sparkles className="h-3.5 w-3.5" /> Our Vision
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
-              A Future of Neurological Well‑being for Every Child
+              Our Vision
             </h1>
             <p className="mt-3 text-sm sm:text-base text-blue-100/90 max-w-2xl">
-              Our vision at the Bangladesh Child Neurology Society (BCNS) is to
-              build a future where every child in Bangladesh, regardless of
-              their location or circumstances, has access to world‑class
-              neurological care.
+              To foster optimal care of all children with neurological and neurodevelopmental disorders and build up professionals and resources through education, training and research.
             </p>
           </div>
         </div>
@@ -43,28 +40,27 @@ export default function VisionPage() {
       {/* Content */}
       <section className="py-10 sm:py-12 lg:py-16 bg-gradient-to-b from-blue-50/40 via-white to-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
-              We aspire to eradicate disparities in healthcare and ensure that
-              neurodevelopmental disorders are diagnosed early and managed
-              effectively.
-            </p>
+          <div className="max-w-4xl">
+            <div className="bg-white/90 backdrop-blur border border-blue-100/70 shadow-sm rounded-2xl p-6 sm:p-8 mb-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Our Vision Statement</h2>
+              <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
+                To foster optimal care of all children with neurological and neurodevelopmental disorders and build up professionals and resources through education, training and research.
+              </p>
+            </div>
           </div>
 
-          <div className="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <article className="rounded-xl bg-white/90 backdrop-blur border border-blue-100/70 shadow-sm hover:shadow-md transition-shadow p-5 sm:p-6">
               <div className="flex items-start gap-3">
                 <div className="h-10 w-10 shrink-0 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
-                  <MapPinned className="h-5 w-5" />
+                  <HeartPulse className="h-5 w-5" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Expert Care is Accessible to All
+                    Optimal Child Care
                   </h3>
                   <p className="mt-1.5 text-sm text-gray-700 leading-relaxed">
-                    A robust network of highly skilled child neurologists and
-                    developmental pediatricians serves every corner of the
-                    country, from urban centers to rural communities.
+                    Ensuring every child with neurological and neurodevelopmental disorders receives the highest quality of care and support.
                   </p>
                 </div>
               </div>
@@ -72,18 +68,15 @@ export default function VisionPage() {
 
             <article className="rounded-xl bg-white/90 backdrop-blur border border-blue-100/70 shadow-sm hover:shadow-md transition-shadow p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <div className="h-10 w-10 shrink-0 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
-                  <Landmark className="h-5 w-5" />
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-green-50 text-green-700 flex items-center justify-center">
+                  <GraduationCap className="h-5 w-5" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    BCNS is a Center of Excellence
+                    Professional Development
                   </h3>
                   <p className="mt-1.5 text-sm text-gray-700 leading-relaxed">
-                    Recognized nationally and internationally as the leading
-                    authority for pediatric neurology in Bangladesh — a hub for
-                    clinical guidelines, knowledge, and professional
-                    development.
+                    Building up skilled professionals through comprehensive education and continuous training programs.
                   </p>
                 </div>
               </div>
@@ -91,17 +84,15 @@ export default function VisionPage() {
 
             <article className="rounded-xl bg-white/90 backdrop-blur border border-blue-100/70 shadow-sm hover:shadow-md transition-shadow p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <div className="h-10 w-10 shrink-0 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
                   <Microscope className="h-5 w-5" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Research Creates Impact
+                    Research Excellence
                   </h3>
                   <p className="mt-1.5 text-sm text-gray-700 leading-relaxed">
-                    Bangladeshi researchers, under BCNS, lead global studies on
-                    neurodevelopmental disorders, contributing unique insights
-                    and making a tangible impact on child health worldwide.
+                    Advancing the field through innovative research and evidence-based practices in pediatric neurology.
                   </p>
                 </div>
               </div>
@@ -109,18 +100,47 @@ export default function VisionPage() {
 
             <article className="rounded-xl bg-white/90 backdrop-blur border border-blue-100/70 shadow-sm hover:shadow-md transition-shadow p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <div className="h-10 w-10 shrink-0 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-orange-50 text-orange-700 flex items-center justify-center">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    A Collaborative Community Thrives
+                    Resource Building
                   </h3>
                   <p className="mt-1.5 text-sm text-gray-700 leading-relaxed">
-                    A strong, supportive, and innovative community of young
-                    professionals and seasoned experts works together, driving
-                    the future of child neurology forward with passion and
-                    dedication.
+                    Developing comprehensive resources and infrastructure to support child neurology services nationwide.
+                  </p>
+                </div>
+              </div>
+            </article>
+
+            <article className="rounded-xl bg-white/90 backdrop-blur border border-blue-100/70 shadow-sm hover:shadow-md transition-shadow p-5 sm:p-6">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
+                  <MapPinned className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Accessible Healthcare
+                  </h3>
+                  <p className="mt-1.5 text-sm text-gray-700 leading-relaxed">
+                    Making specialized neurological care accessible to children across all regions of Bangladesh.
+                  </p>
+                </div>
+              </div>
+            </article>
+
+            <article className="rounded-xl bg-white/90 backdrop-blur border border-blue-100/70 shadow-sm hover:shadow-md transition-shadow p-5 sm:p-6">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                  <Landmark className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Center of Excellence
+                  </h3>
+                  <p className="mt-1.5 text-sm text-gray-700 leading-relaxed">
+                    Establishing BCNS as a recognized center of excellence in pediatric neurology and development.
                   </p>
                 </div>
               </div>
