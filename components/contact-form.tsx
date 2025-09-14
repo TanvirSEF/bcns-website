@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
+import emailjs from '@emailjs/browser';
 import {
   Send,
   MessageSquare,
@@ -50,8 +51,25 @@ export function ContactForm() {
     setSubmitStatus("idle");
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // EmailJS configuration
+      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
+      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
+
+      // Prepare template parameters
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        to_email: 'bcnsmern@gmail.com',
+        subject: formData.subject,
+        message: formData.message,
+        organization: formData.organization || 'Not specified',
+        reply_to: formData.email,
+      };
+
+      // Send email using EmailJS
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
       setSubmitStatus("success");
       setFormData({
         name: "",
@@ -60,7 +78,8 @@ export function ContactForm() {
         message: "",
         organization: "",
       });
-    } catch {
+    } catch (error) {
+      console.error('EmailJS Error:', error);
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);

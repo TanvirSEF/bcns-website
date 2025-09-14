@@ -53,22 +53,22 @@ export default function ContactPage() {
   const departments = [
     {
       name: "General Inquiries",
-      email: "info@bcns.org.bd",
+      email: "office@bcns.org.bd",
       description: "For general questions and information",
     },
     {
       name: "Membership",
-      email: "membership@bcns.org.bd",
+      email: "office@bcns.org.bd",
       description: "Membership applications and benefits",
     },
     {
       name: "Research",
-      email: "research@bcns.org.bd",
+      email: "office@bcns.org.bd",
       description: "Research collaborations and grants",
     },
     {
       name: "Events",
-      email: "events@bcns.org.bd",
+      email: "office@bcns.org.bd",
       description: "Conference and event information",
     },
   ];
@@ -203,7 +203,7 @@ export default function ContactPage() {
                   <CardContent className="p-6">
                     <div className="rounded-lg mb-4 overflow-hidden shadow-lg">
                       <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.193037203936!2d90.36821467589763!3d23.776139387786696!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c0b217c31f9b%3A0xbd96ef36d9e85ce7!2sNational%20Institute%20of%20Neuro%20Sciences%20%26%20Hospital!5e0!3m2!1sen!2sbd!4v1757838210307!5m2!1sen!2sbd" 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3652.2524140846613!2d90.39279147589683!3d23.738376689236798!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8954649cee5%3A0x3bdcd530be93b17a!2sBangabandhu%20Sheikh%20Mujib%20Medical%20University!5e0!3m2!1sen!2sbd!4v1757839337539!5m2!1sen!2sbd" 
                         width="100%" 
                         height="300" 
                         style={{border: 0}} 
@@ -227,7 +227,7 @@ export default function ContactPage() {
                           <Clock className="inline h-4 w-4 mr-2 text-blue-600" />
                           Office Hours
                         </p>
-                        <p className="text-gray-600 text-sm ml-6">Saturday to Wednesday: 08 AM to 02 PM</p>
+                        <p className="text-gray-600 text-sm ml-6">Saturday to Wednesday: 08:00 AM to 02:00 PM</p>
                         <p className="text-gray-500 text-xs ml-6 mt-1">Closed on Thursday & Friday</p>
                       </div>
                     </div>
