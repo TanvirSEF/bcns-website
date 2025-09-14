@@ -50,16 +50,7 @@ import {
 
 const navigationItems = [
   { name: "Home", href: "/", icon: null },
-  {
-    name: "About Us",
-    href: "/about",
-    hasDropdown: true,
-    icon: Shield,
-    dropdownItems: [
-      { name: "Our Mission", href: "/about/mission", icon: Award },
-      { name: "Our Vision", href: "/about/vision", icon: BookOpen },
-    ],
-  },
+  { name: "About Us", href: "/about", icon: Shield },
   {
     name: "Committee",
     href: "/committee",
