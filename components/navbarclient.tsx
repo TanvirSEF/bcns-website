@@ -67,9 +67,9 @@ const navigationItems = [
     hasDropdown: true,
     icon: Calendar,
     dropdownItems: [
-      { name: "Research", href: "/activities/research", icon: BookOpen },
-      { name: "Conference", href: "/activities/conference", icon: Award },
-      { name: "Gallery", href: "/activities/gallery", icon: Users },
+      { name: "Research", href: "/research", icon: BookOpen },
+      { name: "Conference", href: "/conference", icon: Award },
+      { name: "Gallery", href: "/gallery", icon: Users },
     ],
   },
   { name: "Contact us", href: "/contact", icon: Phone },
@@ -303,10 +303,10 @@ export function NavbarClient() {
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex-shrink-0">
                 <Image
-                  src="/images/logo.png"
+                  src="/images/logov2.jpg"
                   alt="BCNS Logo"
-                  width={70}
-                  height={70}
+                  width={100}
+                  height={100}
                   priority
                 />
               </Link>
