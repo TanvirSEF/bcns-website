@@ -39,14 +39,14 @@ export default function ContactPage() {
     {
       icon: MapPin,
       title: "Address",
-      value: "Dhaka Medical College",
-      description: "Dhaka, Bangladesh",
+      value: "Room no. 703, Block- F, Floor- 7",
+      description: "IPNA, BMU, Dhaka-1000",
     },
     {
       icon: Clock,
       title: "Working Hours",
-      value: "Monday - Friday",
-      description: "9:00 AM - 5:00 PM",
+      value: "Saturday to Wednesday",
+      description: "08:00 AM to 02:00 PM",
     },
   ];
 
@@ -201,23 +201,35 @@ export default function ContactPage() {
                 </h3>
                 <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
                   <CardContent className="p-6">
-                    <div className="aspect-video bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-                      <div className="text-center">
-                        <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                        <p className="text-gray-500 font-medium">
-                          Interactive Map
-                        </p>
-                        <p className="text-sm text-gray-400">
-                          Dhaka Medical College, Dhaka, Bangladesh
-                        </p>
-                      </div>
+                    <div className="rounded-lg mb-4 overflow-hidden shadow-lg">
+                      <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.193037203936!2d90.36821467589763!3d23.776139387786696!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c0b217c31f9b%3A0xbd96ef36d9e85ce7!2sNational%20Institute%20of%20Neuro%20Sciences%20%26%20Hospital!5e0!3m2!1sen!2sbd!4v1757838210307!5m2!1sen!2sbd" 
+                        width="100%" 
+                        height="300" 
+                        style={{border: 0}} 
+                        allowFullScreen 
+                        loading="lazy" 
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="BCNS Office Location"
+                      />
                     </div>
-                    <div className="space-y-2">
-                      <p className="text-gray-700 font-medium">
-                        <MapPin className="inline h-4 w-4 mr-2 text-blue-600" />
-                        Dhaka Medical College
-                      </p>
-                      <p className="text-gray-600 text-sm">Dhaka, Bangladesh</p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-gray-700 font-semibold text-lg mb-1">
+                          <MapPin className="inline h-5 w-5 mr-2 text-blue-600" />
+                          BCNS Office
+                        </p>
+                        <p className="text-gray-600 ml-7">Room no. 703, Block- F, Floor- 7</p>
+                        <p className="text-gray-600 ml-7">IPNA, BMU, Dhaka-1000</p>
+                      </div>
+                      <div className="border-t pt-3">
+                        <p className="text-gray-700 font-medium">
+                          <Clock className="inline h-4 w-4 mr-2 text-blue-600" />
+                          Office Hours
+                        </p>
+                        <p className="text-gray-600 text-sm ml-6">Saturday to Wednesday: 08 AM to 02 PM</p>
+                        <p className="text-gray-500 text-xs ml-6 mt-1">Closed on Thursday & Friday</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
