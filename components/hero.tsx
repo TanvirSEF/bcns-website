@@ -103,7 +103,7 @@ export function Hero() {
         <CarouselContent className="ml-0">
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="pl-0">
-              <div className="relative min-h-[22rem] sm:min-h-[28rem] md:min-h-[34rem] lg:min-h-[40rem] xl:min-h-[45rem] w-full">
+              <div className="relative min-h-[20rem] xs:min-h-[24rem] sm:min-h-[28rem] md:min-h-[32rem] lg:min-h-[38rem] xl:min-h-[42rem] 2xl:min-h-[45rem] w-full">
                 <Image
                   src={slide.image}
                   alt={slide.title}
@@ -113,35 +113,35 @@ export function Hero() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/10" />
                 <div className="absolute inset-0 flex flex-col justify-center">
-                  <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="max-w-xl text-center md:text-left">
+                  <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+                    <div className="max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-xl text-center md:text-left">
                       <div className="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-blue-600/90 text-white mb-3 sm:mb-4">
                         {slide.badge}
                       </div>
-                      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-3 sm:mb-4 leading-tight tracking-tight">
+                      <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-2 sm:mb-3 md:mb-4 leading-tight tracking-tight">
                         {slide.title}
                       </h1>
-                      <h2 className="text-base sm:text-lg md:text-xl text-blue-200 mb-4 sm:mb-6">
+                      <h2 className="text-sm xs:text-base sm:text-lg md:text-xl text-blue-200 mb-3 sm:mb-4 md:mb-6">
                         {slide.subtitle}
                       </h2>
-                      <p className="text-sm sm:text-base md:text-lg text-gray-200 mb-6 sm:mb-8 leading-relaxed">
+                      <p className="text-xs xs:text-sm sm:text-base md:text-lg text-gray-200 mb-4 sm:mb-6 md:mb-8 leading-relaxed">
                         {slide.description}
                       </p>
-                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
+                      <div className="flex flex-col xs:flex-row gap-2 xs:gap-3 sm:gap-4 justify-center md:justify-start">
                         <Button
                           size="lg"
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 xs:px-6 sm:px-8 py-2 sm:py-3 text-xs xs:text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
                         >
                           {slide.ctaText}
-                          <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                          <ArrowRight className="ml-1 xs:ml-2 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
                         </Button>
                         <Button
                           variant="outline"
                           size="lg"
                           onClick={() => setIsVideoModalOpen(true)}
-                          className="border-white/80 text-white hover:bg-white hover:text-gray-900 px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 group bg-white/20 backdrop-blur-sm"
+                          className="border-white/80 text-white hover:bg-white hover:text-gray-900 px-4 xs:px-6 sm:px-8 py-2 sm:py-3 text-xs xs:text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 group bg-white/20 backdrop-blur-sm"
                         >
-                          <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5 fill-current group-hover:scale-110 transition-transform duration-300" />
+                          <Play className="mr-1 xs:mr-2 h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5 fill-current group-hover:scale-110 transition-transform duration-300" />
                           Watch Video
                         </Button>
                       </div>
