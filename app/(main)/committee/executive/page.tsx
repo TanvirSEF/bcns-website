@@ -45,34 +45,28 @@ const Executive = () => {
     'Advisor'
   ];
 
-  const getDummyAvatar = (name: string) => {
-    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2);
-    return (
-      <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-        {initials}
-      </div>
-    );
-  };
 
   const MemberCard = ({ member }: { member: CommitteeMember }) => (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow duration-300 w-full">
       <div className="flex flex-col items-center mb-4">
         {member.image ? (
           <Image
             src={member.image}
             alt={member.name}
-            width={96}
-            height={96}
-            className="w-24 h-24 rounded-full object-cover mb-3"
+            width={120}
+            height={120}
+            className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-lg object-contain mb-3"
           />
         ) : (
           <div className="mb-3">
-            {getDummyAvatar(member.name)}
+            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm sm:text-base md:text-lg border-2 border-gray-200">
+              {member.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
+            </div>
           </div>
         )}
-        <h3 className="text-lg font-semibold text-gray-800 text-center">{member.name}</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800 text-center leading-tight">{member.name}</h3>
         {member.role && (
-          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium mb-2">
+          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium mb-2 mt-1">
             {member.role}
           </span>
         )}
