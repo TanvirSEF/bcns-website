@@ -1,0 +1,110 @@
+"use client";
+
+import { Calendar, MapPin, Users, FileText } from "lucide-react";
+
+export function EventsTimeline() {
+  const events = [
+    {
+      id: 1,
+      date: "26.04.2025",
+      title: "Emergency meeting 26.04.2025",
+      attendees: "N/A",
+      venue: "Xinxian China Restaurant, Dhanmondi, Dhaka",
+      summary: "This was the BCNS Committee, General Meeting, 2025. It was held to establish the first Executive Committee for 2025-2027, presided over by Prof. Dr. Md. Mizanur Rahman.",
+      decisions: "The new Executive Committee was formed with Prof. Dr. Muhammad Mizanur Rahman as President and Dr. Mohammad Monir Hossain as General Secretary. Other roles included Vice Presidents, Secretaries, Treasurer, and Advisors. The meeting focused on professional development, scientific programs, and strengthening child neurology services, with a pledge to seek support from UNICEF and international partners."
+    },
+    {
+      id: 2,
+      date: "20.05.2025",
+      title: "EC 1st meeting 20.05.2025",
+      attendees: "26 participants",
+      venue: "Semi conference room, NINSH, Agargaon, Dhaka",
+      summary: "This was the BCNS 1st Executive Committee Meeting, 2025, held on May 20, 2025, at 2:00 PM. It was chaired by Prof. Dr. Muhammad Mizanur Rahman (President, BCNS), with Executive Committee Members attending.",
+      decisions: "Previous decisions were confirmed, extending the President's tenure to two years and approving new membership regulations. Financial matters were resolved with three authorized bank signatories. Major organizational actions included a membership campaign, a new website, social media engagement, and collaboration with the Japan Society for CME, fellowship, and academic exchange. National conferences were planned biennially, with CME programs every 2-3 months."
+    },
+    {
+      id: 3,
+      date: "07.08.2025",
+      title: "EC 2nd meeting 07.08.2025 Zoom",
+      attendees: "N/A",
+      venue: "Zoom (Online Platform)",
+      summary: "This was the BCNS 2nd Executive Committee Meeting 2025, held online on August 7, 2025, chaired by Prof. Dr. Muhammad Mizanur Rahman (President, BCNS), with Executive Committee Members attending.",
+      decisions: "Key resolutions included finalizing the Bangladesh Country Delegate to AOCN and reviewing society finances. The committee approved a standardized rehabilitation approach for Spinal Muscular Atrophy in collaboration with pediatric neurologists. Plans for joint academic programs with the Japanese Child Neurology Society were confirmed, including CME sessions on epilepsy genetics, ASD, ADHD, and tics in September 2025."
+    },
+    {
+      id: 4,
+      date: "20.08.2025",
+      title: "3rd EC meeting 20.08.2025",
+      attendees: "N/A",
+      venue: "Xinxian China Restaurant, Dhanmondi, Dhaka",
+      summary: "This was the BCNS 3rd Executive Committee meeting 2025, held on September 20, 2025, at Xinxian China Restaurant, Dhanmondi, Dhaka. It was chaired by Prof. Dr. Muhammad Mizanur Rahman (President, BCNS), with Executive Committee Members attending.",
+      decisions: "The meeting reviewed organizational activities, discussed upcoming scientific and academic programs, financial updates, and future plans. Reports were presented by the General Secretary and Treasurer. Key points included enhancing scientific engagement, strengthening publicity, and publication initiatives. Decisions were made to improve coordination, finalize event schedules, promote collaborative projects, and outline strategies for academic, scientific, and publicity activities to strengthen organizational impact."
+    }
+  ];
+
+  return (
+    <section className="w-full bg-gray-50 py-12 md:py-16 lg:py-20">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Stay Updated with <span className="text-blue-600">BCNS</span>
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Recent meetings and activities of the Bangladesh Child Neurology Society
+          </p>
+          <div className="w-20 h-1 bg-blue-600 rounded-full mx-auto mt-4"></div>
+        </div>
+
+        <div className="space-y-8">
+          {events.map((event) => (
+            <div key={event.id} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+              <div className="p-6">
+                <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+                  {/* Left Side - Date and Basic Info */}
+                  <div className="lg:w-1/4">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Calendar className="h-5 w-5 text-blue-600" />
+                      <span className="text-lg font-bold text-gray-800">{event.date}</span>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">{event.attendees}</span>
+                      </div>
+                      
+                      <div className="flex items-start space-x-2">
+                        <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                        <span className="text-sm text-gray-600">{event.venue}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Side - Content */}
+                  <div className="lg:w-3/4">
+                    <h3 className="text-xl font-bold text-gray-800 mb-3">{event.title}</h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-gray-700 mb-2 flex items-center">
+                          <FileText className="h-4 w-4 mr-2 text-blue-600" />
+                          Summary
+                        </h4>
+                        <p className="text-gray-600 leading-relaxed">{event.summary}</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-gray-700 mb-2">Key Decisions</h4>
+                        <p className="text-gray-600 leading-relaxed">{event.decisions}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

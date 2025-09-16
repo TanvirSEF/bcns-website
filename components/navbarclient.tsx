@@ -2,17 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import {
   Menu,
-  Phone,
-  Mail,
   Search,
   ChevronDown,
-  MapPin,
   Globe,
   User,
   Shield,
@@ -22,7 +18,8 @@ import {
   Award,
   LogOut,
   LayoutDashboard,
-
+  Phone,
+  
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +54,7 @@ const navigationItems = [
     hasDropdown: true,
     icon: Users,
     dropdownItems: [
-      { name: "Executive Council", href: "/committee/executive", icon: Shield },
+      { name: "Executive Committee", href: "/committee/executive", icon: Shield },
       { name: "Convening Committee", href: "/committee/convening", icon: Users },
     ],
   },
@@ -242,76 +239,17 @@ export function NavbarClient() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full">
-        <div className="bg-blue-900 text-white">
-          <div className="container mx-auto px-4 py-1.5">
-            <div className="flex items-center justify-between text-xs sm:text-sm">
-              <div className="flex items-center space-x-4 lg:space-x-6">
-                <a
-                  href="tel:+8801711261736"
-                  className="flex items-center space-x-1.5 hover:text-blue-200 transition-colors"
-                >
-                  <Phone className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">+880 1711261736</span>
-                </a>
-                <a
-                  href="mailto:office@bcns.org.bd"
-                  className="flex items-center space-x-1.5 hover:text-blue-200 transition-colors"
-                >
-                  <Mail className="h-3.5 w-3.5" />
-                  <span className="hidden md:inline">office@bcns.org.bd</span>
-                </a>
-                <div className="hidden lg:flex items-center space-x-1.5">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span>Dhaka, Bangladesh</span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Button
-                  onClick={() => setIsSearchOpen(true)}
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-blue-800 h-7 w-7"
-                  aria-label="Open search"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-                <div className="flex items-center space-x-1">
-                  <Globe className="h-4 w-4" />
-                  <select className="bg-transparent text-xs focus:outline-none cursor-pointer">
-                    <option value="en" className="text-black">
-                      EN
-                    </option>
-                    <option value="bn" className="text-black">
-                      বাং
-                    </option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div
           className={cn(
-            "transition-shadow duration-300 bg-white border-b",
+            "transition-all duration-300 bg-white border-b",
             isScrolled
               ? "shadow-lg border-gray-200"
-              : "shadow-sm border-transparent"
+              : "shadow-md border-gray-200"
           )}
         >
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-6">
             <div className="flex items-center justify-between h-16">
-              <Link href="/" className="flex-shrink-0">
-                <Image
-                  src="/images/logov2.jpg"
-                  alt="BCNS Logo"
-                  width={100}
-                  height={100}
-                  priority
-                />
-              </Link>
-
-              <nav className="hidden lg:flex items-center space-x-2">
+              <nav className="hidden lg:flex items-center space-x-1">
                 {visibleNavItems.map((item) => (
                   <div key={item.name} className="relative">
                     {item.hasDropdown ? (
@@ -319,8 +257,8 @@ export function NavbarClient() {
                         <DropdownMenuTrigger asChild>
                           <div
                             className={cn(
-                              "h-12 px-4 flex items-center cursor-pointer text-gray-700 hover:text-blue-600 font-medium rounded-lg",
-                              isActive(item.href!) && "text-blue-600"
+                              "h-12 px-6 flex items-center cursor-pointer text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200",
+                              isActive(item.href!) && "text-blue-600 bg-blue-50"
                             )}
                           >
                             {item.icon && <item.icon className="mr-2 h-4 w-4" />}
@@ -353,7 +291,7 @@ export function NavbarClient() {
                       <Link
                         href={item.href!}
                         className={cn(
-                          "h-12 px-4 flex items-center text-gray-700 hover:text-blue-600 font-medium rounded-lg",
+                          "h-12 px-6 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200",
                           isActive(item.href!) && "text-blue-600 bg-blue-50"
                         )}
                       >
@@ -365,11 +303,59 @@ export function NavbarClient() {
                 ))}
               </nav>
 
-              <div className="hidden lg:flex">
+              <div className="hidden lg:flex items-center gap-6">
+                {/* Search Button */}
+                <Button
+                  onClick={() => setIsSearchOpen(true)}
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+                  aria-label="Open search"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+
+                {/* Language Selector */}
+                <div className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200">
+                  <Globe className="h-4 w-4 text-gray-600" />
+                  <select className="bg-transparent text-sm focus:outline-none cursor-pointer text-gray-700 hover:text-blue-600 font-medium">
+                    <option value="en" className="text-black">
+                      EN
+                    </option>
+                    <option value="bn" className="text-black">
+                      বাং
+                    </option>
+                  </select>
+                </div>
+
                 <ActionButtons />
               </div>
 
               <div className="lg:hidden flex items-center gap-3">
+                {/* Mobile Search Button */}
+                <Button
+                  onClick={() => setIsSearchOpen(true)}
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
+                  aria-label="Open search"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+
+                {/* Mobile Language Selector */}
+                <div className="flex items-center px-2 py-1 rounded-lg hover:bg-gray-50">
+                  <Globe className="h-4 w-4 text-gray-600" />
+                  <select className="bg-transparent text-xs focus:outline-none cursor-pointer text-gray-700 ml-1 font-medium">
+                    <option value="en" className="text-black">
+                      EN
+                    </option>
+                    <option value="bn" className="text-black">
+                      বাং
+                    </option>
+                  </select>
+                </div>
+
                 {/* Mobile user profile - show next to hamburger */}
                 {isAuthenticated && user && (
                   <DropdownMenu>
