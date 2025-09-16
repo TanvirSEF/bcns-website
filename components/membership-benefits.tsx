@@ -33,9 +33,9 @@ export function MembershipBenefits() {
   ];
 
   return (
-    <section className="py-20 bg-[#F7F7F7] overflow-hidden">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <section className="py-12 sm:py-16 md:py-20 bg-[#F7F7F7] overflow-hidden">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
           {/* Left Column - Image */}
           <div className="relative">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl">
@@ -52,12 +52,12 @@ export function MembershipBenefits() {
             </div>
 
             {/* Floating stats card */}
-            <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="absolute -bottom-3 sm:-bottom-6 -right-3 sm:-right-6 bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 border border-gray-100">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-1">
+                <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-1">
                   500+
                 </div>
-                <div className="text-sm text-gray-600 font-medium">
+                <div className="text-xs sm:text-sm text-gray-600 font-medium">
                   Active Members
                 </div>
               </div>
@@ -65,13 +65,13 @@ export function MembershipBenefits() {
           </div>
 
           {/* Right Column - Content */}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Headline */}
             <div>
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
                 Why Join the BCNS Community?
               </h2>
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
                 Connect with leading pediatric neurologists, access cutting-edge
                 research, and advance your career through our comprehensive
                 membership program.
@@ -79,14 +79,14 @@ export function MembershipBenefits() {
             </div>
 
             {/* Benefits List */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {benefits.map((benefit) => (
                 <div
                   key={benefit.id}
-                  className="flex items-start space-x-4 group"
+                  className="flex items-start space-x-3 sm:space-x-4 group"
                 >
                   {/* Icon Container */}
-                  <div className="flex-shrink-0 p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors duration-300">
+                  <div className="flex-shrink-0 p-2 sm:p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors duration-300">
                     <div className="text-blue-600 group-hover:text-blue-700 transition-colors duration-300">
                       {benefit.icon}
                     </div>
@@ -94,10 +94,10 @@ export function MembershipBenefits() {
 
                   {/* Content */}
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors duration-300">
                       {benefit.title}
                     </h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                       {benefit.description}
                     </p>
                   </div>

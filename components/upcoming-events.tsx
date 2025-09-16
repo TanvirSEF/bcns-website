@@ -35,32 +35,32 @@ export function UpcomingEvents() {
 
 
   return (
-    <section className="w-full bg-blue-600 text-white py-2 relative overflow-hidden">
-      {/* Upcoming Events Animation */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 animate-pulse opacity-20"></div>
+    <section className="w-full bg-blue-600 text-white py-2 sm:py-3 relative overflow-hidden">
+      {/* Upcoming Events Background */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 opacity-20"></div>
       
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="flex items-center">
-          {/* Upcoming Events Label */}
-          <div className="flex items-center space-x-2 bg-white text-blue-600 px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wide">
-            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 relative z-10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          {/* Desktop Label - Hidden on Mobile */}
+          <div className="hidden sm:flex items-center space-x-2 bg-white text-blue-600 px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wide flex-shrink-0">
+            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
             <span>UPCOMING EVENTS</span>
           </div>
 
-          {/* Scrolling News */}
-          <div className="flex-1 ml-4 overflow-hidden">
-            <div className="flex space-x-6 animate-scroll">
+          {/* Scrolling News - Full Width on Mobile */}
+          <div className="w-full sm:flex-1 overflow-hidden">
+            <div className="flex space-x-4 sm:space-x-6 animate-scroll">
               {/* Duplicate events for seamless loop */}
               {[...events, ...events].map((event, index) => (
-                <div key={`${event.id}-${index}`} className="flex items-center space-x-3 whitespace-nowrap">
+                <div key={`${event.id}-${index}`} className="flex items-center space-x-2 sm:space-x-3 whitespace-nowrap">
                   <div className="flex items-center space-x-1">
-                    <Calendar className="h-3 w-3" />
+                    <Calendar className="h-3 w-3 flex-shrink-0" />
                     <span className="font-semibold text-xs">{event.date}</span>
                   </div>
-                  <div className="w-px h-3 bg-white/50"></div>
-                  <span className="font-medium text-sm">{event.title}</span>
-                  <div className="w-px h-3 bg-white/50"></div>
-                  <span className="text-xs opacity-90">{event.description.substring(0, 60)}...</span>
+                  <div className="w-px h-3 bg-white/50 hidden sm:block"></div>
+                  <span className="font-medium text-xs sm:text-sm truncate max-w-[200px] sm:max-w-none">{event.title}</span>
+                  <div className="w-px h-3 bg-white/50 hidden md:block"></div>
+                  <span className="text-xs opacity-90 hidden md:inline truncate max-w-[300px] lg:max-w-none">{event.description.substring(0, 60)}...</span>
                 </div>
               ))}
             </div>

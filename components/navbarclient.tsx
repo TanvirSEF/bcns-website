@@ -247,8 +247,8 @@ export function NavbarClient() {
               : "shadow-md border-gray-200"
           )}
         >
-          <div className="container mx-auto px-6">
-            <div className="flex items-center justify-between h-16">
+          <div className="container mx-auto px-3 sm:px-4 md:px-6">
+            <div className="flex items-center justify-between h-14 sm:h-16">
               <nav className="hidden lg:flex items-center space-x-1">
                 {visibleNavItems.map((item) => (
                   <div key={item.name} className="relative">
@@ -303,22 +303,22 @@ export function NavbarClient() {
                 ))}
               </nav>
 
-              <div className="hidden lg:flex items-center gap-6">
+              <div className="hidden lg:flex items-center gap-4 xl:gap-6">
                 {/* Search Button */}
                 <Button
                   onClick={() => setIsSearchOpen(true)}
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+                  className="h-8 w-8 xl:h-9 xl:w-9 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
                   aria-label="Open search"
                 >
-                  <Search className="h-4 w-4" />
+                  <Search className="h-3 w-3 xl:h-4 xl:w-4" />
                 </Button>
 
                 {/* Language Selector */}
-                <div className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200">
-                  <Globe className="h-4 w-4 text-gray-600" />
-                  <select className="bg-transparent text-sm focus:outline-none cursor-pointer text-gray-700 hover:text-blue-600 font-medium">
+                <div className="flex items-center space-x-1 xl:space-x-2 px-2 xl:px-3 py-1 xl:py-2 rounded-lg hover:bg-gray-50 transition-all duration-200">
+                  <Globe className="h-3 w-3 xl:h-4 xl:w-4 text-gray-600" />
+                  <select className="bg-transparent text-xs xl:text-sm focus:outline-none cursor-pointer text-gray-700 hover:text-blue-600 font-medium">
                     <option value="en" className="text-black">
                       EN
                     </option>
@@ -331,116 +331,15 @@ export function NavbarClient() {
                 <ActionButtons />
               </div>
 
-              <div className="lg:hidden flex items-center gap-3">
-                {/* Mobile Search Button */}
-                <Button
-                  onClick={() => setIsSearchOpen(true)}
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
-                  aria-label="Open search"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-
-                {/* Mobile Language Selector */}
-                <div className="flex items-center px-2 py-1 rounded-lg hover:bg-gray-50">
-                  <Globe className="h-4 w-4 text-gray-600" />
-                  <select className="bg-transparent text-xs focus:outline-none cursor-pointer text-gray-700 ml-1 font-medium">
-                    <option value="en" className="text-black">
-                      EN
-                    </option>
-                    <option value="bn" className="text-black">
-                      বাং
-                    </option>
-                  </select>
-                </div>
-
-                {/* Mobile user profile - show next to hamburger */}
-                {isAuthenticated && user && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="h-8 w-8 rounded-full border-2 border-blue-600 p-0 overflow-hidden"
-                      >
-                        {user?.profilePictureUrl || user?.avatar ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={
-                              (user?.profilePictureUrl as string) ||
-                              (user?.avatar as string)
-                            }
-                            alt="Avatar"
-                            className="h-full w-full rounded-full object-cover"
-                          />
-                        ) : (
-                          <User className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-56 rounded-lg"
-                      side="bottom"
-                      align="end"
-                      sideOffset={8}
-                      alignOffset={-10}
-                    >
-                      <DropdownMenuLabel className="p-0 font-normal">
-                        <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
-                          <div className="flex-shrink-0">
-                            {user?.profilePictureUrl || user?.avatar ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={
-                                  (user?.profilePictureUrl as string) ||
-                                  (user?.avatar as string)
-                                }
-                                alt="Profile"
-                                className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
-                                <User className="h-5 w-5 text-blue-600" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-col space-y-1 leading-none min-w-0 flex-1">
-                            <p className="font-medium truncate">{user?.name}</p>
-                            <p className="truncate text-sm text-gray-500">
-                              {user?.email}
-                            </p>
-                          </div>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuItem asChild>
-                        <Link href="/user-dashboard" className="flex items-center">
-                          <LayoutDashboard className="mr-2 h-4 w-4" />
-                          Dashboard
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/user-dashboard/profile" className="flex items-center">
-                          <User className="mr-2 h-4 w-4" />
-                          Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={logout} className="text-red-600">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Sign Out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-
+              <div className="lg:hidden flex items-center justify-between w-full">
+                {/* Left side - Hamburger Menu */}
                 <Sheet
                   open={isMobileMenuOpen}
                   onOpenChange={setIsMobileMenuOpen}
                 >
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Menu />
+                    <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+                      <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
                     </Button>
                   </SheetTrigger>
                   <SheetContent>
@@ -512,6 +411,111 @@ export function NavbarClient() {
                     </nav>
                   </SheetContent>
                 </Sheet>
+
+                {/* Right side - Search, Language, User Profile */}
+                <div className="flex items-center gap-2 sm:gap-3">
+                  {/* Mobile Search Button */}
+                  <Button
+                    onClick={() => setIsSearchOpen(true)}
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 sm:h-9 sm:w-9 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
+                    aria-label="Open search"
+                  >
+                    <Search className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </Button>
+
+                  {/* Mobile Language Selector */}
+                  <div className="flex items-center px-1 sm:px-2 py-1 rounded-lg hover:bg-gray-50">
+                    <Globe className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+                    <select className="bg-transparent text-xs focus:outline-none cursor-pointer text-gray-700 ml-1 font-medium">
+                      <option value="en" className="text-black">
+                        EN
+                      </option>
+                      <option value="bn" className="text-black">
+                        বাং
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* Mobile user profile */}
+                  {isAuthenticated && user && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border-2 border-blue-600 p-0 overflow-hidden"
+                        >
+                          {user?.profilePictureUrl || user?.avatar ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={
+                                (user?.profilePictureUrl as string) ||
+                                (user?.avatar as string)
+                              }
+                              alt="Avatar"
+                              className="h-full w-full rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        className="w-56 rounded-lg"
+                        side="bottom"
+                        align="end"
+                        sideOffset={8}
+                        alignOffset={-10}
+                      >
+                        <DropdownMenuLabel className="p-0 font-normal">
+                          <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
+                            <div className="flex-shrink-0">
+                              {user?.profilePictureUrl || user?.avatar ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={
+                                    (user?.profilePictureUrl as string) ||
+                                    (user?.avatar as string)
+                                  }
+                                  alt="Profile"
+                                  className="h-10 w-10 rounded-full object-cover border-2 border-blue-200"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-200">
+                                  <User className="h-5 w-5 text-blue-600" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col space-y-1 leading-none min-w-0 flex-1">
+                              <p className="font-medium truncate">{user?.name}</p>
+                              <p className="truncate text-sm text-gray-500">
+                                {user?.email}
+                              </p>
+                            </div>
+                          </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuItem asChild>
+                          <Link href="/user-dashboard" className="flex items-center">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/user-dashboard/profile" className="flex items-center">
+                            <User className="mr-2 h-4 w-4" />
+                            Profile
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={logout} className="text-red-600">
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Sign Out
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -519,8 +523,8 @@ export function NavbarClient() {
       </header>
 
       {isSearchOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/50 flex items-start justify-center pt-20">
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4 p-4">
+        <div className="fixed inset-0 z-[60] bg-black/50 flex items-start justify-center pt-16 sm:pt-20">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-3 sm:mx-4 p-3 sm:p-4">
             <form onSubmit={handleSearchSubmit}>
               <h3 className="text-lg font-semibold">Search Website</h3>
               <input

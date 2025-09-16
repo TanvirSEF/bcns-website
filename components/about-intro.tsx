@@ -65,19 +65,19 @@ Together, let us strive to ensure a brighter, healthier future for every child.`
     setSelectedLeader(null);
   };
   return (
-    <section className="w-full bg-white py-12 md:py-16 lg:py-20">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+    <section className="w-full bg-white py-8 sm:py-12 md:py-16 lg:py-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start lg:items-center">
           {/* Left Side - Text Content */}
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+          <div className="space-y-4 sm:space-y-6 order-2 lg:order-1">
+            <div className="space-y-3 sm:space-y-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
                 About <span className="text-blue-600">BCNS</span>
               </h2>
-              <div className="w-20 h-1 bg-blue-600 rounded-full"></div>
+              <div className="w-16 sm:w-20 h-1 bg-blue-600 rounded-full"></div>
             </div>
             
-            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
+            <div className="prose prose-sm sm:prose-base md:prose-lg max-w-none text-gray-700 leading-relaxed space-y-3 sm:space-y-4">
               <p>
                 <strong>Bangladesh Child Neurology Society (BCNS)</strong> is an association of child neurologists working at different health sectors of Bangladesh. Being one of the most densely populated countries in the world, Bangladesh is also known for its scenic beauty, rich cultural heritage and a glorious history of bravery, war & revolution.
               </p>
@@ -101,29 +101,29 @@ Together, let us strive to ensure a brighter, healthier future for every child.`
           </div>
 
            {/* Right Side - Leadership Cards */}
-           <div className="space-y-6 max-w-xs">
+           <div className="space-y-4 sm:space-y-6 max-w-xs sm:max-w-sm mx-auto lg:mx-0 order-1 lg:order-2">
              {/* President Card */}
-             <div 
+             <div
                className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105"
                onClick={() => handleLeaderClick('mizanur')}
              >
                {/* Header */}
-               <div className="bg-gray-700 px-4 py-3">
-                 <h3 className="text-white font-bold text-sm uppercase tracking-wide text-center">President</h3>
+               <div className="bg-gray-700 px-3 sm:px-4 py-2 sm:py-3">
+                 <h3 className="text-white font-bold text-xs sm:text-sm uppercase tracking-wide text-center">President</h3>
                </div>
-               
+
                {/* Image and Name */}
-               <div className="p-4 text-center">
-                 <div className="relative w-28 h-36 mx-auto mb-3">
+               <div className="p-3 sm:p-4 text-center">
+                 <div className="relative w-24 h-32 sm:w-28 sm:h-36 mx-auto mb-2 sm:mb-3">
                    <Image
                      src="/images/president.jpg"
                      alt="President - Prof. Dr. Md. Mizanur Rahman"
                      width={112}
                      height={144}
-                     className="w-28 h-36 object-cover border border-gray-300"
+                     className="w-24 h-32 sm:w-28 sm:h-36 object-cover border border-gray-300"
                    />
                  </div>
-                 <p className="text-gray-800 font-semibold text-sm leading-tight">
+                 <p className="text-gray-800 font-semibold text-xs sm:text-sm leading-tight">
                    Prof. Dr. Md. Mizanur Rahman
                  </p>
                  <p className="text-xs text-blue-600 mt-1">Click to view details</p>
@@ -131,27 +131,27 @@ Together, let us strive to ensure a brighter, healthier future for every child.`
              </div>
 
              {/* General Secretary Card */}
-             <div 
+             <div
                className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105"
                onClick={() => handleLeaderClick('monir')}
              >
                {/* Header */}
-               <div className="bg-gray-700 px-4 py-3">
-                 <h3 className="text-white font-bold text-sm uppercase tracking-wide text-center">General Secretary</h3>
+               <div className="bg-gray-700 px-3 sm:px-4 py-2 sm:py-3">
+                 <h3 className="text-white font-bold text-xs sm:text-sm uppercase tracking-wide text-center">General Secretary</h3>
                </div>
-               
+
                {/* Image and Name */}
-               <div className="p-4 text-center">
-                 <div className="relative w-28 h-36 mx-auto mb-3">
+               <div className="p-3 sm:p-4 text-center">
+                 <div className="relative w-24 h-32 sm:w-28 sm:h-36 mx-auto mb-2 sm:mb-3">
                    <Image
                      src="/images/monir.jpg"
                      alt="General Secretary - Dr. Mohammad Monir Hossain"
                      width={112}
                      height={144}
-                     className="w-28 h-36 object-cover border border-gray-300"
+                     className="w-24 h-32 sm:w-28 sm:h-36 object-cover border border-gray-300"
                    />
                  </div>
-                 <p className="text-gray-800 font-semibold text-sm leading-tight">
+                 <p className="text-gray-800 font-semibold text-xs sm:text-sm leading-tight">
                    Dr. Mohammad Monir Hossain
                  </p>
                  <p className="text-xs text-blue-600 mt-1">Click to view details</p>
