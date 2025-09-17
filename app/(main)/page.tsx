@@ -32,18 +32,6 @@ const MembershipBenefits = dynamic(
   }
 );
 
-const LatestPublications = dynamic(
-  () =>
-    import("@/components/latest-publications").then((mod) => ({
-      default: mod.LatestPublications,
-    })),
-  {
-    loading: () => (
-      <div className="animate-pulse bg-gray-200 h-96 rounded-lg" />
-    ),
-  }
-);
-
 const PhotoGalleryPreview = dynamic(
   () =>
     import("@/components/photo-gallery-preview").then((mod) => ({
@@ -71,7 +59,7 @@ export default function Home() {
       {/* <EventsAnnouncements /> */}
       <CoreActivities />
       <MembershipBenefits />
-      <LatestPublications />
+      {/* <LatestPublications /> */}
       <PhotoGalleryPreview />
       <Footer />
     </div>

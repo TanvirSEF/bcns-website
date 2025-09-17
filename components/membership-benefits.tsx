@@ -40,8 +40,8 @@ export function MembershipBenefits() {
           <div className="relative">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl">
               <Image
-                src="/images/membership.png"
-                alt="BCNS Membership Benefits"
+                src="/images/community.jpg"
+                alt="BCNS Community Members"
                 width={600}
                 height={500}
                 className="w-full h-auto object-cover"
@@ -55,7 +55,7 @@ export function MembershipBenefits() {
             <div className="absolute -bottom-3 sm:-bottom-6 -right-3 sm:-right-6 bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 border border-gray-100">
               <div className="text-center">
                 <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-1">
-                  500+
+                  70+
                 </div>
                 <div className="text-xs sm:text-sm text-gray-600 font-medium">
                   Active Members
