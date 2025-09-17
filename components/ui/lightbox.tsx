@@ -25,10 +25,13 @@ export function Lightbox({
   title
 }: LightboxProps) {
   const [isLoading, setIsLoading] = React.useState(true);
+  const [imageError, setImageError] = React.useState(false);
 
   React.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      setIsLoading(true);
+      setImageError(false);
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -36,7 +39,7 @@ export function Lightbox({
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, currentIndex]);
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -108,14 +111,34 @@ export function Lightbox({
             alt={title || `Gallery image ${currentIndex + 1}`}
             fill
             className="object-contain"
-            onLoad={() => setIsLoading(false)}
+            onLoad={() => {
+              setIsLoading(false);
+              setImageError(false);
+            }}
+            onError={() => {
+              setIsLoading(false);
+              setImageError(true);
+            }}
             priority
+            quality={90}
+            sizes="90vw"
           />
           
           {/* Loading Spinner */}
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+            </div>
+          )}
+          
+          {/* Error State */}
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-white">
+                <div className="text-4xl mb-2">⚠️</div>
+                <p className="text-lg">Failed to load image</p>
+                <p className="text-sm opacity-75">Please try again</p>
+              </div>
             </div>
           )}
         </div>

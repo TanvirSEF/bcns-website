@@ -58,6 +58,8 @@ export function GalleryCategoryClient({ eventData }: GalleryCategoryClientProps)
                 alt={`${eventData.title} - Image ${index + 1}`}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
+                quality={85}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
               <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">

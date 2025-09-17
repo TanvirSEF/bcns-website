@@ -67,7 +67,7 @@ export function Hero() {
         "Through collaboration and knowledge sharing, we are building a stronger community of child neurology specialists across Bangladesh.",
     },
     {
-      image: "/images/banner6.JPG",
+      image: "/images/banner6.jpg",
       title: "Excellence in Education",
       subtitle: "Training the next generation of child neurologists",
       description:
@@ -89,13 +89,15 @@ export function Hero() {
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="pl-0">
               <div className="relative min-h-[20rem] xs:min-h-[24rem] sm:min-h-[28rem] md:min-h-[32rem] lg:min-h-[38rem] xl:min-h-[42rem] 2xl:min-h-[45rem] w-full">
-                <Image
-                  src={slide.image}
-                  alt={slide.title}
-                  fill
-                  className="object-cover"
-                  priority={index === 0}
-                />
+              <Image
+                src={slide.image}
+                alt={slide.title}
+                fill
+                className="object-cover"
+                priority={index === 0}
+                quality={85}
+                sizes="100vw"
+              />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/10" />
                 <div className="absolute inset-0 flex flex-col justify-center">
                   <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8">

@@ -59,7 +59,7 @@ export function PhotoGalleryPreview() {
     },
     {
       id: "sma2025",
-      src: "/images/sma/1.JPG",
+      src: "/images/sma/1.jpg",
       alt: "SMA Workshop & Program",
       eventName: "SMA Workshop & Program",
       date: "August 23-24, 2025",
@@ -113,6 +113,8 @@ export function PhotoGalleryPreview() {
                 alt={image.alt}
                 fill
                 className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                quality={80}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity"></div>
               <div className="relative z-10 p-3 sm:p-4 space-y-2 transform transition-transform duration-300 ease-out translate-y-6 group-hover:translate-y-0">

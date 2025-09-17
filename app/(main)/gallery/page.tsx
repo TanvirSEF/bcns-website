@@ -47,7 +47,7 @@ const eventCategories = [
     title: "SMA Workshop & Program",
     date: "August 23-24, 2025",
     attendees: "40+ Participants",
-    coverImage: "/images/sma/1.JPG",
+    coverImage: "/images/sma/1.jpg",
     imageCount: 2,
     description: "Workshop on Standardized Rehabilitation Approach for SMA"
   },
