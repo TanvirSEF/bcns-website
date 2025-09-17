@@ -26,7 +26,7 @@ export function LatestPublications() {
     abstract:
       "This comprehensive review examines the latest diagnostic methodologies in pediatric epilepsy, including advanced imaging techniques, genetic testing protocols, and clinical assessment tools that are revolutionizing early detection and treatment planning.",
     date: "2024-03-15",
-    image: "/images/publication1.png",
+    image: "/images/journal.jpg",
     link: "/publications/pediatric-epilepsy-diagnosis",
   };
 
@@ -40,7 +40,7 @@ export function LatestPublications() {
       abstract:
         "Long-term neurodevelopmental assessment of preterm infants reveals critical insights into early intervention strategies and long-term care planning.",
       date: "2024-03-10",
-      image: "/images/publication2.png",
+      image: "/images/journal1.jpg",
       link: "/publications/preterm-neurodevelopment",
     },
     {
@@ -51,7 +51,7 @@ export function LatestPublications() {
       abstract:
         "Exploring cutting-edge therapeutic interventions and their impact on improving quality of life for children with ASD.",
       date: "2024-03-08",
-      image: "/images/publication3.png",
+      image: "/images/journal2.jpg",
       link: "/publications/autism-therapeutics",
     },
   ];
@@ -81,80 +81,80 @@ export function LatestPublications() {
           </p>
         </div>
 
-        {/* Asymmetrical Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-8 lg:mb-10">
-          {/* Left Column - Featured Publication (60%) */}
-          <div className="md:col-span-2 lg:col-span-3">
+        {/* Redesigned Grid Layout - Images Fully Visible */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8 lg:mb-10">
+          {/* Featured Publication - Full Width on Mobile, 2/3 on Desktop */}
+          <div className="lg:col-span-2">
             <Link href={featuredPublication.link} className="group block">
               <div className="bg-slate-800/60 rounded-xl sm:rounded-2xl overflow-hidden border border-slate-700 hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
-                {/* Featured Image */}
-                <div className="h-40 sm:h-56 relative overflow-hidden">
+                {/* Featured Image - Full Display */}
+                <div className="relative w-full h-64 sm:h-80 lg:h-96">
                   <Image
                     src={featuredPublication.image}
                     alt={featuredPublication.title}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-contain bg-slate-100 group-hover:scale-105 transition-transform duration-300"
                   />
                   {/* Category Badge */}
-                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
-                    <Badge className="bg-blue-600 text-white font-medium px-2 py-1 sm:px-3">
+                  <div className="absolute top-4 left-4">
+                    <Badge className="bg-blue-600 text-white font-medium px-3 py-1.5">
                       {featuredPublication.category}
                     </Badge>
                   </div>
                   {/* Date Badge */}
-                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/50 backdrop-blur-sm rounded-lg px-2 py-1 sm:px-3">
-                    <div className="flex items-center text-white text-xs sm:text-sm">
-                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1.5">
+                    <div className="flex items-center text-white text-sm">
+                      <Calendar className="h-4 w-4 mr-2" />
                       {formatDate(featuredPublication.date)}
                     </div>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-4 sm:p-5 lg:p-6">
-                  <h3 className="text-base sm:text-lg lg:text-xl font-serif font-bold text-white mb-2 sm:mb-2.5 lg:mb-3 group-hover:text-blue-300 transition-colors line-clamp-2">
+                <div className="p-6 lg:p-8">
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-white mb-4 group-hover:text-blue-300 transition-colors">
                     {featuredPublication.title}
                   </h3>
 
-                  <div className="flex items-center text-gray-400 mb-2">
-                    <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                    <span className="text-[11px] sm:text-xs">
+                  <div className="flex items-center text-gray-400 mb-4">
+                    <User className="h-4 w-4 mr-2" />
+                    <span className="text-sm">
                       {featuredPublication.author}
                     </span>
                   </div>
 
-                  <p className="text-gray-300 leading-relaxed mb-3 sm:mb-4 line-clamp-3 text-xs sm:text-sm">
+                  <p className="text-gray-300 leading-relaxed mb-6 text-base sm:text-lg">
                     {featuredPublication.abstract}
                   </p>
 
-                  <div className="flex items-center text-blue-300 font-semibold text-xs sm:text-sm">
+                  <div className="flex items-center text-blue-300 font-semibold text-base">
                     Read Full Paper
-                    <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                   </div>
                 </div>
               </div>
             </Link>
           </div>
 
-          {/* Right Column - Secondary Publications (40%) */}
-          <div className="md:col-span-2 lg:col-span-2 space-y-3 lg:space-y-4">
+          {/* Secondary Publications - Side Column */}
+          <div className="lg:col-span-1 space-y-6">
             {secondaryPublications.map((publication) => (
               <Link
                 key={publication.id}
                 href={publication.link}
                 className="group block"
               >
-                <div className="bg-slate-800/60 rounded-lg sm:rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/5 transition-all duration-300">
-                  {/* Publication Image */}
-                  <div className="h-24 sm:h-28 relative overflow-hidden">
+                <div className="bg-slate-800/60 rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/5 transition-all duration-300">
+                  {/* Publication Image - Full Display */}
+                  <div className="relative w-full h-48 sm:h-56">
                     <Image
                       src={publication.image}
                       alt={publication.title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-contain bg-slate-100 group-hover:scale-105 transition-transform duration-300"
                     />
                     {/* Category Badge */}
-                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                    <div className="absolute top-3 left-3">
                       <Badge className="bg-green-600 text-white text-xs font-medium px-2 py-1">
                         {publication.category}
                       </Badge>
@@ -162,25 +162,25 @@ export function LatestPublications() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-3 sm:p-4">
-                    <h4 className="text-sm sm:text-base font-serif font-semibold text-white mb-2 group-hover:text-blue-300 transition-colors line-clamp-2">
+                  <div className="p-4 sm:p-5">
+                    <h4 className="text-base sm:text-lg font-serif font-semibold text-white mb-3 group-hover:text-blue-300 transition-colors line-clamp-2">
                       {publication.title}
                     </h4>
 
-                    <div className="flex items-center text-gray-400 mb-2">
-                      <User className="h-3 w-3 mr-1" />
-                      <span className="text-[11px] sm:text-xs">
+                    <div className="flex items-center text-gray-400 mb-3">
+                      <User className="h-3 w-3 mr-2" />
+                      <span className="text-xs">
                         {publication.author}
                       </span>
                     </div>
 
-                    <p className="text-gray-400 text-[11px] sm:text-xs leading-relaxed mb-3 line-clamp-2">
+                    <p className="text-gray-400 text-sm leading-relaxed mb-4 line-clamp-3">
                       {publication.abstract}
                     </p>
 
-                    <div className="flex items-center text-blue-300 text-[11px] sm:text-xs font-medium">
+                    <div className="flex items-center text-blue-300 text-sm font-medium">
                       Read More
-                      <ExternalLink className="ml-1 sm:ml-2 h-3 w-3 transition-transform duration-300 group-hover:scale-110" />
+                      <ExternalLink className="ml-2 h-3 w-3 transition-transform duration-300 group-hover:scale-110" />
                     </div>
                   </div>
                 </div>

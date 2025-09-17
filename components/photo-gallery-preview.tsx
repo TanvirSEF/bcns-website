@@ -18,69 +18,69 @@ interface GalleryImage {
 export function PhotoGalleryPreview() {
   const galleryImages: GalleryImage[] = [
     {
-      id: "1",
-      src: "/images/event1.png",
-      alt: "Annual Conference 2024",
-      eventName: "Annual Conference 2024",
-      date: "March 15, 2024",
-      attendees: "150+ Attendees",
-      category: "Conference",
-      href: "/gallery/conference-2024",
+      id: "ecm2025",
+      src: "/images/ecm2025/1.jpg",
+      alt: "Executive Committee Meeting 2025",
+      eventName: "Executive Committee Meeting 2025",
+      date: "April 26, 2025",
+      attendees: "15+ Committee Members",
+      category: "Executive Meeting",
+      href: "/gallery/ecm2025",
     },
     {
-      id: "2",
-      src: "/images/event2.png",
-      alt: "Workshop Session",
-      eventName: "Advanced Neurology Workshop",
-      date: "February 28, 2024",
-      attendees: "45 Participants",
+      id: "cme2025",
+      src: "/images/cme/1.jpg",
+      alt: "CME on Paediatric Movement Disorder",
+      eventName: "CME on Paediatric Movement Disorder",
+      date: "June 21, 2025",
+      attendees: "80+ Participants",
+      category: "CME",
+      href: "/gallery/cme2025",
+    },
+    {
+      id: "ce2025",
+      src: "/images/ce/1.jpg",
+      alt: "Childhood Epilepsy Workshop",
+      eventName: "Childhood Epilepsy Workshop",
+      date: "August 26, 2025",
+      attendees: "60+ Specialists",
       category: "Workshop",
-      href: "/gallery/workshop-2024",
+      href: "/gallery/ce2025",
     },
     {
-      id: "3",
-      src: "/images/event3.png",
-      alt: "Research Symposium",
-      eventName: "Research Symposium",
-      date: "January 20, 2024",
-      attendees: "80 Researchers",
-      category: "Symposium",
-      href: "/gallery/symposium-2024",
+      id: "cgm2025",
+      src: "/images/cgm/1.jpg",
+      alt: "Committee General Meeting 2025",
+      eventName: "Committee General Meeting 2025",
+      date: "April 26, 2025",
+      attendees: "25+ Members",
+      category: "General Meeting",
+      href: "/gallery/cgm2025",
     },
     {
-      id: "4",
-      src: "/images/child_neurology.png",
-      alt: "Child Neurology Seminar",
-      eventName: "Child Neurology Seminar",
-      date: "December 10, 2023",
-      attendees: "60 Specialists",
-      category: "Seminar",
-      href: "/gallery/seminar-2023",
+      id: "sma2025",
+      src: "/images/sma/1.JPG",
+      alt: "SMA Workshop & Program",
+      eventName: "SMA Workshop & Program",
+      date: "August 23-24, 2025",
+      attendees: "40+ Participants",
+      category: "Workshop",
+      href: "/gallery/sma2025",
     },
     {
-      id: "5",
-      src: "/images/membership.png",
-      alt: "Membership Meeting",
-      eventName: "Annual Membership Meeting",
-      date: "November 25, 2023",
-      attendees: "120 Members",
-      category: "Meeting",
-      href: "/gallery/meeting-2023",
-    },
-    {
-      id: "6",
-      src: "/images/event1.png",
-      alt: "Training Program",
-      eventName: "Pediatric Neurology Training",
-      date: "October 15, 2023",
-      attendees: "35 Trainees",
-      category: "Training",
-      href: "/gallery/training-2023",
+      id: "fyt2025",
+      src: "/images/fyt/1.jpg",
+      alt: "Featured Year Events 2025",
+      eventName: "Featured Year Events 2025",
+      date: "2025",
+      attendees: "100+ Total Participants",
+      category: "Featured Events",
+      href: "/gallery/fyt2025",
     },
   ];
 
   return (
-    <section className="py-10 sm:py-14 lg:py-16 bg-gradient-to-b from-blue-50/40 via-white to-white overflow-hidden">
+    <section id="gallery" className="py-10 sm:py-14 lg:py-16 bg-gradient-to-b from-blue-50/40 via-white to-white overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-10">
@@ -147,9 +147,9 @@ export function PhotoGalleryPreview() {
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-                25+
+                6
               </div>
-              <div className="text-gray-600 text-sm">Events This Year</div>
+              <div className="text-gray-600 text-sm">Major Events 2025</div>
             </div>
           </div>
           <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-blue-100/60">
@@ -158,7 +158,7 @@ export function PhotoGalleryPreview() {
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-                500+
+                70+
               </div>
               <div className="text-gray-600 text-sm">Active Members</div>
             </div>
@@ -169,9 +169,9 @@ export function PhotoGalleryPreview() {
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-                50+
+                30+
               </div>
-              <div className="text-gray-600 text-sm">Research Papers</div>
+              <div className="text-gray-600 text-sm">Event Photos</div>
             </div>
           </div>
         </div>

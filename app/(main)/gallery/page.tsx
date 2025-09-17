@@ -1,133 +1,182 @@
-import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
+import { Camera, Calendar, Users, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Camera, Clock, Mail, Phone, Image, Video } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Gallery | BCNS - Bangladesh Child Neurology Society",
-  description: "Photo gallery showcasing BCNS events, conferences, and activities.",
-};
+const eventCategories = [
+  {
+    id: "ecm2025",
+    title: "Executive Committee Meeting 2025",
+    date: "April 26, 2025",
+    attendees: "15+ Committee Members",
+    coverImage: "/images/ecm2025/1.jpg",
+    imageCount: 2,
+    description: "First Executive Committee Meeting of 2025"
+  },
+  {
+    id: "cme2025",
+    title: "CME on Paediatric Movement Disorder",
+    date: "June 21, 2025",
+    attendees: "80+ Participants",
+    coverImage: "/images/cme/1.jpg",
+    imageCount: 10,
+    description: "Continuing Medical Education on Paediatric Movement Disorder"
+  },
+  {
+    id: "ce2025",
+    title: "Childhood Epilepsy Workshop",
+    date: "August 26, 2025",
+    attendees: "60+ Specialists",
+    coverImage: "/images/ce/1.jpg",
+    imageCount: 12,
+    description: "Childhood Epilepsy - A Practical Approach Workshop"
+  },
+  {
+    id: "cgm2025",
+    title: "Committee General Meeting 2025",
+    date: "April 26, 2025",
+    attendees: "25+ Members",
+    coverImage: "/images/cgm/1.jpg",
+    imageCount: 4,
+    description: "Committee General Meeting 2025"
+  },
+  {
+    id: "sma2025",
+    title: "SMA Workshop & Program",
+    date: "August 23-24, 2025",
+    attendees: "40+ Participants",
+    coverImage: "/images/sma/1.JPG",
+    imageCount: 2,
+    description: "Workshop on Standardized Rehabilitation Approach for SMA"
+  },
+  {
+    id: "fyt2025",
+    title: "Featured Year Events 2025",
+    date: "2025",
+    attendees: "100+ Total Participants",
+    coverImage: "/images/fyt/1.jpg",
+    imageCount: 6,
+    description: "Featured events and highlights from 2025"
+  }
+];
 
 export default function GalleryPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white">
       <Navbar />
-      
-      {/* Hero Section */}
-      <section className="relative py-16 sm:py-20 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full mb-6">
-              <Camera className="w-8 h-8 text-white" />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6 ring-8 ring-blue-50">
+            <Camera className="h-8 w-8 text-blue-600" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+            Event Gallery
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Explore our collection of events, workshops, and meetings from 2025. 
+            Click on any event to view all photos from that occasion.
+          </p>
+        </div>
+
+        {/* Event Categories Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
+          {eventCategories.map((event) => (
+            <Link
+              key={event.id}
+              href={`/gallery/${event.id}`}
+              className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+            >
+              {/* Cover Image */}
+              <div className="relative h-64 sm:h-72 overflow-hidden">
+                <Image
+                  src={event.coverImage}
+                  alt={event.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                {/* Image Count Badge */}
+                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm font-semibold text-gray-800">
+                  {event.imageCount} photos
+                </div>
+                
+                {/* Event Info Overlay */}
+                <div className="absolute bottom-4 left-4 right-4 text-white">
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-blue-300 transition-colors">
+                    {event.title}
+                  </h3>
+                  <p className="text-sm text-white/90 mb-3 line-clamp-2">
+                    {event.description}
+                  </p>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      <span>{event.date}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 mr-1" />
+                      <span>{event.attendees}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hover Action */}
+              <div className="p-6">
+                <div className="flex items-center justify-center text-blue-600 font-semibold group-hover:text-blue-700">
+                  View All Photos
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Statistics */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+            Gallery Statistics
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-blue-600 mb-2">
+                {eventCategories.length}
+              </div>
+              <div className="text-gray-600">Event Categories</div>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Photo <span className="bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent">Gallery</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Explore moments from our events, conferences, and activities through our photo gallery.
-            </p>
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-green-600 mb-2">
+                {eventCategories.reduce((total, event) => total + event.imageCount, 0)}
+              </div>
+              <div className="text-gray-600">Total Photos</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-purple-600 mb-2">
+                2025
+              </div>
+              <div className="text-gray-600">Year</div>
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* Coming Soon Section */}
-      <section className="py-16 sm:py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <Card className="text-center">
-              <CardHeader className="pb-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full mb-6 mx-auto">
-                  <Clock className="w-10 h-10 text-white" />
-                </div>
-                <CardTitle className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                  Coming Soon
-                </CardTitle>
-                <p className="text-lg text-gray-600 mb-6">
-                  We&apos;re organizing our photo collection to share memorable moments from BCNS activities.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="bg-gradient-to-r from-blue-50 to-pink-50 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    What&apos;s Coming:
-                  </h3>
-                  <ul className="space-y-3 text-left max-w-2xl mx-auto">
-                    <li className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full"></div>
-                      <span className="text-gray-700">Conference & Event Photos</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full"></div>
-                      <span className="text-gray-700">Workshop & Training Sessions</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full"></div>
-                      <span className="text-gray-700">Award Ceremonies & Recognition</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full"></div>
-                      <span className="text-gray-700">Research Presentations</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full"></div>
-                      <span className="text-gray-700">Networking & Social Events</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="text-center p-4">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-3">
-                      {/* eslint-disable-next-line jsx-a11y/alt-text */}
-                      <Image className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">High-Quality Photos</h4>
-                    <p className="text-sm text-gray-600">Professional photography from events</p>
-                  </div>
-                  <div className="text-center p-4">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-pink-100 rounded-full mb-3">
-                      <Video className="w-6 h-6 text-pink-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Video Highlights</h4>
-                    <p className="text-sm text-gray-600">Event highlights and presentations</p>
-                  </div>
-                  <div className="text-center p-4">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-3">
-                      <Camera className="w-6 h-6 text-green-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Easy Navigation</h4>
-                    <p className="text-sm text-gray-600">Browse by event, date, or category</p>
-                  </div>
-                </div>
-
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Have photos to share or want to access our gallery?
-                  </h3>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a
-                      href="mailto:office@bcns.org.bd"
-                      className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-pink-600 text-white rounded-lg hover:from-blue-700 hover:to-pink-700 transition-all duration-200"
-                    >
-                      <Mail className="w-5 h-5" />
-                      <span>Share Photos</span>
-                    </a>
-                    <a
-                      href="tel:+8801711261736"
-                      className="inline-flex items-center space-x-2 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-blue-600 hover:text-blue-600 transition-all duration-200"
-                    >
-                      <Phone className="w-5 h-5" />
-                      <span>Call for Access</span>
-                    </a>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Back to Home */}
+        <div className="text-center">
+          <Button
+            asChild
+            variant="outline"
+            className="border-blue-500 text-blue-600 hover:bg-blue-50 px-8 py-3"
+          >
+            <Link href="/">
+              <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
+              Back to Home
+            </Link>
+          </Button>
         </div>
-      </section>
-
+      </div>
       <Footer />
     </div>
   );
