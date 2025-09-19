@@ -74,8 +74,8 @@ const eventCategories = {
     attendees: "40+ Participants",
     description: "Workshop on Standardized Rehabilitation Approach for SMA",
     images: [
-      "/images/sma/1.JPG",
-      "/images/sma/2.JPG"
+      "/images/sma/1.jpg",
+      "/images/sma/2.jpg"
     ]
   },
   fyt2025: {
