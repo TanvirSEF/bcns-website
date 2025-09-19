@@ -86,7 +86,7 @@ const eventCategories = {
     images: [
       "/images/fyt/1.jpg",
       "/images/fyt/2.jpg",
-      "/images/fyt/3.JPG",
+      "/images/fyt/3.jpg",
       "/images/fyt/4.jpg",
       "/images/fyt/5.jpg",
       "/images/fyt/6.jpg"
