@@ -56,6 +56,24 @@ const eventCategories = {
       "/images/ce/12.jpg"
     ]
   },
+  pmd2025: {
+    title: "Paediatric Movement Disorder CME",
+    date: "June 21, 2025",
+    attendees: "80+ Participants",
+    description: "CME on Paediatric Movement Disorder",
+    images: [
+      "/images/pmd/1.jpg",
+      "/images/pmd/2.jpg",
+      "/images/pmd/3.jpg",
+      "/images/pmd/4.jpg",
+      "/images/pmd/5.jpg",
+      "/images/pmd/6.jpg",
+      "/images/pmd/7.jpg",
+      "/images/pmd/8.jpg",
+      "/images/pmd/9.jpg",
+      "/images/pmd/10.jpg"
+    ]
+  },
   cgm2025: {
     title: "Committee General Meeting 2025",
     date: "April 26, 2025",
@@ -90,6 +108,19 @@ const eventCategories = {
       "/images/fyt/4.jpg",
       "/images/fyt/5.jpg",
       "/images/fyt/6.jpg"
+    ]
+  }
+  ,
+  workshop2025: {
+    title: "Workshop 2025",
+    date: "2025",
+    attendees: "Specialists",
+    description: "Workshop Highlights",
+    images: [
+      "/images/workshop/1WORKS_1.JPG",
+      "/images/workshop/2WORKS_1.JPG",
+      "/images/workshop/3WORKS_1.JPG",
+      "/images/workshop/4WORKS_1.JPG"
     ]
   }
 };
