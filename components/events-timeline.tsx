@@ -5,6 +5,18 @@ import { Calendar, MapPin, Users, FileText } from "lucide-react";
 export function EventsTimeline() {
   const events = [
     {
+      id: 0,
+      date: "21.09.2025",
+      title: "CME: Insight into the Recent Innovation and Challenges of Epilepsy & Developmental Disorders",
+      attendees: "International speakers and BCNS members",
+      venue: "Conference Hall, NINS, Dhaka-1207",
+      summary:
+        "The CME on “Insight into the Recent Innovation and Challenges of Epilepsy & Developmental Disorders” was held on 21–22 September 2025 at the Conference Room, NINS, organized by the Bangladesh Child Neurology Society (BCNS). The two-day CME highlighted recent innovations in epilepsy and neurodevelopmental disorders. International experts Prof. Dr. Mitsuhiro Kato and Dr. Masaya Tachibana shared valuable insights, focusing on genetic epilepsy, behavioral challenges, and practical case management. The event fostered scientific learning, collaboration, and knowledge exchange among child neurologists, pediatricians, and allied professionals, strengthening clinical practice in Bangladesh.",
+      decisions:
+        "21 Sept 2025: Scientific Presentation on Genetic Epilepsy: When and How? by Prof. Dr. Mitsuhiro Kato (Japan); Live Case Management; Expert Panel Discussion. 22 Sept 2025: Scientific Presentation on Challenges of Neurodevelopmental & Behavioural Disorders by Dr. Masaya Tachibana (Japan); Live Case Management on Challenging Behaviors; Expert Panel Discussion. Time: 9:00 AM on both days.",
+      registrationUrl: "https://shorturl.at/EhHm4",
+    },
+    {
       id: 1,
       date: "26.04.2025",
       title: "Emergency meeting 26.04.2025",
@@ -97,6 +109,19 @@ export function EventsTimeline() {
                         <h4 className="font-semibold text-gray-700 mb-2">Key Decisions</h4>
                         <p className="text-gray-600 leading-relaxed">{event.decisions}</p>
                       </div>
+
+                      {"registrationUrl" in event && event.registrationUrl && (
+                        <div className="pt-2">
+                          <a
+                            href={event.registrationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition-colors text-sm font-semibold"
+                          >
+                            Register Now
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
