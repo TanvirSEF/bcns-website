@@ -1,6 +1,7 @@
 "use client";
 
-import { Calendar, MapPin, Users, FileText } from "lucide-react";
+import { Calendar, MapPin } from "lucide-react";
+import { useState } from "react";
 
 export function EventsTimeline() {
   const events = [
@@ -15,6 +16,8 @@ export function EventsTimeline() {
       decisions:
         "21 Sept 2025: Scientific Presentation on Genetic Epilepsy: When and How? by Prof. Dr. Mitsuhiro Kato (Japan); Live Case Management; Expert Panel Discussion. 22 Sept 2025: Scientific Presentation on Challenges of Neurodevelopmental & Behavioural Disorders by Dr. Masaya Tachibana (Japan); Live Case Management on Challenging Behaviors; Expert Panel Discussion. Time: 9:00 AM on both days.",
       registrationUrl: "https://shorturl.at/EhHm4",
+      type: "program",
+      time: "21–22 Sep 2025, 9:00 AM",
     },
     {
       id: 1,
@@ -23,7 +26,8 @@ export function EventsTimeline() {
       attendees: "N/A",
       venue: "Xinxian China Restaurant, Dhanmondi,Dhaka",
       summary: "This was the BCNS Committee, General Meeting, 2025. It was held to establish the first Executive Committee for 2025-2027, presided over by Prof. Dr. Md. Mizanur Rahman.",
-      decisions: "The new Executive Committee was formed with Prof. Dr. Muhammad Mizanur Rahman as President and Dr. Mohammad Monir Hossain as General Secretary. Other roles included Vice Presidents, Secretaries, Treasurer, and Advisors. The meeting focused on professional development, scientific programs, and strengthening child neurology services, with a pledge to seek support from UNICEF and international partners."
+      decisions: "The new Executive Committee was formed with Prof. Dr. Muhammad Mizanur Rahman as President and Dr. Mohammad Monir Hossain as General Secretary. Other roles included Vice Presidents, Secretaries, Treasurer, and Advisors. The meeting focused on professional development, scientific programs, and strengthening child neurology services, with a pledge to seek support from UNICEF and international partners.",
+      type: "meeting"
     },
     {
       id: 2,
@@ -32,7 +36,9 @@ export function EventsTimeline() {
       attendees: "26 participants",
       venue: "Semi conference room, NINSH, Agargaon, Dhaka",
       summary: "This was the BCNS 1st Executive Committee Meeting, 2025, held on May 20, 2025, at 2:00 PM. It was chaired by Prof. Dr. Muhammad Mizanur Rahman (President, BCNS), with Executive Committee Members attending.",
-      decisions: "Previous decisions were confirmed, extending the President's tenure to two years and approving new membership regulations. Financial matters were resolved with three authorized bank signatories. Major organizational actions included a membership campaign, a new website, social media engagement, and collaboration with the Japan Society for CME, fellowship, and academic exchange. National conferences were planned biennially, with CME programs every 2-3 months."
+      decisions: "Previous decisions were confirmed, extending the President's tenure to two years and approving new membership regulations. Financial matters were resolved with three authorized bank signatories. Major organizational actions included a membership campaign, a new website, social media engagement, and collaboration with the Japan Society for CME, fellowship, and academic exchange. National conferences were planned biennially, with CME programs every 2-3 months.",
+      type: "meeting",
+      time: "2:00 PM"
     },
     {
       id: 3,
@@ -41,7 +47,8 @@ export function EventsTimeline() {
       attendees: "N/A",
       venue: "Zoom (Online Platform)",
       summary: "This was the BCNS 2nd Executive Committee Meeting 2025, held online on August 7, 2025, chaired by Prof. Dr. Muhammad Mizanur Rahman (President, BCNS), with Executive Committee Members attending.",
-      decisions: "Key resolutions included finalizing the Bangladesh Country Delegate to AOCN and reviewing society finances. The committee approved a standardized rehabilitation approach for Spinal Muscular Atrophy in collaboration with pediatric neurologists. Plans for joint academic programs with the Japanese Child Neurology Society were confirmed, including CME sessions on epilepsy genetics, ASD, ADHD, and tics in September 2025."
+      decisions: "Key resolutions included finalizing the Bangladesh Country Delegate to AOCN and reviewing society finances. The committee approved a standardized rehabilitation approach for Spinal Muscular Atrophy in collaboration with pediatric neurologists. Plans for joint academic programs with the Japanese Child Neurology Society were confirmed, including CME sessions on epilepsy genetics, ASD, ADHD, and tics in September 2025.",
+      type: "meeting"
     },
     {
       id: 4,
@@ -50,80 +57,76 @@ export function EventsTimeline() {
       attendees: "N/A",
       venue: "Xinxian China Restaurant, Dhanmondi, Dhaka",
       summary: "This was the BCNS 3rd Executive Committee meeting 2025, held on September 20, 2025, at Xinxian China Restaurant, Dhanmondi, Dhaka. It was chaired by Prof. Dr. Muhammad Mizanur Rahman (President, BCNS), with Executive Committee Members attending.",
-      decisions: "The meeting reviewed organizational activities, discussed upcoming scientific and academic programs, financial updates, and future plans. Reports were presented by the General Secretary and Treasurer. Key points included enhancing scientific engagement, strengthening publicity, and publication initiatives. Decisions were made to improve coordination, finalize event schedules, promote collaborative projects, and outline strategies for academic, scientific, and publicity activities to strengthen organizational impact."
+      decisions: "The meeting reviewed organizational activities, discussed upcoming scientific and academic programs, financial updates, and future plans. Reports were presented by the General Secretary and Treasurer. Key points included enhancing scientific engagement, strengthening publicity, and publication initiatives. Decisions were made to improve coordination, finalize event schedules, promote collaborative projects, and outline strategies for academic, scientific, and publicity activities to strengthen organizational impact.",
+      type: "meeting"
     }
   ];
+  const [activeTab, setActiveTab] = useState<"meeting" | "program" | "workshop">("meeting");
+
+  const filtered = events.filter((e) => e.type === activeTab);
 
   return (
     <section className="w-full bg-gray-50 py-12 md:py-16 lg:py-20">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-8 md:mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
             Stay Updated with <span className="text-blue-600">BCNS</span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Recent meetings and activities of the Bangladesh Child Neurology Society
-          </p>
-          <div className="w-20 h-1 bg-blue-600 rounded-full mx-auto mt-4"></div>
+          <div className="w-20 h-1 bg-blue-600 rounded-full mx-auto"></div>
         </div>
 
-        <div className="space-y-8">
-          {events.map((event) => (
+        {/* Tabs */}
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-8">
+          {([
+            { key: "meeting", label: "Meeting" },
+            { key: "program", label: "Program" },
+            { key: "workshop", label: "Workshop" },
+          ] as const).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
+                activeTab === tab.key
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+              }`}
+              aria-pressed={activeTab === tab.key}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Event Cards - simplified fields */}
+        <div className="space-y-6">
+          {filtered.length === 0 && (
+            <div className="text-center text-gray-600">No items under {activeTab} right now.</div>
+          )}
+          {filtered.map((event) => (
             <div key={event.id} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-              <div className="p-6">
-                <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-                  {/* Left Side - Date and Basic Info */}
-                  <div className="lg:w-1/4">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <Calendar className="h-5 w-5 text-blue-600" />
-                      <span className="text-lg font-bold text-gray-800">{event.date}</span>
+              <div className="p-5 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">{event.title}</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium">{("time" in event && (event as any).time) ? (event as any).time : event.date}</span>
                     </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <Users className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm text-gray-600">{event.attendees}</span>
-                      </div>
-                      
-                      <div className="flex items-start space-x-2">
-                        <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
-                        <span className="text-sm text-gray-600">{event.venue}</span>
-                      </div>
+                    <div className="flex items-start gap-2 text-gray-700">
+                      <MapPin className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <span className="text-sm">{event.venue}</span>
                     </div>
                   </div>
-
-                  {/* Right Side - Content */}
-                  <div className="lg:w-3/4">
-                    <h3 className="text-xl font-bold text-gray-800 mb-3">{event.title}</h3>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-gray-700 mb-2 flex items-center">
-                          <FileText className="h-4 w-4 mr-2 text-blue-600" />
-                          Summary
-                        </h4>
-                        <p className="text-gray-600 leading-relaxed">{event.summary}</p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-semibold text-gray-700 mb-2">Key Decisions</h4>
-                        <p className="text-gray-600 leading-relaxed">{event.decisions}</p>
-                      </div>
-
-                      {"registrationUrl" in event && event.registrationUrl && (
-                        <div className="pt-2">
-                          <a
-                            href={event.registrationUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition-colors text-sm font-semibold"
-                          >
-                            Register Now
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {"registrationUrl" in event && (event as any).registrationUrl && (
+                    <a
+                      href={(event as any).registrationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition-colors text-sm font-semibold"
+                    >
+                      Register Now
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

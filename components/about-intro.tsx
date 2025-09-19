@@ -55,10 +55,7 @@ Together, let us strive to ensure a brighter, healthier future for every child.`
     }
   };
 
-  const handleLeaderClick = (leaderId: string) => {
-    setSelectedLeader(leadershipData[leaderId as keyof typeof leadershipData]);
-    setIsProfileOpen(true);
-  };
+  
 
   const handleCloseProfile = () => {
     setIsProfileOpen(false);
@@ -67,7 +64,7 @@ Together, let us strive to ensure a brighter, healthier future for every child.`
   return (
     <section className="w-full bg-white py-8 sm:py-12 md:py-16 lg:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start lg:items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start lg:items-start">
           {/* Left Side - Text Content */}
           <div className="space-y-4 sm:space-y-6 order-2 lg:order-1">
             <div className="space-y-3 sm:space-y-4">
@@ -100,19 +97,18 @@ Together, let us strive to ensure a brighter, healthier future for every child.`
             </div>
           </div>
 
-           {/* Right Side - Leadership Cards */}
-           <div className="space-y-4 sm:space-y-6 max-w-xs sm:max-w-sm mx-auto lg:mx-0 order-1 lg:order-2">
+          {/* Right Side - Leadership Cards with Messages (no click needed) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl mx-auto lg:mx-0 order-1 lg:order-2">
              {/* President Card */}
              <div
-               className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105"
-               onClick={() => handleLeaderClick('mizanur')}
-             >
+              className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 h-full"
+              >
                {/* Header */}
                <div className="bg-gray-700 px-3 sm:px-4 py-2 sm:py-3">
                  <h3 className="text-white font-bold text-xs sm:text-sm uppercase tracking-wide text-center">President</h3>
                </div>
 
-               {/* Image and Name */}
+              {/* Image and Name */}
                <div className="p-3 sm:p-4 text-center">
                  <div className="relative w-24 h-32 sm:w-28 sm:h-36 mx-auto mb-2 sm:mb-3">
                    <Image
@@ -126,21 +122,31 @@ Together, let us strive to ensure a brighter, healthier future for every child.`
                  <p className="text-gray-800 font-semibold text-xs sm:text-sm leading-tight">
                    Prof. Dr. Md. Mizanur Rahman
                  </p>
-                 <p className="text-xs text-blue-600 mt-1">Click to view details</p>
+              </div>
+
+              {/* Message Content */}
+              <div className="px-3 sm:px-4 pb-4 border-t border-gray-100">
+                <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">President&apos;s Message</h4>
+                <div className="text-left max-h-64 sm:max-h-80 overflow-y-auto pr-1 sm:pr-2">
+                  <div className="prose prose-[0.9rem] sm:prose-sm max-w-none text-gray-700 leading-relaxed">
+                    {leadershipData.mizanur.message.split('\n\n').map((para: string, idx: number) => (
+                      <p key={idx}>{para}</p>
+                    ))}
+                  </div>
+                </div>
                </div>
-             </div>
+            </div>
 
              {/* General Secretary Card */}
              <div
-               className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105"
-               onClick={() => handleLeaderClick('monir')}
-             >
+              className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 h-full"
+            >
                {/* Header */}
                <div className="bg-gray-700 px-3 sm:px-4 py-2 sm:py-3">
                  <h3 className="text-white font-bold text-xs sm:text-sm uppercase tracking-wide text-center">General Secretary</h3>
                </div>
 
-               {/* Image and Name */}
+              {/* Image and Name */}
                <div className="p-3 sm:p-4 text-center">
                  <div className="relative w-24 h-32 sm:w-28 sm:h-36 mx-auto mb-2 sm:mb-3">
                    <Image
@@ -154,10 +160,21 @@ Together, let us strive to ensure a brighter, healthier future for every child.`
                  <p className="text-gray-800 font-semibold text-xs sm:text-sm leading-tight">
                    Dr. Mohammad Monir Hossain
                  </p>
-                 <p className="text-xs text-blue-600 mt-1">Click to view details</p>
+              </div>
+
+              {/* Message Content */}
+              <div className="px-3 sm:px-4 pb-4 border-t border-gray-100">
+                <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">General Secretary&apos;s Message</h4>
+                <div className="text-left max-h-64 sm:max-h-80 overflow-y-auto pr-1 sm:pr-2">
+                  <div className="prose prose-[0.9rem] sm:prose-sm max-w-none text-gray-700 leading-relaxed">
+                    {leadershipData.monir.message.split('\n\n').map((para: string, idx: number) => (
+                      <p key={idx}>{para}</p>
+                    ))}
+              </div>
                </div>
              </div>
-           </div>
+             </div>
+            </div>
         </div>
       </div>
 
