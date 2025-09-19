@@ -5,7 +5,6 @@ import { Footer } from "@/components/footer";
 import { LogoBanner } from "@/components/logo-banner";
 import { AboutIntro } from "@/components/about-intro";
 import { EventsTimeline } from "@/components/events-timeline";
-import { UpcomingEvents } from "@/components/upcoming-events";
 
 // Lazy load below-the-fold components for better performance
 const CoreActivities = dynamic(
@@ -52,7 +51,6 @@ export default function Home() {
     <div className="min-h-screen">
       <LogoBanner />
       <Navbar />
-      <UpcomingEvents />
       <Hero />
       <AboutIntro />
       <EventsTimeline />
