@@ -3,7 +3,7 @@
 import * as React from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { RobustImage } from "@/components/ui/robust-image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 interface LightboxProps {
   images: string[];
@@ -101,7 +101,7 @@ export function Lightbox({
       {/* Image Container */}
       <div className="relative max-w-[90vw] max-h-[90vh] w-full h-full flex items-center justify-center p-8">
         <div className="relative w-full h-full">
-          <RobustImage
+          <FallbackImage
             src={currentImage}
             alt={title || `Gallery image ${currentIndex + 1}`}
             fill

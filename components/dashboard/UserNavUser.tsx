@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Settings,
   MoreVertical,
@@ -112,26 +113,26 @@ export function UserNavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href="/user-dashboard/profile">
+                <Link href="/user-dashboard/profile">
                   <User className="size-4" />
                   My Profile
-                </a>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a href="/user-dashboard/favorites">
+                <Link href="/user-dashboard/favorites">
                   <Heart className="size-4" />
                   Favorites
-                </a>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell className="size-4" />
                 Notifications
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a href="/user-dashboard/settings">
+                <Link href="/user-dashboard/settings">
                   <Settings className="size-4" />
                   Settings
-                </a>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

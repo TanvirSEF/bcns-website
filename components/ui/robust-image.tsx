@@ -35,17 +35,20 @@ export function RobustImage({
   const handleError = () => {
     console.error(`Failed to load image: ${currentSrc} (attempt ${retryCount + 1})`);
     
-    if (retryCount < 2) {
+    if (retryCount < 3) {
       // Try different approaches on retry
       setRetryCount(prev => prev + 1);
       setIsLoading(true);
       
       if (retryCount === 0) {
-        // First retry: try with unoptimized
+        // First retry: try with unoptimized flag
         setCurrentSrc(`${src}?unoptimized=true`);
       } else if (retryCount === 1) {
-        // Second retry: try direct path
-        setCurrentSrc(src.replace('/images/', '/images/'));
+        // Second retry: try with different quality
+        setCurrentSrc(`${src}?q=75`);
+      } else if (retryCount === 2) {
+        // Third retry: try direct static serving
+        setCurrentSrc(src);
       }
     } else {
       setHasError(true);
@@ -66,17 +69,30 @@ export function RobustImage({
         <div className="text-center text-gray-500">
           <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
           <p className="text-sm">Image failed to load</p>
-          <button
-            onClick={() => {
-              setHasError(false);
-              setIsLoading(true);
-              setRetryCount(0);
-              setCurrentSrc(src);
-            }}
-            className="text-xs text-blue-600 hover:text-blue-700 mt-1"
-          >
-            Retry
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={() => {
+                setHasError(false);
+                setIsLoading(true);
+                setRetryCount(0);
+                setCurrentSrc(src);
+              }}
+              className="text-xs text-blue-600 hover:text-blue-700 mr-2"
+            >
+              Retry with Next.js
+            </button>
+            <button
+              onClick={() => {
+                setHasError(false);
+                setIsLoading(true);
+                setRetryCount(0);
+                setCurrentSrc(src);
+              }}
+              className="text-xs text-green-600 hover:text-green-700"
+            >
+              Try Direct Load
+            </button>
+          </div>
         </div>
       </div>
     );
