@@ -10,55 +10,55 @@ const eventCategories = [
     id: "ecm2025",
     title: "Executive Committee Meeting 2025",
     date: "April 26, 2025",
-    attendees: "15+ Committee Members",
+    attendees: "Committee Members",
     coverImage: "/images/ecm2025/1.jpg",
     imageCount: 2,
     description: "First Executive Committee Meeting of 2025"
   },
   {
-    id: "cme2025",
-    title: "CME on Paediatric Movement Disorder",
-    date: "June 21, 2025",
-    attendees: "80+ Participants",
-    coverImage: "/images/cme/1.jpg",
-    imageCount: 10,
-    description: "Continuing Medical Education on Paediatric Movement Disorder"
-  },
-  {
-    id: "ce2025",
-    title: "Childhood Epilepsy Workshop",
-    date: "August 26, 2025",
-    attendees: "60+ Specialists",
-    coverImage: "/images/ce/1.jpg",
-    imageCount: 12,
-    description: "Childhood Epilepsy - A Practical Approach Workshop"
-  },
-  {
     id: "cgm2025",
     title: "Committee General Meeting 2025",
     date: "April 26, 2025",
-    attendees: "25+ Members",
+    attendees: "Members",
     coverImage: "/images/cgm/1.jpg",
     imageCount: 4,
     description: "Committee General Meeting 2025"
   },
   {
-    id: "sma2025",
-    title: "SMA Workshop & Program",
-    date: "August 23-24, 2025",
-    attendees: "40+ Participants",
-    coverImage: "/images/sma/1.jpg",
-    imageCount: 2,
-    description: "Workshop on Standardized Rehabilitation Approach for SMA"
+    id: "cme2025",
+    title: "CME on Paediatric Movement Disorder",
+    date: "June 21, 2025",
+    attendees: "Participants",
+    coverImage: "/images/cme/1.jpg",
+    imageCount: 12,
+    description: "Continuing Medical Education on Paediatric Movement Disorder"
   },
   {
-    id: "fyt2025",
-    title: "Featured Year Events 2025",
+    id: "pmd2025",
+    title: "Paediatric Movement Disorder CME",
+    date: "June 21, 2025",
+    attendees: "Participants",
+    coverImage: "/images/pmd/1.jpg",
+    imageCount: 10,
+    description: "CME on Paediatric Movement Disorder"
+  },
+  {
+    id: "ce2025",
+    title: "Childhood Epilepsy Workshop",
+    date: "August 26, 2025",
+    attendees: "Specialists",
+    coverImage: "/images/ce/1.jpg",
+    imageCount: 12,
+    description: "Childhood Epilepsy - A Practical Approach Workshop"
+  },
+  {
+    id: "workshop2025",
+    title: "Workshop 2025",
     date: "2025",
-    attendees: "100+ Total Participants",
-    coverImage: "/images/fyt/1.jpg",
-    imageCount: 6,
-    description: "Featured events and highlights from 2025"
+    attendees: "Specialists",
+    coverImage: "/images/workshop/1WORKS_1.JPG",
+    imageCount: 4,
+    description: "Workshop Highlights"
   }
 ];
 
