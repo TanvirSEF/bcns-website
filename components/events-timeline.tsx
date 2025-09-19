@@ -21,7 +21,7 @@ export function EventsTimeline() {
       date: "26.04.2025",
       title: "Emergency meeting 26.04.2025",
       attendees: "N/A",
-      venue: "Xinxian China Restaurant, Dhanmondi, Dhaka",
+      venue: "Xinxian China Restaurant, Dhanmondi,Dhaka",
       summary: "This was the BCNS Committee, General Meeting, 2025. It was held to establish the first Executive Committee for 2025-2027, presided over by Prof. Dr. Md. Mizanur Rahman.",
       decisions: "The new Executive Committee was formed with Prof. Dr. Muhammad Mizanur Rahman as President and Dr. Mohammad Monir Hossain as General Secretary. Other roles included Vice Presidents, Secretaries, Treasurer, and Advisors. The meeting focused on professional development, scientific programs, and strengthening child neurology services, with a pledge to seek support from UNICEF and international partners."
     },
