@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Camera } from "lucide-react";
 import { Lightbox } from "@/components/ui/lightbox";
-import { RobustImage } from "@/components/ui/robust-image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 interface EventData {
   title: string;
@@ -57,7 +57,7 @@ export function GalleryCategoryClient({ eventData }: GalleryCategoryClientProps)
               onClick={() => !hasError && openLightbox(index)}
             >
               <div className="aspect-square relative">
-                <RobustImage
+                <FallbackImage
                   src={imageSrc}
                   alt={`${eventData.title} - Image ${index + 1}`}
                   fill

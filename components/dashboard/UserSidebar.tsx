@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   User,
   Calendar,
@@ -112,7 +113,7 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
               asChild
               className="data-[slot=sidebar-menu-button]:!p-3 data-[slot=sidebar-menu-button]:hover:bg-white/50 data-[slot=sidebar-menu-button]:rounded-lg"
             >
-              <a href="/user-dashboard" className="flex items-center gap-3">
+              <Link href="/user-dashboard" className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
                   <Building2 className="h-5 w-5 text-white" />
                 </div>
@@ -120,7 +121,7 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
                   <span className="text-base font-bold text-gray-900">BCNS</span>
                   <span className="text-xs text-gray-600 -mt-0.5">Member Portal</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
