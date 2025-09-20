@@ -14,7 +14,7 @@ export function LogoBanner() {
             width={800}
             height={160}
             priority
-            className="w-full h-auto max-w-[280px] xs:max-w-[320px] sm:max-w-[350px] md:max-w-[400px] lg:max-w-[500px] xl:max-w-[600px] 2xl:max-w-[700px] drop-shadow-xl object-contain"
+            className="w-full h-auto max-w-[360px] xs:max-w-[400px] sm:max-w-[350px] md:max-w-[400px] lg:max-w-[500px] xl:max-w-[600px] 2xl:max-w-[700px] drop-shadow-xl object-contain"
           />
         </div>
       </div>

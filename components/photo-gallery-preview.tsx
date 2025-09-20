@@ -149,7 +149,7 @@ export function PhotoGalleryPreview() {
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-                6
+                6+
               </div>
               <div className="text-gray-600 text-sm">Major Events 2025</div>
             </div>
