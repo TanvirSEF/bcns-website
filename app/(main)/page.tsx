@@ -3,6 +3,7 @@ import { Hero } from "@/components/hero";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { LogoBanner } from "@/components/logo-banner";
+import { UpcomingEvents } from "@/components/upcoming-events";
 import { AboutIntro } from "@/components/about-intro";
 import { EventsTimeline } from "@/components/events-timeline";
 
@@ -50,6 +51,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <LogoBanner />
+      <UpcomingEvents />
       <Navbar />
       <Hero />
       <AboutIntro />
