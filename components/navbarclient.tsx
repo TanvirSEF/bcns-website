@@ -56,6 +56,7 @@ const navigationItems = [
     dropdownItems: [
       { name: "Executive Committee", href: "/committee/executive", icon: Shield },
       { name: "Convening Committee", href: "/committee/convening", icon: Users },
+      { name: "BCNS Member", href: "/committee/member", icon: User },
     ],
   },
   {
