@@ -26,8 +26,8 @@ export function MembershipBenefits() {
     },
     {
       id: "3",
-      title: "Special Discounts",
-      description: "Discounts on all conferences and workshops",
+      title: "Special Enrollment",
+      description: "Special enrollment on all conferences and workshops",
       icon: <Calendar className="h-6 w-6" />,
     },
   ];

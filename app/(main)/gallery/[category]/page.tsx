@@ -112,7 +112,7 @@ const eventCategories = {
   }
   ,
   workshop2025: {
-    title: "Workshop 2025",
+    title: "SMA Workshop 2025",
     date: "2025",
     attendees: "Specialists",
     description: "Workshop Highlights",

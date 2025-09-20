@@ -53,7 +53,7 @@ const eventCategories = [
   },
   {
     id: "workshop2025",
-    title: "Workshop 2025",
+    title: "SMA Workshop 2025",
     date: "2025",
     attendees: "Specialists",
     coverImage: "/images/workshop/1WORKS_1.JPG",
