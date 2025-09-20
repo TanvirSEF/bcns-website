@@ -61,7 +61,7 @@ export function EventsTimeline() {
       type: "meeting"
     }
   ];
-  const [activeTab, setActiveTab] = useState<"meeting" | "program" | "workshop">("meeting");
+  const [activeTab, setActiveTab] = useState<"meeting" | "program" | "workshop">("program");
 
   const filtered = events.filter((e) => e.type === activeTab);
 
@@ -78,9 +78,9 @@ export function EventsTimeline() {
         {/* Tabs */}
         <div className="flex items-center justify-center gap-2 sm:gap-3 mb-8">
           {([
-            { key: "meeting", label: "Meeting" },
             { key: "program", label: "Program" },
             { key: "workshop", label: "Workshop" },
+            { key: "meeting", label: "Meeting" },
           ] as const).map((tab) => (
             <button
               key={tab.key}

@@ -70,8 +70,8 @@ export function PhotoGalleryPreview() {
     {
       id: "workshop2025",
       src: "/images/workshop/1WORKS_1.JPG",
-      alt: "Workshop 2025",
-      eventName: "Workshop 2025",
+      alt: "SMA Workshop 2025",
+      eventName: "SMA Workshop 2025",
       date: "2025",
       attendees: "Specialists",
       category: "Workshop",
