@@ -11,7 +11,6 @@ import {
   ArrowRight,
   Calendar,
   Stethoscope,
-  GraduationCap,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -108,18 +107,10 @@ export default function AboutPage() {
             </div>
             
             <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <GraduationCap className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">60+</div>
-              <div className="text-sm text-gray-600">FCPS & MD Graduates</div>
-            </div>
-            
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Users className="h-6 w-6 text-purple-600" />
               </div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">70+</div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">90+</div>
               <div className="text-sm text-gray-600">Active Members</div>
             </div>
             

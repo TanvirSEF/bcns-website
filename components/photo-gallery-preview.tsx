@@ -160,7 +160,7 @@ export function PhotoGalleryPreview() {
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-                70+
+                90+
               </div>
               <div className="text-gray-600 text-sm">Active Members</div>
             </div>
