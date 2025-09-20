@@ -30,6 +30,28 @@ export const eventsData: EventItem[] = [
     registrationUrl: "https://shorturl.at/EhHm4",
   },
   {
+    slug: "sma-workshop-2025",
+    type: "workshop",
+    title: "SMA Workshop 2025",
+    date: "2025",
+    time: "N/A",
+    venue: "N/A",
+    attendees: "N/A",
+    summary:
+      "Standardized Rehabilitation Approach for Spinal Muscular Atrophy (SMA). Details will be updated soon.",
+  },
+  {
+    slug: "childhood-epilepsy-workshop-2025",
+    type: "workshop",
+    title: "Childhood epilepsy Workshop",
+    date: "2025",
+    time: "N/A",
+    venue: "N/A",
+    attendees: "N/A",
+    summary:
+      "Workshop focusing on practical approaches to childhood epilepsy. Details will be updated soon.",
+  },
+  {
     slug: "emergency-meeting-26-04-2025",
     type: "meeting",
     title: "Emergency meeting 26.04.2025",
