@@ -51,10 +51,10 @@ export function Hero() {
       image: "/images/banner5.jpg",
       title: "(CME) on “Paediatric Movement Disorder” was held on 21 June 2025",
     },
-    {
-      image: "/images/banner6.jpg",
-      title: "",
-    },
+    // {
+    //   image: "/images/banner6.jpg",
+    //   title: "",
+    // },
   ];
 
   return (
