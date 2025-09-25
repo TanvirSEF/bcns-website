@@ -64,7 +64,8 @@ export default function ConferencePage() {
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <Link href={`/events/${event.slug}`} className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 text-sm font-semibold">View Summary</Link>
-                          {event.registrationUrl && (
+                          {/* Registration temporarily disabled */}
+                          {false && event.registrationUrl && (
                             <a href={event.registrationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Register</a>
                           )}
                         </div>
