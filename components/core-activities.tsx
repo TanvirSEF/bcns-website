@@ -80,7 +80,7 @@ export function CoreActivities() {
           {coreActivities.map((activity) => (
             <div key={activity.id} className="group relative">
               {/* Glassmorphism Panel */}
-              <div className="relative h-full p-5 md:p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-500 hover:bg-white/20 hover:border-white/40 hover:scale-105">
+              <div className="relative h-full p-5 md:p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-500 hover:bg-white/20 hover:border-white/40 hover:scale-105 cursor-pointer">
                 {/* Icon */}
                 <div className="flex justify-center mb-4">
                   <div className="p-3 md:p-4 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
@@ -102,7 +102,7 @@ export function CoreActivities() {
                 <div className="flex justify-center">
                   <a
                     href={activity.link}
-                    className="inline-flex items-center text-white font-semibold hover:text-blue-200 transition-colors duration-300 group/link"
+                    className="inline-flex items-center text-white font-semibold hover:text-blue-200 transition-colors duration-300 group/link cursor-pointer"
                   >
                     Explore
                     <ArrowRight className="ml-2 h-4 w-4 group-hover/link:translate-x-1 transition-transform duration-300" />

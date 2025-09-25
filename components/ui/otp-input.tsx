@@ -181,6 +181,9 @@ export function OTPInput({
             // Disabled styles
             disabled && "opacity-50 cursor-not-allowed bg-gray-100",
             
+            // Cursor pointer for clickable inputs
+            !disabled && "cursor-pointer",
+            
             // Mobile optimizations
             "touch-manipulation select-all",
             

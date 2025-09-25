@@ -53,7 +53,7 @@ export default function EventsPage() {
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">{section.title}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {items.map((event) => (
-                    <Card key={event.slug} className="p-5 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <Card key={event.slug} className="p-5 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
                           <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{event.title}</h4>
@@ -65,7 +65,8 @@ export default function EventsPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Link href={`/events/${event.slug}`} className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 text-sm font-semibold">View Summary</Link>
-                          {event.registrationUrl && (
+                          {/* Registration temporarily disabled */}
+                          {false && event.registrationUrl && (
                             <a href={event.registrationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Register</a>
                           )}
                         </div>

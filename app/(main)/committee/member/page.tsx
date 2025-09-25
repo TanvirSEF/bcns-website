@@ -6,7 +6,7 @@ import { generalMembers, type GeneralMember } from "../../../../data/general-mem
 import Image from "next/image";
 
 const MemberCard = ({ member }: { member: GeneralMember }) => (
-  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow duration-300 w-full">
+  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow duration-300 w-full cursor-pointer">
     <div className="flex flex-col items-center mb-4">
       <div className="mb-3">
         {member.image ? (
@@ -53,7 +53,7 @@ const MemberCard = ({ member }: { member: GeneralMember }) => (
         {member.mobile && (
           <div className="flex items-center space-x-2">
             <Phone className="w-4 h-4 text-blue-600" />
-            <a href={`tel:${member.mobile}`} className="text-sm text-blue-600 hover:underline">
+            <a href={`tel:${member.mobile}`} className="text-sm text-blue-600 hover:underline cursor-pointer">
               {member.mobile}
             </a>
           </div>
@@ -61,7 +61,7 @@ const MemberCard = ({ member }: { member: GeneralMember }) => (
         {member.email && (
           <div className="flex items-center space-x-2">
             <Mail className="w-4 h-4 text-blue-600" />
-            <a href={`mailto:${member.email}`} className="text-sm text-blue-600 hover:underline break-all">
+            <a href={`mailto:${member.email}`} className="text-sm text-blue-600 hover:underline break-all cursor-pointer">
               {member.email}
             </a>
           </div>
