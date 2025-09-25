@@ -30,7 +30,7 @@ export function EventsTimeline() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors cursor-pointer ${
                 activeTab === tab.key
                   ? "bg-blue-600 text-white border-blue-600"
                   : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
@@ -48,7 +48,7 @@ export function EventsTimeline() {
             <div className="text-center text-gray-600">No items under {activeTab} right now.</div>
           )}
           {filtered.map((event) => (
-            <div key={event.slug} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow">
+            <div key={event.slug} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
               <div className="p-5 sm:p-6">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">{event.title}</h3>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -63,14 +63,12 @@ export function EventsTimeline() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {activeTab !== "program" && (
-                      <Link
-                        href={`/events/${event.slug}`}
-                        className="inline-flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors text-sm font-semibold"
-                      >
-                        View Summary
-                      </Link>
-                    )}
+                    <Link
+                      href={`/events/${event.slug}`}
+                      className="inline-flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors text-sm font-semibold"
+                    >
+                      View Summary
+                    </Link>
                     {/* Registration temporarily disabled */}
                     {false && event.registrationUrl && (
                       <a
