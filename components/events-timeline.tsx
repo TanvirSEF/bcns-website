@@ -71,7 +71,8 @@ export function EventsTimeline() {
                         View Summary
                       </Link>
                     )}
-                    {event.registrationUrl && (
+                    {/* Registration temporarily disabled */}
+                    {false && event.registrationUrl && (
                       <a
                         href={event.registrationUrl}
                         target="_blank"
