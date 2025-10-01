@@ -37,19 +37,27 @@ export function Hero() {
     },
     {
       image: "/images/banner2.jpg",
-      title: "(CME) on “Paediatric Movement Disorder” was held on 21 June 2025",
+      title: '(CME) on "Paediatric Movement Disorder" was held on 21 June 2025',
     },
     {
       image: "/images/banner3.jpg",
-      title: "(CME) on “Paediatric Movement Disorder” was held on 21 June 2025",
-    },
-    {
-      image: "/images/banner4.jpg",
-      title: "(CME) on “Paediatric Movement Disorder” was held on 21 June 2025",
+      title: '(CME) on "Paediatric Movement Disorder" was held on 21 June 2025',
     },
     {
       image: "/images/banner5.jpg",
-      title: "(CME) on “Paediatric Movement Disorder” was held on 21 June 2025",
+      title: '(CME) on "Paediatric Movement Disorder" was held on 21 June 2025',
+    },
+    {
+      image: "/images/banner7.jpg",
+      title: '(CME) on "Paediatric Movement Disorder"',
+    },
+    {
+      image: "/images/banner8.jpg",
+      title: '(CME) on "Paediatric Movement Disorder"',
+    },
+    {
+      image: "/images/banner9.jpg",
+      title: '(CME) on "Paediatric Movement Disorder"',
     },
     // {
     //   image: "/images/banner6.jpg",

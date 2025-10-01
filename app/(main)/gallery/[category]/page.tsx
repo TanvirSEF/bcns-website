@@ -71,7 +71,25 @@ const eventCategories = {
       "/images/pmd/7.jpg",
       "/images/pmd/8.jpg",
       "/images/pmd/9.jpg",
-      "/images/pmd/10.jpg"
+      "/images/pmd/10.jpg",
+      "/images/pmd/11.jpg",
+      "/images/pmd/12.jpg",
+      "/images/pmd/13.jpg",
+      "/images/pmd/14.jpg",
+      "/images/pmd/15.jpg",
+      "/images/pmd/16.jpg",
+      "/images/pmd/17.jpg",
+      "/images/pmd/18.jpg",
+      "/images/pmd/19.jpg",
+      "/images/pmd/20.jpg",
+      "/images/pmd/21.jpg",
+      "/images/pmd/22.jpg",
+      "/images/pmd/23.jpg",
+      "/images/pmd/24.jpg",
+      "/images/pmd/25.jpg",
+      "/images/pmd/26.jpg",
+      "/images/pmd/27.jpg",
+      "/images/pmd/28.jpg"
     ]
   },
   cgm2025: {

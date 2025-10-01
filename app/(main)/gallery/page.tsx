@@ -39,7 +39,7 @@ const eventCategories = [
     date: "June 21, 2025",
     attendees: "Participants",
     coverImage: "/images/pmd/1.jpg",
-    imageCount: 10,
+    imageCount: 28,
     description: "CME on Paediatric Movement Disorder"
   },
   {
