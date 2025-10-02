@@ -17,7 +17,7 @@ export const eventsData: EventItem[] = [
   {
     slug: "cme-malaysia-june-2025",
     type: "program",
-    title: "CME Malaysia, Mr. Arifin Program 21.06.2025. ((CME) on \"Paediatric Movement Disorder\")",
+    title: "CME \"Paediatric Movement Disorder\"",
     date: "21.06.2025",
     time: "9:00 AM",
     venue: "NINSH, Agargaon, Dhaka",
@@ -28,7 +28,7 @@ export const eventsData: EventItem[] = [
   {
     slug: "childhood-epilepsy-jashore-aug-2025",
     type: "program",
-    title: "Childhood Epilepsy, Jashore Medical College 26.08.2025 at JMCH. (Scientific Seminar titled \"Childhood Epilepsy: A Practical Approach\")",
+    title: "Scientific Seminar \"Childhood Epilepsy: A Practical Approach\"",
     date: "26.08.2025",
     time: "9:00 AM",
     venue: "Jashore Medical College (JMCH)",
@@ -39,7 +39,7 @@ export const eventsData: EventItem[] = [
   {
     slug: "cme-japan-sept-2025",
     type: "program",
-    title: "CME Japan Mr. Kato Program 21.09.2025. (CME on \"Insight into the Recent Innovation and Challenges of Epilepsy & Developmental Disorders\")",
+    title: "CME on \"Insight into the Recent Innovation and Challenges of Epilepsy & Developmental Disorders\"",
     date: "21 and 22 September 2025",
     time: "9:00 AM",
     venue: "Conference Hall, NINS, Dhaka-1207",
@@ -51,24 +51,13 @@ export const eventsData: EventItem[] = [
   {
     slug: "sma-workshop-aug-2025",
     type: "workshop",
-    title: "Workshop SMA & Program 23, 24.08.2025 (workshop on \"Standardized Rehabilitation Approach for Spinal Muscular Atrophy (SMA)\")",
+    title: "Workshop on \"Standardized Rehabilitation Approach for Spinal Muscular Atrophy (SMA)\"",
     date: "23-24.08.2025",
     time: "9:00 AM",
     venue: "NINSH, Agargaon, Dhaka",
     attendees: "200+",
     summary:
       "The two-day workshop on \"Standardized Rehabilitation Approach for Spinal Muscular Atrophy (SMA)\" was held on 23–24 August 2025 at the National Institute of Neurosciences & Hospital (NINS), jointly organized by NINS, Bangladesh Child Neurology Society (BCNS), CureSMA Bangladesh, and Roche Bangladesh Ltd. Chief Guest Prof. Dr. Kazi Gias Uddin Ahmed and special guest Prof. Dr. Md. Badrul Alam Mondal highlighted the importance of advanced rehabilitation for SMA patients. Sessions included expert lectures, live demonstrations, and case-based discussions led by foreign physiotherapists Casandra Beh Huan Gaik, Thashendran Navindran, and Fezia Tyebally, along with local specialists. Key topics covered were motor function assessments, electrical stimulation, spider cage therapy, dynamic movement intervention, Halliwick concept, and aquatherapy. The workshop emphasized evidence-based rehabilitation techniques to improve functional outcomes and quality of life for SMA patients. Interactive participation, parent insights, and multidisciplinary collaboration made the event impactful, fostering future directions in SMA care.",
-  },
-  {
-    slug: "childhood-epilepsy-workshop-2025",
-    type: "workshop",
-    title: "Childhood epilepsy Workshop",
-    date: "2025",
-    time: "N/A",
-    venue: "N/A",
-    attendees: "N/A",
-    summary:
-      "Workshop focusing on practical approaches to childhood epilepsy. Details will be updated soon.",
   },
   {
     slug: "emergency-meeting-26-04-2025",
