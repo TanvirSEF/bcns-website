@@ -59,6 +59,15 @@ const eventCategories = [
     coverImage: "/images/workshop/1WORKS_1.JPG",
     imageCount: 4,
     description: "Workshop Highlights"
+  },
+  {
+    id: "cmeo2025",
+    title: "CME on Insight into the recent Innovation and challenges of epilepsy & Developmental Disorder",
+    date: "September 21-22, 2025",
+    attendees: "200+ Participants",
+    coverImage: "/images/cmeo/11.jpg",
+    imageCount: 18,
+    description: "CME on Insight into the Recent Innovation and Challenges of Epilepsy & Developmental Disorders"
   }
 ];
 
