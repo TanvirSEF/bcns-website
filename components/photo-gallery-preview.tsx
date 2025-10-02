@@ -77,6 +77,16 @@ export function PhotoGalleryPreview() {
       category: "Workshop",
       href: "/gallery/workshop2025",
     },
+    {
+      id: "cmeo2025",
+      src: "/images/cmeo/11.jpg",
+      alt: "CME on Insight into the recent Innovation and challenges of epilepsy & Developmental Disorder",
+      eventName: "CME on Insight into the recent Innovation and challenges of epilepsy & Developmental Disorder",
+      date: "21-22 September 2025",
+      attendees: "200+ Participants",
+      category: "CME",
+      href: "/gallery/cmeo2025",
+    },
   ];
 
   return (
@@ -149,7 +159,7 @@ export function PhotoGalleryPreview() {
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-                6+
+                7+
               </div>
               <div className="text-gray-600 text-sm">Major Events 2025</div>
             </div>

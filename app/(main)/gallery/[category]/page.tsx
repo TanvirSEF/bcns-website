@@ -140,6 +140,32 @@ const eventCategories = {
       "/images/workshop/3WORKS_1.JPG",
       "/images/workshop/4WORKS_1.JPG"
     ]
+  },
+  cmeo2025: {
+    title: "CME on Insight into the recent Innovation and challenges of epilepsy & Developmental Disorder",
+    date: "September 21-22, 2025",
+    attendees: "200+ Participants",
+    description: "CME on Insight into the Recent Innovation and Challenges of Epilepsy & Developmental Disorders",
+    images: [
+      "/images/cmeo/11.jpg",
+      "/images/cmeo/12.jpg",
+      "/images/cmeo/13.jpg",
+      "/images/cmeo/14.jpg",
+      "/images/cmeo/15.jpg",
+      "/images/cmeo/16.jpg",
+      "/images/cmeo/17.jpg",
+      "/images/cmeo/18.jpg",
+      "/images/cmeo/19.jpg",
+      "/images/cmeo/20.jpg",
+      "/images/cmeo/21.jpg",
+      "/images/cmeo/22.jpg",
+      "/images/cmeo/23.jpg",
+      "/images/cmeo/24.jpg",
+      "/images/cmeo/25.jpg",
+      "/images/cmeo/26.jpg",
+      "/images/cmeo/27.jpg",
+      "/images/cmeo/28.jpg"
+    ]
   }
 };
 
