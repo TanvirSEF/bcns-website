@@ -201,16 +201,14 @@ function ProfilePageContent() {
   };
 
   const handleSave = async () => {
-    // Prepare data for API call
+    // Prepare data for API call (excluding read-only fields)
     const updateData = {
       name: formData.name,
-      email: formData.email,
+      // email, specialization, and institution are read-only
       phone: formData.phone,
       affiliation: formData.affiliation,
       mailingAddress: formData.mailingAddress,
       permanentAddress: formData.permanentAddress,
-      specialization: formData.specialization,
-      institution: formData.institution,
       bio: formData.bio,
       primaryResearchInterest: formData.primaryResearchInterest,
       secondaryResearchInterest: formData.secondaryResearchInterest,
@@ -404,8 +402,9 @@ function ProfilePageContent() {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    disabled={!isEditing}
+                    disabled
+                    className="bg-gray-50 cursor-not-allowed"
+                    title="Email cannot be changed"
                   />
                 </div>
                 <div className="space-y-2">
@@ -468,8 +467,9 @@ function ProfilePageContent() {
                   <Input
                     id="specialization"
                     value={formData.specialization}
-                    onChange={(e) => handleInputChange("specialization", e.target.value)}
-                    disabled={!isEditing}
+                    disabled
+                    className="bg-gray-50 cursor-not-allowed"
+                    title="Specialization is set during registration and cannot be changed"
                   />
                 </div>
                 <div className="space-y-2">
@@ -477,8 +477,9 @@ function ProfilePageContent() {
                   <Input
                     id="institution"
                     value={formData.institution}
-                    onChange={(e) => handleInputChange("institution", e.target.value)}
-                    disabled={!isEditing}
+                    disabled
+                    className="bg-gray-50 cursor-not-allowed"
+                    title="Institution is set during registration and cannot be changed"
                   />
                 </div>
               </div>

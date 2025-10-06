@@ -274,14 +274,13 @@ export function isValidationErrorResponse(
 // Input types for API operations (what we send to the server)
 export interface UserUpdateInput {
   readonly name?: string;
-  readonly email?: EmailAddress;
+  // email is read-only, cannot be updated via profile
   readonly phone?: string;
   readonly bio?: string;
   readonly affiliation?: string;
   readonly mailingAddress?: string;
   readonly permanentAddress?: string;
-  readonly specialization?: string;
-  readonly institution?: string;
+  // specialization and institution are read-only (set during registration)
   readonly primaryResearchInterest?: string;
   readonly secondaryResearchInterest?: string;
 }
