@@ -18,7 +18,6 @@ import {
   OperationResponse,
   FileUploadResponse,
   UserUpdateInput,
-  PasswordChangeInput,
   LoginInput,
   RegisterInput,
   SendOTPInput,
@@ -119,12 +118,12 @@ export const authApi = {
 
 export const userApi = {
   updateProfile: async (data: UserUpdateInput): Promise<User> => {
-    const response = await apiClient.put<User>('/users/me', data);
+    const response = await apiClient.patch<User>('/users/me', data);
     return handleApiResponse<User>(response);
   },
 
-  changePassword: async (passwordData: PasswordChangeInput): Promise<OperationResponse> => {
-    const response = await apiClient.put<OperationResponse>(
+  changePassword: async (passwordData: { currentPassword: string; newPassword: string }): Promise<OperationResponse> => {
+    const response = await apiClient.patch<OperationResponse>(
       '/users/me/change-password',
       passwordData
     );
@@ -140,7 +139,8 @@ export const userApi = {
       '/users/me/profile-picture',
       file,
       undefined,
-      onProgress
+      onProgress,
+      'profilePicture' // Backend expects this field name
     );
     
     return handleApiResponse<FileUploadResponse>(response);

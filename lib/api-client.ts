@@ -599,10 +599,11 @@ export class ApiClient {
     endpoint: string,
     file: File,
     additionalData?: Record<string, string>,
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
+    fieldName: string = 'file'
   ): Promise<T> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append(fieldName, file);
 
     if (additionalData) {
       Object.entries(additionalData).forEach(([key, value]) => {

@@ -33,12 +33,13 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { toast } from "react-toastify";
 
 function ProfilePageContent() {
-  const { user, isLoading, isAuthorized, updateUser } = useRequireAuth();
+  const { user, isLoading, isAuthorized, updateUser, refreshUser } = useRequireAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(true);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -56,6 +57,27 @@ function ProfilePageContent() {
     newPassword: "",
     confirmPassword: ""
   });
+
+  // Fetch fresh user data when component mounts
+  React.useEffect(() => {
+    const loadUserData = async () => {
+      if (refreshUser) {
+        try {
+          setIsRefreshing(true);
+          await refreshUser();
+        } catch (error) {
+          console.error('Failed to refresh user data:', error);
+        } finally {
+          setIsRefreshing(false);
+        }
+      } else {
+        setIsRefreshing(false);
+      }
+    };
+    
+    loadUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount - refreshUser is stable from useCallback
 
   // Profile update with proper async handling
   const { loading: updateLoading, execute: executeUpdate } = useAsyncSubmit(
@@ -153,11 +175,14 @@ function ProfilePageContent() {
     }
   }, [user]);
 
-  // Show loading spinner while checking authentication
-  if (isLoading) {
+  // Show loading spinner while checking authentication or refreshing user data
+  if (isLoading || isRefreshing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+          <p className="text-sm text-gray-600">Loading your profile...</p>
+        </div>
       </div>
     );
   }
@@ -176,16 +201,14 @@ function ProfilePageContent() {
   };
 
   const handleSave = async () => {
-    // Prepare data for API call
+    // Prepare data for API call (excluding read-only fields)
     const updateData = {
       name: formData.name,
-      email: formData.email,
+      // email, specialization, and institution are read-only
       phone: formData.phone,
       affiliation: formData.affiliation,
       mailingAddress: formData.mailingAddress,
       permanentAddress: formData.permanentAddress,
-      specialization: formData.specialization,
-      institution: formData.institution,
       bio: formData.bio,
       primaryResearchInterest: formData.primaryResearchInterest,
       secondaryResearchInterest: formData.secondaryResearchInterest,
@@ -379,8 +402,9 @@ function ProfilePageContent() {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    disabled={!isEditing}
+                    disabled
+                    className="bg-gray-50 cursor-not-allowed"
+                    title="Email cannot be changed"
                   />
                 </div>
                 <div className="space-y-2">
@@ -443,8 +467,9 @@ function ProfilePageContent() {
                   <Input
                     id="specialization"
                     value={formData.specialization}
-                    onChange={(e) => handleInputChange("specialization", e.target.value)}
-                    disabled={!isEditing}
+                    disabled
+                    className="bg-gray-50 cursor-not-allowed"
+                    title="Specialization is set during registration and cannot be changed"
                   />
                 </div>
                 <div className="space-y-2">
@@ -452,8 +477,9 @@ function ProfilePageContent() {
                   <Input
                     id="institution"
                     value={formData.institution}
-                    onChange={(e) => handleInputChange("institution", e.target.value)}
-                    disabled={!isEditing}
+                    disabled
+                    className="bg-gray-50 cursor-not-allowed"
+                    title="Institution is set during registration and cannot be changed"
                   />
                 </div>
               </div>

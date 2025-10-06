@@ -37,7 +37,12 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
 
     // Extract user data from various possible response structures
-    const user = data.user || data.data?.user || data;
+    let user = data.user || data.data?.user || data;
+
+    // Transform MongoDB _id to id for frontend compatibility
+    if (user._id && !user.id) {
+      user = { ...user, id: user._id };
+    }
 
     return NextResponse.json({
       success: true,
@@ -52,7 +57,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
   try {
     const token = getToken(request);
     if (!token) {
@@ -74,21 +79,30 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!response.ok) {
-      const errorData = await response.text().catch(() => 'Backend request failed');
-      throw new Error(`Backend request failed: ${response.status} ${response.statusText} - ${errorData}`);
+      const errorData = await response.json().catch(() => ({ message: 'Backend request failed' }));
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: errorData.message || `Update failed with status ${response.status}` 
+        },
+        { status: response.status }
+      );
     }
 
     const data = await response.json();
-    const user = data.user || data.data?.user || data;
-
+    
+    // Backend returns user directly (not nested)
     return NextResponse.json({
       success: true,
-      data: user,
+      data: data,
     });
   } catch (error) {
     console.error("Update profile API error:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update profile" },
+      { 
+        success: false, 
+        message: error instanceof Error ? error.message : "Failed to update profile" 
+      },
       { status: 500 }
     );
   }
