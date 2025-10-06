@@ -208,6 +208,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userData);
       setUserData(userData);
     } catch (error) {
+      console.error('[AuthContext] Failed to refresh user:', error);
       setError(error instanceof Error ? error : new Error('Failed to refresh user data'));
       
       // If refresh fails due to auth error, logout the user
@@ -274,7 +275,7 @@ export function useAuth() {
 }
 
 export function useRequireAuth() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, updateUser, refreshUser } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -283,13 +284,12 @@ export function useRequireAuth() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  const { updateUser: contextUpdateUser } = useAuth();
-
   return {
     user,
     isAuthenticated,
     isLoading,
-    updateUser: contextUpdateUser,
+    updateUser,
+    refreshUser, // Refresh user data from API
     isAuthorized: isAuthenticated && !isLoading,
   };
 }

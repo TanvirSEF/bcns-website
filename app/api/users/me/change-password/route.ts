@@ -10,7 +10,7 @@ function getToken(request: NextRequest): string | null {
   return request.cookies.get("auth_token")?.value || null;
 }
 
-export async function PUT(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
   try {
     const token = getToken(request);
     if (!token) {
@@ -25,7 +25,7 @@ export async function PUT(request: NextRequest) {
     const response = await fetch(
       `${config.backendUrl}/api/users/me/change-password`,
       {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -35,8 +35,14 @@ export async function PUT(request: NextRequest) {
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Password change failed");
+      const errorData = await response.json().catch(() => ({ message: 'Password change failed' }));
+      return NextResponse.json(
+        {
+          success: false,
+          message: errorData.message || `Password change failed with status ${response.status}`,
+        },
+        { status: response.status }
+      );
     }
 
     const data = await response.json();
