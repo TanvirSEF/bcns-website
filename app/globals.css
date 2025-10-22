@@ -139,3 +139,26 @@
   }
 }
 
+/* Auto-scroll animation for notice board */
+@keyframes scroll-up {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.animate-scroll-up {
+  animation: scroll-up 60s linear infinite;
+}
+
+.animate-scroll-up:hover {
+  animation-play-state: paused;
+}
+
+/* Ensure smooth scrolling */
+.animate-scroll-up {
+  will-change: transform;
+}
+
