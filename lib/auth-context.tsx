@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useRouter } from "next/navigation";
 import { User } from "@/types/api";
 import { authApi } from "./api";
-import { ApiError } from "./api-client";
+import apiClient, { ApiError } from "./api-client";
 
 interface AuthContextType {
   user: User | null;
@@ -107,6 +107,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       : Date.now() + (60 * 60 * 1000); // Default 1 hour
     
     localStorage.setItem("token_expires_at", expirationTime.toString());
+
+    // Update shared API client so subsequent requests include Authorization
+    try {
+      apiClient.setToken(token, expiresIn);
+    } catch {
+      // Ignore invalid token format errors; local storage still holds token
+    }
   };
 
   const clearTokenData = (): void => {
@@ -114,6 +121,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     localStorage.removeItem("auth_token");
     localStorage.removeItem("token_expires_at");
+
+    // Ensure API client also forgets the token
+    try {
+      apiClient.logout();
+    } catch {}
   };
 
   // Initialize auth state
@@ -127,12 +139,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (hasValidToken && storedUser) {
           // We have a valid token and stored user data
           setUser(storedUser);
+          // Sync API client with stored token for subsequent requests
+          const token = localStorage.getItem("auth_token");
+          const expiresAt = localStorage.getItem("token_expires_at");
+          if (token) {
+            const expiresIn = expiresAt ? Math.max(0, Math.floor((parseInt(expiresAt, 10) - Date.now()) / 1000)) : undefined;
+            try { apiClient.setToken(token, expiresIn); } catch {}
+          }
         } else if (hasValidToken) {
           // We have a token but no user data, try to fetch it
           try {
             const userData = await authApi.getProfile();
             setUser(userData);
             setUserData(userData);
+            // Ensure API client is in sync
+            const token = localStorage.getItem("auth_token");
+            const expiresAt = localStorage.getItem("token_expires_at");
+            if (token) {
+              const expiresIn = expiresAt ? Math.max(0, Math.floor((parseInt(expiresAt, 10) - Date.now()) / 1000)) : undefined;
+              try { apiClient.setToken(token, expiresIn); } catch {}
+            }
           } catch (error) {
             // Clear invalid token
             clearTokenData();

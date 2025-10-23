@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { AlertCircle, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { authApi } from "@/lib/api";
-import { LoginInput } from "@/types/api";
+import { LoginInput, UserRole } from "@/types/api";
 import { NavbarClient } from "@/components/navbarclient";
 import { Footer } from "@/components/footer";
 
@@ -65,13 +65,26 @@ function LoginPageContent() {
         // Update auth context (this will handle storage)
         login(response.user, response.token, response.expiresIn);
 
-        // Show success message briefly then redirect
+        // Determine role using fresh profile to avoid stale/placeholder data
+        let destinationRole = response.user.role;
+        try {
+          const freshUser = await authApi.getProfile();
+          if (freshUser?.role) {
+            destinationRole = freshUser.role;
+          }
+        } catch {}
+
+        // Show success message briefly then redirect based on role
         setSuccess("Login successful! Redirecting...");
 
-        // Small delay to show success message, then redirect
+        // Small delay to show success message, then redirect based on role
         setTimeout(() => {
-          router.push("/user-dashboard");
-        }, 500);
+          if (destinationRole === UserRole.ADMIN) {
+            router.replace("/admin");
+          } else {
+            router.replace("/user-dashboard");
+          }
+        }, 400);
       } else {
         setError("Login response is incomplete. Please try again.");
       }
