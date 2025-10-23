@@ -8,6 +8,8 @@ import {
   User,
 } from "lucide-react"
 
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/lib/auth-context"
 import {
   Avatar,
   AvatarFallback,
@@ -39,6 +41,16 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { logout } = useAuth()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } finally {
+      router.replace("/login")
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -98,7 +110,12 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault()
+                handleLogout()
+              }}
+            >
               <LogOut className="size-4" />
               Log out
             </DropdownMenuItem>

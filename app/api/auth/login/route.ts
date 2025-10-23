@@ -78,16 +78,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Transform the response to match our frontend expectations
-    const transformedData = {
-      user: data.user || {
-        // If no user data, create placeholder with request email
+    // Try to ensure we always return a proper user object
+    const accessToken: string = data.accessToken;
+
+    // Helper to normalize user shape
+    const normalizeUser = (u: any) => {
+      if (!u) return null;
+      const user = { ...u };
+      if (user._id && !user.id) user.id = user._id;
+      return user;
+    };
+
+    // Prefer user from login response; otherwise fetch profile with the new token
+    let user = normalizeUser(data.user);
+
+    if (!user) {
+      try {
+        const meRes = await fetch(`${config.backendUrl}/api/users/me`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          // Backend may return { user } or the user directly
+          user = normalizeUser(meData?.user || meData?.data?.user || meData);
+        }
+      } catch {
+        // Ignore and fallback
+      }
+    }
+
+    // Final fallback if still no user (avoid incorrect role defaults)
+    if (!user) {
+      user = {
         id: "temp",
         email: body.email,
         name: "User",
-        role: "member"
-      },
-      token: data.accessToken, // Transform accessToken to token
+        role: "guest",
+      };
+    }
+
+    // Transform the response to match our frontend expectations
+    const transformedData = {
+      user,
+      token: accessToken, // Transform accessToken to token
       expiresIn: data.expiresIn || 3600, // Default to 1 hour if not provided
       isTwoFactorRequired: data.isTwoFactorRequired || false
     };
