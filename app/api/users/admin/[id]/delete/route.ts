@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import config from "@/lib/config";
+import { fetchWithTimeout, getErrorMessage, getErrorStatusCode } from "@/lib/fetch-with-timeout";
 
 function getToken(request: NextRequest): string | null {
   const authHeader = request.headers.get("authorization");
@@ -26,12 +26,13 @@ export async function DELETE(
 
     const { id: userId } = await params;
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${config.backendUrl}/api/users/admin/${userId}/delete`,
       {
         method: "DELETE",
         headers: { 
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       }
     );
@@ -56,9 +57,15 @@ export async function DELETE(
     });
   } catch (error) {
     console.error("Delete user API error:", error);
+    const errorMessage = getErrorMessage(error);
+    const statusCode = getErrorStatusCode(error);
+    
     return NextResponse.json(
-      { success: false, message: "Failed to delete user" },
-      { status: 500 }
+      { 
+        success: false, 
+        message: errorMessage || "Failed to delete user" 
+      },
+      { status: statusCode }
     );
   }
 }

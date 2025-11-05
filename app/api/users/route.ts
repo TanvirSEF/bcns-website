@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import config from "@/lib/config";
+import { fetchWithTimeout, getErrorMessage, getErrorStatusCode } from "@/lib/fetch-with-timeout";
 
 interface BackendUser {
   _id?: string;
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
       backendUrl += `?role=${encodeURIComponent(role)}`;
     }
 
-    const response = await fetch(backendUrl, {
+    const response = await fetchWithTimeout(backendUrl, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -123,9 +124,15 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Users API error:", error);
+    const errorMessage = getErrorMessage(error);
+    const statusCode = getErrorStatusCode(error);
+    
     return NextResponse.json(
-      { success: false, message: "Failed to fetch users" },
-      { status: 500 }
+      { 
+        success: false, 
+        message: errorMessage || "Failed to fetch users" 
+      },
+      { status: statusCode }
     );
   }
 }
