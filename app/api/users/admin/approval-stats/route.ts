@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import config from "@/lib/config";
+import { fetchWithTimeout, getErrorMessage, getErrorStatusCode } from "@/lib/fetch-with-timeout";
 
 function getToken(request: NextRequest): string | null {
   const authHeader = request.headers.get("authorization");
@@ -21,10 +21,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${config.backendUrl}/api/users/admin/approval-stats`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -55,9 +58,15 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Approval stats API error:", error);
+    const errorMessage = getErrorMessage(error);
+    const statusCode = getErrorStatusCode(error);
+    
     return NextResponse.json(
-      { success: false, message: "Failed to fetch approval statistics" },
-      { status: 500 }
+      { 
+        success: false, 
+        message: errorMessage || "Failed to fetch approval statistics" 
+      },
+      { status: statusCode }
     );
   }
 }

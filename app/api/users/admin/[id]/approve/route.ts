@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import config from "@/lib/config";
+import { fetchWithTimeout, getErrorMessage, getErrorStatusCode } from "@/lib/fetch-with-timeout";
 
 function getToken(request: NextRequest): string | null {
   const authHeader = request.headers.get("authorization");
@@ -26,7 +26,7 @@ export async function PATCH(
 
     const { id: userId } = await params;
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${config.backendUrl}/api/users/admin/${userId}/approve`,
       {
         method: "PATCH",
@@ -63,9 +63,15 @@ export async function PATCH(
     });
   } catch (error) {
     console.error("Approve user API error:", error);
+    const errorMessage = getErrorMessage(error);
+    const statusCode = getErrorStatusCode(error);
+    
     return NextResponse.json(
-      { success: false, message: "Failed to approve user" },
-      { status: 500 }
+      { 
+        success: false, 
+        message: errorMessage || "Failed to approve user" 
+      },
+      { status: statusCode }
     );
   }
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import config from "@/lib/config";
+import { fetchWithTimeout, getErrorMessage, getErrorStatusCode } from "@/lib/fetch-with-timeout";
 
 interface BackendUser {
   _id?: string;
@@ -39,10 +39,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${config.backendUrl}/api/users/admin/pending`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -89,9 +92,15 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Pending users API error:", error);
+    const errorMessage = getErrorMessage(error);
+    const statusCode = getErrorStatusCode(error);
+    
     return NextResponse.json(
-      { success: false, message: "Failed to fetch pending users" },
-      { status: 500 }
+      { 
+        success: false, 
+        message: errorMessage || "Failed to fetch pending users" 
+      },
+      { status: statusCode }
     );
   }
 }
