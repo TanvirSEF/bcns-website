@@ -87,6 +87,13 @@ export function MembershipForm() {
       if (result.success) {
         setSubmitStatus("success");
         
+        // Store full membership form data in localStorage (excluding photo file)
+        const formDataToStore = {
+          ...formData,
+          photo: null, // Don't store file in localStorage
+        };
+        localStorage.setItem('membershipFormData', JSON.stringify(formDataToStore));
+        
         // Redirect to OTP verification page with user data
         const params = new URLSearchParams({
           name: formData.name,
