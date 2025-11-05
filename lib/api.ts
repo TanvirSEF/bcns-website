@@ -182,6 +182,12 @@ export const adminApi = {
     return handleApiResponse<ApprovalStats>(response);
   },
 
+  getAllUsers: async (role?: string): Promise<readonly User[]> => {
+    const url = role ? `/users?role=${encodeURIComponent(role)}` : '/users';
+    const response = await apiClient.get<readonly User[]>(url);
+    return handleApiResponse<readonly User[]>(response);
+  },
+
   approveUser: async (userId: string): Promise<OperationResponse> => {
     const response = await apiClient.patch<OperationResponse>(`/users/admin/${userId}/approve`);
     return handleApiResponse<OperationResponse>(response);
