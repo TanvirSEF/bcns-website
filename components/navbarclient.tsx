@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { UserRole } from "@/types/api";
 import {
   Menu,
   Search,
@@ -81,6 +82,7 @@ export function NavbarClient() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isScrolled, setIsScrolled] = React.useState(false);
   const { isAuthenticated, user, logout } = useAuth();
+  const dashboardHref = user?.role === UserRole.ADMIN ? "/admin" : "/user-dashboard";
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -189,17 +191,19 @@ export function NavbarClient() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <Link href="/user-dashboard" className="flex items-center">
+                <Link href={dashboardHref} className="flex items-center">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/user-dashboard/profile" className="flex items-center">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </Link>
-              </DropdownMenuItem>
+              {user?.role !== UserRole.ADMIN && (
+                <DropdownMenuItem asChild>
+                  <Link href="/user-dashboard/profile" className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />
@@ -497,17 +501,19 @@ export function NavbarClient() {
                           </div>
                         </DropdownMenuLabel>
                         <DropdownMenuItem asChild>
-                          <Link href="/user-dashboard" className="flex items-center">
+                          <Link href={dashboardHref} className="flex items-center">
                             <LayoutDashboard className="mr-2 h-4 w-4" />
                             Dashboard
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/user-dashboard/profile" className="flex items-center">
-                            <User className="mr-2 h-4 w-4" />
-                            Profile
-                          </Link>
-                        </DropdownMenuItem>
+                        {user?.role !== UserRole.ADMIN && (
+                          <DropdownMenuItem asChild>
+                            <Link href="/user-dashboard/profile" className="flex items-center">
+                              <User className="mr-2 h-4 w-4" />
+                              Profile
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={logout} className="text-red-600">
                           <LogOut className="mr-2 h-4 w-4" />

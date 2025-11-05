@@ -29,10 +29,17 @@ function LoginPageContent() {
   // Check for registration success message
   useEffect(() => {
     const message = searchParams.get('message');
+    const payment = searchParams.get('payment');
+    const registered = searchParams.get('registered');
+    
     if (message === 'registration-success') {
       setSuccess("Account created successfully! Please login with your credentials.");
     } else if (message === 'otp-verified') {
       setSuccess("Email verified successfully! You can now login with your credentials.");
+    } else if (payment === 'completed' && registered === 'true') {
+      setSuccess("Payment completed successfully! Please login with your credentials to access your account.");
+    } else if (registered === 'true') {
+      setSuccess("Account created successfully! Please login with your credentials.");
     }
   }, [searchParams]);
 

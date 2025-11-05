@@ -161,9 +161,42 @@ export const userApi = {
   },
 };
 
+export interface ApprovalStats {
+  readonly pending: number;
+  readonly approved: number;
+  readonly total: number;
+}
+
+export interface PendingUser extends User {
+  readonly status: string;
+}
+
+export const adminApi = {
+  getPendingUsers: async (): Promise<readonly PendingUser[]> => {
+    const response = await apiClient.get<readonly PendingUser[]>('/users/admin/pending');
+    return handleApiResponse<readonly PendingUser[]>(response);
+  },
+
+  getApprovalStats: async (): Promise<ApprovalStats> => {
+    const response = await apiClient.get<ApprovalStats>('/users/admin/approval-stats');
+    return handleApiResponse<ApprovalStats>(response);
+  },
+
+  approveUser: async (userId: string): Promise<OperationResponse> => {
+    const response = await apiClient.patch<OperationResponse>(`/users/admin/${userId}/approve`);
+    return handleApiResponse<OperationResponse>(response);
+  },
+
+  deleteUser: async (userId: string): Promise<OperationResponse> => {
+    const response = await apiClient.delete<OperationResponse>(`/users/admin/${userId}/delete`);
+    return handleApiResponse<OperationResponse>(response);
+  },
+};
+
 export const api = {
   auth: authApi,
   users: userApi,
+  admin: adminApi,
 };
 
 // Backward compatibility exports
