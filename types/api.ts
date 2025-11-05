@@ -89,6 +89,9 @@ export interface Event {
   readonly updatedAt: ISODateString;
   readonly description?: string;
   readonly location?: string;
+  readonly category?: "Program" | "Workshop" | "Meeting";
+  readonly time?: string;
+  readonly imageUrl?: URL;
   readonly isRegistered: boolean;
 }
 
@@ -336,7 +339,10 @@ export interface EventCreateInput {
   readonly title: string;
   readonly description?: string;
   readonly date: ISODateString;
+  readonly time?: string;
+  readonly category: "program" | "workshop" | "meeting";
   readonly location?: string;
+  readonly imageUrl?: string;
 }
 
 export interface DocumentCreateInput {

@@ -25,6 +25,7 @@ import {
   ResendOTPInput,
   SendOTPResponse,
   VerifyOTPResponse,
+  EventCreateInput,
 } from '@/types/api';
 
 function handleApiResponse<T>(response: unknown): T {
@@ -199,10 +200,44 @@ export const adminApi = {
   },
 };
 
+// Event API
+export const eventApi = {
+  getEvents: async (category?: string): Promise<readonly Event[]> => {
+    const url = category ? `/events?category=${encodeURIComponent(category)}` : '/events';
+    const response = await apiClient.get<readonly Event[]>(url);
+    return handleApiResponse<readonly Event[]>(response);
+  },
+
+  getEvent: async (eventId: string): Promise<Event> => {
+    const response = await apiClient.get<Event>(`/events/${eventId}`);
+    return handleApiResponse<Event>(response);
+  },
+
+  createEvent: async (eventData: EventCreateInput & { eventImage?: File }): Promise<Event> => {
+    const formData = new FormData();
+    formData.append('title', eventData.title);
+    if (eventData.description) formData.append('description', eventData.description);
+    formData.append('date', eventData.date);
+    if (eventData.time) formData.append('time', eventData.time);
+    formData.append('category', eventData.category);
+    if (eventData.location) formData.append('location', eventData.location);
+    if (eventData.eventImage) {
+      formData.append('eventImage', eventData.eventImage);
+    }
+
+    // Use post method with FormData - apiClient handles it correctly
+    const response = await apiClient.post<Event>('/events', formData, {
+      skipAuth: false,
+    });
+    return handleApiResponse<Event>(response);
+  },
+};
+
 export const api = {
   auth: authApi,
   users: userApi,
   admin: adminApi,
+  events: eventApi,
 };
 
 // Backward compatibility exports
@@ -240,10 +275,13 @@ export const getAllMembers = userApi.getMembers;
 export const uploadProfileImage = userApi.uploadProfilePicture;
 export const deleteProfileImage = userApi.deleteProfilePicture;
 
-// Placeholder exports (to be implemented)
-export const getEvents = (): Promise<readonly Event[]> => Promise.resolve([]);
-export const createEvent = (): Promise<Event> => Promise.reject(new Error('Not implemented'));
-export const getEvent = (): Promise<Event> => Promise.reject(new Error('Not implemented'));
+// Event backward compatibility exports
+export const getEvents = (category?: string): Promise<readonly Event[]> => 
+  eventApi.getEvents(category);
+export const getEvent = (eventId: string): Promise<Event> => 
+  eventApi.getEvent(eventId);
+export const createEvent = (eventData: EventCreateInput & { eventImage?: File }): Promise<Event> => 
+  eventApi.createEvent(eventData);
 export const registerForEvent = (): Promise<OperationResponse> => 
   Promise.resolve({ success: true, message: 'Success' });
 
