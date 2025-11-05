@@ -17,7 +17,6 @@ import {
   Lock
 } from 'lucide-react';
 import { verifyOTP, verifyRegistrationOTP, resendRegistrationOTP } from '@/lib/api';
-import { useAuth } from '@/lib/auth-context';
 import { NavbarClient } from '@/components/navbarclient';
 import { Footer } from '@/components/footer';
 
@@ -30,7 +29,6 @@ interface UserData {
 function OTPVerificationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
 
   const [otp, setOtp] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -127,21 +125,16 @@ function OTPVerificationContent() {
       if (response && response.user) {
         setSuccess(true);
         
-        if (response.token) {
-          // User has token, proceed with login
-          login(response.user, response.token, response.expiresIn);
-          
-          setTimeout(() => {
-            router.push('/user-dashboard?welcome=true');
-          }, 2000);
-        } else if ((response as any).requiresLogin) {
-          // User registered but needs to login manually
-          setTimeout(() => {
-            router.push('/login?registered=true&email=' + encodeURIComponent(userData.email));
-          }, 2000);
-        } else {
-          throw new Error('Invalid registration response - no user data received');
-        }
+        // After successful registration, redirect to payment page
+        // User will complete payment and then login
+        setTimeout(() => {
+          router.push(
+            '/payment?email=' + 
+            encodeURIComponent(userData.email) + 
+            '&name=' + 
+            encodeURIComponent(userData.name)
+          );
+        }, 2000);
       } else {
         throw new Error('Invalid registration response - no user data received');
       }
@@ -245,7 +238,7 @@ function OTPVerificationContent() {
                   </div>
                   <div className="flex items-center justify-center gap-2 text-green-600">
                     <Sparkles className="w-4 h-4 animate-pulse" />
-                    <span className="text-sm">Redirecting to your dashboard</span>
+                    <span className="text-sm">Redirecting to payment page</span>
                     <Sparkles className="w-4 h-4 animate-pulse" />
                   </div>
                 </div>

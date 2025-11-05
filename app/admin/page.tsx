@@ -1,5 +1,6 @@
 import { SectionCards } from "@/components/section-cards"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
+import { PendingUsersWidget } from "@/components/admin/PendingUsersWidget"
 
 export default function AdminDashboard() {
   return (
@@ -11,8 +12,11 @@ export default function AdminDashboard() {
       
       <SectionCards />
       
-      <div className="p-6 bg-card rounded-lg border shadow-sm">
-        <ChartAreaInteractive />
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="p-6 bg-card rounded-lg border shadow-sm">
+          <ChartAreaInteractive />
+        </div>
+        <PendingUsersWidget />
       </div>
     </div>
   )
