@@ -65,7 +65,13 @@ function OTPVerificationContent() {
       }
     }
 
-    setUserData({ name, email, password, membershipData });
+    // Conditionally include membershipData to avoid exactOptionalPropertyTypes issues
+    setUserData({
+      name,
+      email,
+      password,
+      ...(membershipData && { membershipData }),
+    });
   }, [searchParams, router]);
 
   const maskEmail = (email: string): string => {
