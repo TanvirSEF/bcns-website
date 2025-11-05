@@ -37,13 +37,35 @@ export async function POST(request: NextRequest) {
     const backendUrl = config.backendUrl;
     const verifyEndpoint = `${backendUrl}/api/auth/verify-registration`;
 
-    // Only send the essential fields for verification
-    const verificationPayload = {
+    // Build payload with all membership fields
+    const verificationPayload: any = {
       name: body.name,
       email: body.email,
       password: body.password,
-      otp: body.otp.toString().trim() // Ensure OTP is string and trimmed
+      otp: body.otp.toString().trim(), // Ensure OTP is string and trimmed
     };
+
+    // Add all membership form fields if provided
+    if (body.formNo !== undefined) verificationPayload.formNo = body.formNo;
+    if (body.refNo !== undefined) verificationPayload.refNo = body.refNo;
+    if (body.phone !== undefined) verificationPayload.phone = body.phone;
+    if (body.affiliation !== undefined) verificationPayload.affiliation = body.affiliation;
+    if (body.mailingAddress !== undefined) verificationPayload.mailingAddress = body.mailingAddress;
+    if (body.permanentAddress !== undefined) verificationPayload.permanentAddress = body.permanentAddress;
+    
+    // Education Qualifications
+    if (body.educationQualifications && Array.isArray(body.educationQualifications)) {
+      verificationPayload.educationQualifications = body.educationQualifications;
+    }
+    
+    // Training
+    if (body.training && Array.isArray(body.training)) {
+      verificationPayload.training = body.training;
+    }
+    
+    // Research Interests
+    if (body.primaryResearchInterest !== undefined) verificationPayload.primaryResearchInterest = body.primaryResearchInterest;
+    if (body.secondaryResearchInterest !== undefined) verificationPayload.secondaryResearchInterest = body.secondaryResearchInterest;
 
 
     const response = await fetch(verifyEndpoint, {

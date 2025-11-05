@@ -16,14 +16,16 @@ import {
   Sparkles,
   Lock
 } from 'lucide-react';
-import { verifyOTP, verifyRegistrationOTP, resendRegistrationOTP } from '@/lib/api';
+import { verifyOTP, resendRegistrationOTP, api } from '@/lib/api';
 import { NavbarClient } from '@/components/navbarclient';
 import { Footer } from '@/components/footer';
+import { MembershipFormData } from '@/types/membership';
 
 interface UserData {
   name: string;
   email: string;
   password: string;
+  membershipData?: MembershipFormData;
 }
 
 function OTPVerificationContent() {
@@ -51,7 +53,19 @@ function OTPVerificationContent() {
       return;
     }
 
-    setUserData({ name, email, password });
+    // Retrieve full membership form data from localStorage
+    const storedFormData = localStorage.getItem('membershipFormData');
+    let membershipData: MembershipFormData | undefined;
+    
+    if (storedFormData) {
+      try {
+        membershipData = JSON.parse(storedFormData);
+      } catch (error) {
+        console.error('Failed to parse stored membership data:', error);
+      }
+    }
+
+    setUserData({ name, email, password, membershipData });
   }, [searchParams, router]);
 
   const maskEmail = (email: string): string => {
@@ -114,16 +128,99 @@ function OTPVerificationContent() {
     
     try {
       // Step 2: Complete registration with verified OTP
-      const response = await verifyRegistrationOTP(
-        userData.name,
-        userData.email,
-        userData.password,
-        otpValue
-      );
+      // Include all membership form data if available
+      const registrationData: any = {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        otp: otpValue,
+      };
+
+      // Add all membership form fields if available
+      if (userData.membershipData) {
+        const md = userData.membershipData;
+        
+        // Personal Information
+        if (md.formNo) registrationData.formNo = md.formNo;
+        if (md.refNo) registrationData.refNo = md.refNo;
+        if (md.affiliation) registrationData.affiliation = md.affiliation;
+        if (md.phone) registrationData.phone = md.phone;
+        if (md.mailingAddress) registrationData.mailingAddress = md.mailingAddress;
+        if (md.permanentAddress) registrationData.permanentAddress = md.permanentAddress;
+
+        // Education Qualifications - build array
+        const educationQualifications: Array<{ qualification: string; year: string; institution: string }> = [];
+        if (md.mbbsYear || md.mbbsInstitution) {
+          educationQualifications.push({
+            qualification: 'MBBS',
+            year: md.mbbsYear || '',
+            institution: md.mbbsInstitution || '',
+          });
+        }
+        if (md.fcpsMdYear || md.fcpsMdInstitution) {
+          educationQualifications.push({
+            qualification: 'FCPS/MD',
+            year: md.fcpsMdYear || '',
+            institution: md.fcpsMdInstitution || '',
+          });
+        }
+        if (md.mdFcpsYear || md.mdFcpsInstitution) {
+          educationQualifications.push({
+            qualification: 'MD/FCPS',
+            year: md.mdFcpsYear || '',
+            institution: md.mdFcpsInstitution || '',
+          });
+        }
+        if (md.additionalDegree && (md.additionalYear || md.additionalInstitution)) {
+          educationQualifications.push({
+            qualification: md.additionalDegree,
+            year: md.additionalYear || '',
+            institution: md.additionalInstitution || '',
+          });
+        }
+        if (educationQualifications.length > 0) {
+          registrationData.educationQualifications = educationQualifications;
+        }
+
+        // Training - build array
+        const training: Array<{ period: string; institute: string }> = [];
+        if (md.training1Period || md.training1Institute) {
+          training.push({
+            period: md.training1Period || '',
+            institute: md.training1Institute || '',
+          });
+        }
+        if (md.training2Period || md.training2Institute) {
+          training.push({
+            period: md.training2Period || '',
+            institute: md.training2Institute || '',
+          });
+        }
+        if (md.training3Period || md.training3Institute) {
+          training.push({
+            period: md.training3Period || '',
+            institute: md.training3Institute || '',
+          });
+        }
+        if (training.length > 0) {
+          registrationData.training = training;
+        }
+
+        // Research Interests
+        if (md.researchInterest1) registrationData.primaryResearchInterest = md.researchInterest1;
+        if (md.researchInterest2) registrationData.secondaryResearchInterest = md.researchInterest2;
+      }
+
+      // Call the API directly with the full registration data
+      // Type cast to VerifyOTPInput since we're extending it with additional fields
+      const response = await api.auth.verifyRegistrationOTP(registrationData as any);
 
       // CRITICAL: Only proceed if we have valid user data
       if (response && response.user) {
         setSuccess(true);
+        
+        // Clean up localStorage after successful registration
+        localStorage.removeItem('membershipFormData');
         
         // After successful registration, redirect to payment page
         // User will complete payment and then login
