@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect, type ChangeEvent } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,7 +59,7 @@ function ProfilePageContent() {
   });
 
   // Fetch fresh user data when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
     const loadUserData = async () => {
       if (refreshUser) {
         try {
@@ -156,7 +156,7 @@ function ProfilePageContent() {
   );
 
   // Update form data when user data is loaded
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       setFormData(prev => ({
         ...prev,
@@ -233,7 +233,7 @@ function ProfilePageContent() {
     });
   };
 
-  const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePictureUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 

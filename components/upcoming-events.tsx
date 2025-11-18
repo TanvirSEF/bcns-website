@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Calendar, Heart, Users, Sparkles } from "lucide-react";
 // import { eventsData } from "@/data/events";
 
@@ -65,20 +64,20 @@ export function UpcomingEvents() {
                   <span className="hidden sm:inline text-white/70">|</span>
                   <span className="text-xs sm:text-sm">📅 {currentEvent.date}</span>
                   {currentEvent.time && (
-                    <React.Fragment>
+                    <>
                       <span className="hidden sm:inline text-white/70">|</span>
                       <span className="text-xs sm:text-sm">🕘 {currentEvent.time}</span>
-                    </React.Fragment>
+                    </>
                   )}
                   <span className="hidden sm:inline text-white/70">|</span>
                   <span className="text-xs sm:text-sm">📍 {currentEvent.venue}</span>
                   {currentEvent.registrationUrl && (
-                    <React.Fragment>
+                    <>
                       <span className="hidden sm:inline text-white/70">|</span>
                       <span className="text-xs sm:text-sm bg-yellow-400 text-blue-900 px-2 py-0.5 rounded-full font-medium">
                         🎯 Register Now
                       </span>
-                    </React.Fragment>
+                    </>
                   )}
                 </div>
                 {/* Duplicate for seamless looping */}
@@ -88,20 +87,20 @@ export function UpcomingEvents() {
                   <span className="hidden sm:inline text-white/70">|</span>
                   <span className="text-xs sm:text-sm">📅 {currentEvent.date}</span>
                   {currentEvent.time && (
-                    <React.Fragment>
+                    <>
                       <span className="hidden sm:inline text-white/70">|</span>
                       <span className="text-xs sm:text-sm">🕘 {currentEvent.time}</span>
-                    </React.Fragment>
+                    </>
                   )}
                   <span className="hidden sm:inline text-white/70">|</span>
                   <span className="text-xs sm:text-sm">📍 {currentEvent.venue}</span>
                   {currentEvent.registrationUrl && (
-                    <React.Fragment>
+                    <>
                       <span className="hidden sm:inline text-white/70">|</span>
                       <span className="text-xs sm:text-sm bg-yellow-400 text-blue-900 px-2 py-0.5 rounded-full font-medium">
                         🎯 Register Now
                       </span>
-                    </React.Fragment>
+                    </>
                   )}
                 </div>
               </div>
