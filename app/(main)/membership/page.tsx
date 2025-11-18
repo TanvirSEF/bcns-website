@@ -1,4 +1,3 @@
-import React from "react";
 import { Shield } from "lucide-react";
 import { NavbarClient } from "@/components/navbarclient";
 import { Footer } from "@/components/footer";
