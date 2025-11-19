@@ -1,8 +1,21 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { OTPInput } from "@/components/ui/otp-input";
 import {
   User,
   Mail,
@@ -12,632 +25,700 @@ import {
   GraduationCap,
   Calendar,
   FileText,
+  Upload,
+  Plus,
+  Trash2,
+  Camera,
+  CheckCircle2,
+  Loader2,
   Send,
-  CheckCircle,
-  AlertCircle,
+  Lock,
 } from "lucide-react";
-import {
-  MembershipFormData,
-  SubmissionStatus,
-  FormValidationState,
-  DEFAULT_MEMBERSHIP_FORM_DATA,
-  validateForm,
-} from "@/types/membership";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+// --- Zod Schema ---
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+
+const educationSchema = z.object({
+  qualification: z.string().min(1, "Qualification is required"),
+  year: z.string().regex(/^\d{4}$/, "Year must be 4 digits"),
+  institution: z.string().min(1, "Institution is required"),
+});
+
+const trainingSchema = z.object({
+  period: z.string().min(1, "Period is required"),
+  institute: z.string().min(1, "Institute is required"),
+});
+
+const formSchema = z.object({
+  profilePicture: z
+    .custom<File>((v) => v instanceof File, "Profile picture is required")
+    .refine((file) => file?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
+      "Only .jpg, .jpeg, .png and .webp formats are supported."
+    ),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  affiliation: z.string().min(2, "Affiliation is required"),
+  formNo: z.string().optional(),
+  refNo: z.string().optional(),
+  mailingAddress: z.string().min(5, "Mailing address is required"),
+  permanentAddress: z.string().min(5, "Permanent address is required"),
+  educationQualifications: z.array(educationSchema),
+  training: z.array(trainingSchema),
+  researchInterest1: z.string().optional(),
+  researchInterest2: z.string().optional(),
+  otp: z.string().length(6, "OTP must be 6 digits"),
+  documents: z
+    .array(z.instanceof(File))
+    .min(1, "At least one document is required")
+    .optional(), // Optional in schema because we handle it specially, but verified in submit
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export function MembershipForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState<MembershipFormData>(
-    DEFAULT_MEMBERSHIP_FORM_DATA
-  );
-  const [validation, setValidation] = useState<FormValidationState>({
-    isValid: false,
-    errors: {},
-    touched: {},
-  });
-  const [formError, setFormError] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [documentFiles, setDocumentFiles] = useState<File[]>([]);
+  const [isSendingOTP, setIsSendingOTP] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<SubmissionStatus>("idle");
 
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      affiliation: "",
+      mailingAddress: "",
+      permanentAddress: "",
+      educationQualifications: [
+        { qualification: "MBBS", year: "", institution: "" },
+      ],
+      training: [{ period: "", institute: "" }],
+      researchInterest1: "",
+      researchInterest2: "",
+      otp: "",
+    },
+  });
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  const {
+    fields: eduFields,
+    append: appendEdu,
+    remove: removeEdu,
+  } = useFieldArray({
+    control: form.control,
+    name: "educationQualifications",
+  });
+
+  const {
+    fields: trainingFields,
+    append: appendTraining,
+    remove: removeTraining,
+  } = useFieldArray({
+    control: form.control,
+    name: "training",
+  });
+
+  // --- Handlers ---
+
+  const handleProfilePictureChange = (
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Update validation on input change
-    const updatedData = { ...formData, [name]: value };
-    const newValidation = validateForm(updatedData);
-    setValidation(newValidation);
+    const file = e.target.files?.[0];
+    if (file) {
+      form.setValue("profilePicture", file, { shouldValidate: true });
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDocumentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setDocumentFiles((prev) => [...prev, ...newFiles]);
+      // Update form value for validation if needed, though we handle appending manually
+      form.setValue("documents", [...documentFiles, ...newFiles]); 
+    }
+  };
 
-    // Validate form
-    const formValidation = validateForm(formData);
-    setValidation(formValidation);
+  const removeDocument = (index: number) => {
+    const newFiles = documentFiles.filter((_, i) => i !== index);
+    setDocumentFiles(newFiles);
+    form.setValue("documents", newFiles);
+  };
 
-    if (!formValidation.isValid) {
-      setSubmitStatus("error");
-      setFormError(`Please fix the validation errors: ${Object.values(formValidation.errors).join(', ')}`);
+  const handleSendOTP = async () => {
+    const email = form.getValues("email");
+    const emailError = form.getFieldState("email").error;
+
+    if (!email || emailError) {
+      form.setError("email", {
+        type: "manual",
+        message: "Please enter a valid email first",
+      });
+      return;
+    }
+
+    setIsSendingOTP(true);
+    try {
+      const response = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setOtpSent(true);
+        toast.success("OTP sent successfully to your email!");
+      } else {
+        toast.error(data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setIsSendingOTP(false);
+    }
+  };
+
+  const onSubmit = async (data: FormValues) => {
+    if (documentFiles.length === 0) {
+      toast.error("Please upload at least one document");
       return;
     }
 
     setIsSubmitting(true);
-    setSubmitStatus("submitting");
-    setFormError("");
-
     try {
-      // Send OTP for registration (backend only needs email)
-      const response = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: formData.email,
-          // Store name and password for later use in verification
-          name: formData.name,
-          password: formData.password 
-        }),
+      const formData = new FormData();
+
+      // Text Fields
+      formData.append("name", data.name);
+      formData.append("email", data.email);
+      formData.append("phone", data.phone);
+      formData.append("password", data.password);
+      formData.append("affiliation", data.affiliation);
+      if (data.formNo) formData.append("formNo", data.formNo);
+      if (data.refNo) formData.append("refNo", data.refNo);
+      formData.append("mailingAddress", data.mailingAddress);
+      formData.append("permanentAddress", data.permanentAddress);
+      if (data.researchInterest1)
+        formData.append("researchInterest1", data.researchInterest1);
+      if (data.researchInterest2)
+        formData.append("researchInterest2", data.researchInterest2);
+      formData.append("otp", data.otp);
+
+      // JSON Stringify Arrays
+      formData.append(
+        "educationQualifications",
+        JSON.stringify(data.educationQualifications)
+      );
+      formData.append("training", JSON.stringify(data.training));
+
+      // Files
+      if (data.profilePicture instanceof File) {
+        formData.append("profilePicture", data.profilePicture);
+      }
+
+      documentFiles.forEach((file) => {
+        formData.append("documents", file);
+      });
+
+      const response = await fetch("/api/auth/verify-registration", {
+        method: "POST",
+        body: formData,
+        // Do NOT set Content-Type header for FormData
       });
 
       const result = await response.json();
-      
-      if (result.success) {
-        setSubmitStatus("success");
-        
-        // Store full membership form data in localStorage (excluding photo file)
-        const formDataToStore = {
-          ...formData,
-          photo: null, // Don't store file in localStorage
-        };
-        localStorage.setItem('membershipFormData', JSON.stringify(formDataToStore));
-        
-        // Redirect to OTP verification page with user data
-        const params = new URLSearchParams({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        });
-        
-        setTimeout(() => {
-          router.push(`/verify-email?${params.toString()}`);
-        }, 2000);
+
+      if (result.success || response.ok) {
+        toast.success("Registration submitted successfully!");
+        // Redirect or show success state
+        router.push("/login");
       } else {
-        throw new Error(result.message || "Failed to send verification code");
+        toast.error(result.message || "Registration failed");
       }
-    } catch (error: unknown) {
-      setSubmitStatus("error");
-      
-      // More detailed error message
-      let errorMessage = "Registration failed. Please try again.";
-      if (error instanceof Error && error.message) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      }
-      
-      setFormError(errorMessage);
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getFieldError = (
-    fieldName: keyof MembershipFormData
-  ): string | undefined => {
-    return validation.errors[fieldName];
-  };
-
-  const isFieldTouched = (fieldName: keyof MembershipFormData): boolean => {
-    return validation.touched[fieldName] || false;
-  };
-
   return (
-    <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-2xl rounded-2xl overflow-hidden">
-      <CardContent className="p-6 lg:p-8">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Personal Information Section */}
-          <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-xl p-6 lg:p-8 border border-primary/20">
-            <div className="flex items-center mb-6">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center mr-4">
-                <User className="h-5 w-5 text-primary-foreground" />
+    <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-2xl rounded-2xl overflow-hidden w-full max-w-4xl mx-auto">
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent p-8">
+        <CardTitle className="text-2xl font-bold text-primary">
+          Member Registration
+        </CardTitle>
+        <CardDescription>
+          Join our community of professionals. Please fill out the form below.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+          
+          {/* 1. Profile Picture Section */}
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="relative group">
+              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20 bg-slate-100 flex items-center justify-center shadow-lg">
+                {previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt="Profile Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-16 h-16 text-slate-400" />
+                )}
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-foreground">Personal Information</h3>
-                <p className="text-sm text-muted-foreground">Tell us about yourself</p>
-              </div>
+              <label
+                htmlFor="profile-upload"
+                className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-primary/90 transition-colors"
+              >
+                <Camera className="w-5 h-5" />
+                <input
+                  id="profile-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleProfilePictureChange}
+                />
+              </label>
             </div>
+            <div className="text-center">
+              <Label className="text-lg font-semibold">Profile Picture</Label>
+              {form.formState.errors.profilePicture && (
+                <p className="text-destructive text-sm mt-1">
+                  {form.formState.errors.profilePicture.message as string}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Click camera icon to upload. Max 5MB.
+              </p>
+            </div>
+          </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Full Name *
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
-                        getFieldError("name") && isFieldTouched("name")
-                          ? "border-destructive focus:ring-destructive"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                      placeholder="Enter your full name"
-                    />
-                  </div>
-                  {getFieldError("name") && isFieldTouched("name") && (
-                    <p className="text-destructive text-sm mt-1 flex items-center">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      {getFieldError("name")}
-                    </p>
-                  )}
+          {/* 2. Personal Info */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
+              <User className="w-5 h-5" /> Personal Information
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="name"
+                    placeholder="Dr. John Doe"
+                    {...form.register("name")}
+                    className={`pl-9 ${form.formState.errors.name ? "border-destructive" : ""}`}
+                  />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Email Address *
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
-                        getFieldError("email") && isFieldTouched("email")
-                          ? "border-destructive focus:ring-destructive"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                      placeholder="Enter email address"
-                    />
-                  </div>
-                  {getFieldError("email") && isFieldTouched("email") && (
-                    <p className="text-destructive text-sm mt-1 flex items-center">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      {getFieldError("email")}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Phone Number *
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      required
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
-                        getFieldError("phone") && isFieldTouched("phone")
-                          ? "border-destructive focus:ring-destructive"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                      placeholder="Enter phone number"
-                    />
-                  </div>
-                  {getFieldError("phone") && isFieldTouched("phone") && (
-                    <p className="text-destructive text-sm mt-1 flex items-center">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      {getFieldError("phone")}
-                    </p>
-                  )}
-                </div>
+                {form.formState.errors.name && (
+                  <p className="text-destructive text-xs">{form.formState.errors.name.message}</p>
+                )}
               </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Institution/Affiliation *
-                  </label>
-                  <div className="relative">
-                    <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      name="affiliation"
-                      value={formData.affiliation}
-                      onChange={handleInputChange}
-                      required
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
-                        getFieldError("affiliation") && isFieldTouched("affiliation")
-                          ? "border-destructive focus:ring-destructive"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                      placeholder="Your institution/hospital"
-                    />
-                  </div>
-                  {getFieldError("affiliation") && isFieldTouched("affiliation") && (
-                    <p className="text-destructive text-sm mt-1 flex items-center">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      {getFieldError("affiliation")}
-                    </p>
-                  )}
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="phone"
+                    placeholder="+880..."
+                    {...form.register("phone")}
+                    className={`pl-9 ${form.formState.errors.phone ? "border-destructive" : ""}`}
+                  />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Password *
-                  </label>
-                  <input
+                {form.formState.errors.phone && (
+                  <p className="text-destructive text-xs">{form.formState.errors.phone.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="john@example.com"
+                    {...form.register("email")}
+                    className={`pl-9 ${form.formState.errors.email ? "border-destructive" : ""}`}
+                  />
+                </div>
+                {form.formState.errors.email && (
+                  <p className="text-destructive text-xs">{form.formState.errors.email.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
                     type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
-                      getFieldError("password") && isFieldTouched("password")
-                        ? "border-destructive focus:ring-destructive"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                    placeholder="Create a password (min 6 characters)"
-                  />
-                  {getFieldError("password") && isFieldTouched("password") && (
-                    <p className="text-destructive text-sm mt-1 flex items-center">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      {getFieldError("password")}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Mailing Address *
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <textarea
-                    name="mailingAddress"
-                    value={formData.mailingAddress}
-                    onChange={handleInputChange}
-                    required
-                    rows={3}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
-                      getFieldError("mailingAddress") && isFieldTouched("mailingAddress")
-                        ? "border-destructive focus:ring-destructive"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                    placeholder="Enter your mailing address"
+                    placeholder="••••••"
+                    {...form.register("password")}
+                    className={`pl-9 ${form.formState.errors.password ? "border-destructive" : ""}`}
                   />
                 </div>
-                {getFieldError("mailingAddress") && isFieldTouched("mailingAddress") && (
-                  <p className="text-destructive text-sm mt-1 flex items-center">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    {getFieldError("mailingAddress")}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Permanent Address *
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <textarea
-                    name="permanentAddress"
-                    value={formData.permanentAddress}
-                    onChange={handleInputChange}
-                    required
-                    rows={3}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm ${
-                      getFieldError("permanentAddress") && isFieldTouched("permanentAddress")
-                        ? "border-destructive focus:ring-destructive"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                    placeholder="Enter your permanent address"
-                  />
-                </div>
-                {getFieldError("permanentAddress") && isFieldTouched("permanentAddress") && (
-                  <p className="text-destructive text-sm mt-1 flex items-center">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    {getFieldError("permanentAddress")}
-                  </p>
+                {form.formState.errors.password && (
+                  <p className="text-destructive text-xs">{form.formState.errors.password.message}</p>
                 )}
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Education Qualification Section */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl p-6 lg:p-8 border border-blue-200/50 dark:border-blue-800/30">
-            <div className="flex items-center mb-6">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
-                <GraduationCap className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-foreground">Education Qualifications</h3>
-                <p className="text-sm text-muted-foreground">Your academic background</p>
-              </div>
+          {/* 3. Professional Info */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
+              <Building className="w-5 h-5" /> Professional Information
             </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
-                <div className="font-semibold text-foreground">Qualification</div>
-                <div className="font-semibold text-foreground">Year</div>
-                <div className="font-semibold text-foreground">Institution</div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
-                <div className="font-medium text-blue-600 dark:text-blue-400">MBBS</div>
-                <input
-                  type="text"
-                  name="mbbsYear"
-                  value={formData.mbbsYear}
-                  onChange={handleInputChange}
-                  className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm ${
-                    getFieldError("mbbsYear")
-                      ? "border-destructive"
-                      : "border-border hover:border-blue-300"
-                  }`}
-                  placeholder="YYYY"
-                />
-                <input
-                  type="text"
-                  name="mbbsInstitution"
-                  value={formData.mbbsInstitution}
-                  onChange={handleInputChange}
-                  className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-blue-300"
-                  placeholder="Institution name"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
-                <div className="font-medium text-blue-600 dark:text-blue-400">FCPS / MD</div>
-                <input
-                  type="text"
-                  name="fcpsMdYear"
-                  value={formData.fcpsMdYear}
-                  onChange={handleInputChange}
-                  className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm ${
-                    getFieldError("fcpsMdYear")
-                      ? "border-destructive"
-                      : "border-border hover:border-blue-300"
-                  }`}
-                  placeholder="YYYY"
-                />
-                <input
-                  type="text"
-                  name="fcpsMdInstitution"
-                  value={formData.fcpsMdInstitution}
-                  onChange={handleInputChange}
-                  className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-blue-300"
-                  placeholder="Institution name"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
-                <div className="font-medium text-blue-600 dark:text-blue-400">MD / FCPS</div>
-                <input
-                  type="text"
-                  name="mdFcpsYear"
-                  value={formData.mdFcpsYear}
-                  onChange={handleInputChange}
-                  className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm ${
-                    getFieldError("mdFcpsYear")
-                      ? "border-destructive"
-                      : "border-border hover:border-blue-300"
-                  }`}
-                  placeholder="YYYY"
-                />
-                <input
-                  type="text"
-                  name="mdFcpsInstitution"
-                  value={formData.mdFcpsInstitution}
-                  onChange={handleInputChange}
-                  className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-blue-300"
-                  placeholder="Institution name"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
-                <div className="font-medium text-blue-600 dark:text-blue-400">Additional Degree</div>
-                <input
-                  type="text"
-                  name="additionalYear"
-                  value={formData.additionalYear}
-                  onChange={handleInputChange}
-                  className={`px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm ${
-                    getFieldError("additionalYear")
-                      ? "border-destructive"
-                      : "border-border hover:border-blue-300"
-                  }`}
-                  placeholder="YYYY"
-                />
-                <input
-                  type="text"
-                  name="additionalInstitution"
-                  value={formData.additionalInstitution}
-                  onChange={handleInputChange}
-                  className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-blue-300"
-                  placeholder="Institution name"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Training Section */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-xl p-6 lg:p-8 border border-green-200/50 dark:border-green-800/30">
-            <div className="flex items-center mb-6">
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
-                <Calendar className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-foreground">Professional Training</h3>
-                <p className="text-sm text-muted-foreground">Your training experience</p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-green-100 dark:border-green-800/30">
-                <div className="font-semibold text-foreground">Training #</div>
-                <div className="font-semibold text-foreground">Period</div>
-                <div className="font-semibold text-foreground">Institute</div>
-              </div>
-
-              {[1, 2, 3].map((num) => (
-                <div
-                  key={num}
-                  className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-white/50 dark:bg-slate-700/50 rounded-lg p-4 border border-green-100 dark:border-green-800/30"
-                >
-                  <div className="font-medium text-green-600 dark:text-green-400">{num}.</div>
-                  <input
-                    type="text"
-                    name={`training${num}Period`}
-                    value={
-                      formData[
-                        `training${num}Period` as keyof MembershipFormData
-                      ] as string
-                    }
-                    onChange={handleInputChange}
-                    className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-green-300"
-                    placeholder="Training period"
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2 md:col-span-3">
+                <Label htmlFor="affiliation">Affiliation / Hospital</Label>
+                <div className="relative">
+                  <Building className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="affiliation"
+                    placeholder="Dhaka Medical College Hospital"
+                    {...form.register("affiliation")}
+                    className={`pl-9 ${form.formState.errors.affiliation ? "border-destructive" : ""}`}
                   />
-                  <input
-                    type="text"
-                    name={`training${num}Institute`}
-                    value={
-                      formData[
-                        `training${num}Institute` as keyof MembershipFormData
-                      ] as string
-                    }
-                    onChange={handleInputChange}
-                    className="px-3 py-2 border border-border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-background/50 backdrop-blur-sm hover:border-green-300"
-                    placeholder="Training institute"
-                  />
+                </div>
+                {form.formState.errors.affiliation && (
+                  <p className="text-destructive text-xs">{form.formState.errors.affiliation.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="formNo">Form No. (Optional)</Label>
+                <Input
+                  id="formNo"
+                  placeholder="12345"
+                  {...form.register("formNo")}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="refNo">Ref No. (Optional)</Label>
+                <Input
+                  id="refNo"
+                  placeholder="REF-001"
+                  {...form.register("refNo")}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* 4. Address Info */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
+              <MapPin className="w-5 h-5" /> Address Information
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="mailingAddress">Mailing Address</Label>
+                <Textarea
+                  id="mailingAddress"
+                  placeholder="Full mailing address..."
+                  {...form.register("mailingAddress")}
+                  className={form.formState.errors.mailingAddress ? "border-destructive" : ""}
+                />
+                {form.formState.errors.mailingAddress && (
+                  <p className="text-destructive text-xs">{form.formState.errors.mailingAddress.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="permanentAddress">Permanent Address</Label>
+                <Textarea
+                  id="permanentAddress"
+                  placeholder="Permanent home address..."
+                  {...form.register("permanentAddress")}
+                  className={form.formState.errors.permanentAddress ? "border-destructive" : ""}
+                />
+                {form.formState.errors.permanentAddress && (
+                  <p className="text-destructive text-xs">{form.formState.errors.permanentAddress.message}</p>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* 5. Education Qualifications (Dynamic Array) */}
+          <section className="space-y-6">
+            <div className="flex items-center justify-between border-b pb-2 text-lg font-semibold text-primary">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="w-5 h-5" /> Education Qualifications
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => appendEdu({ qualification: "", year: "", institution: "" })}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Add
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {eduFields.map((field, index) => (
+                <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                  <div className="md:col-span-3 space-y-2">
+                    <Label>Qualification</Label>
+                    <Input
+                      {...form.register(`educationQualifications.${index}.qualification`)}
+                      placeholder="e.g. MBBS"
+                      className={form.formState.errors.educationQualifications?.[index]?.qualification ? "border-destructive" : ""}
+                    />
+                  </div>
+                  <div className="md:col-span-3 space-y-2">
+                    <Label>Year</Label>
+                    <Input
+                      {...form.register(`educationQualifications.${index}.year`)}
+                      placeholder="YYYY"
+                      className={form.formState.errors.educationQualifications?.[index]?.year ? "border-destructive" : ""}
+                    />
+                  </div>
+                  <div className="md:col-span-5 space-y-2">
+                    <Label>Institution</Label>
+                    <Input
+                      {...form.register(`educationQualifications.${index}.institution`)}
+                      placeholder="Institution Name"
+                      className={form.formState.errors.educationQualifications?.[index]?.institution ? "border-destructive" : ""}
+                    />
+                  </div>
+                  <div className="md:col-span-1 flex justify-center">
+                    {eduFields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive/90"
+                        onClick={() => removeEdu(index)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Research Interests Section */}
-          <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 rounded-xl p-6 lg:p-8 border border-purple-200/50 dark:border-purple-800/30">
-            <div className="flex items-center mb-6">
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
-                <FileText className="h-5 w-5 text-white" />
+          {/* 6. Training (Dynamic Array) */}
+          <section className="space-y-6">
+            <div className="flex items-center justify-between border-b pb-2 text-lg font-semibold text-primary">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" /> Professional Training
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-foreground">Research Interests</h3>
-                <p className="text-sm text-muted-foreground">Your areas of research focus</p>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => appendTraining({ period: "", institute: "" })}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Add
+              </Button>
             </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Primary Research Interest
-                </label>
-                <textarea
-                  name="researchInterest1"
-                  value={formData.researchInterest1}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm hover:border-purple-300"
-                  placeholder="Describe your primary research interest"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Secondary Research Interest
-                </label>
-                <textarea
-                  name="researchInterest2"
-                  value={formData.researchInterest2}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-background/50 backdrop-blur-sm hover:border-purple-300"
-                  placeholder="Describe your secondary research interest (optional)"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Submit Status Messages */}
-          {submitStatus === "success" && (
-            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800/30">
-              <CardContent className="p-6 flex items-start space-x-4">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <h5 className="text-lg font-semibold text-foreground mb-2">
-                    Verification Code Sent! 📧
-                  </h5>
-                  <p className="text-muted-foreground mb-3">
-                    We&apos;ve sent a 6-digit verification code to your email address. Please check your inbox and enter the code to complete your registration.
-                  </p>
-                  <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-sm">
-                    <p><strong>Email:</strong> {formData.email}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Check your spam folder if you don&apos;t see the email
-                    </p>
+            <div className="space-y-4">
+              {trainingFields.map((field, index) => (
+                <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                  <div className="md:col-span-5 space-y-2">
+                    <Label>Period</Label>
+                    <Input
+                      {...form.register(`training.${index}.period`)}
+                      placeholder="e.g. Jan 2020 - Dec 2021"
+                      className={form.formState.errors.training?.[index]?.period ? "border-destructive" : ""}
+                    />
                   </div>
-                  <p className="text-muted-foreground text-sm mt-3">
-                    Redirecting to verification page...
-                  </p>
+                  <div className="md:col-span-6 space-y-2">
+                    <Label>Institute</Label>
+                    <Input
+                      {...form.register(`training.${index}.institute`)}
+                      placeholder="Training Institute"
+                      className={form.formState.errors.training?.[index]?.institute ? "border-destructive" : ""}
+                    />
+                  </div>
+                  <div className="md:col-span-1 flex justify-center">
+                     {trainingFields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive/90"
+                        onClick={() => removeTraining(index)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              ))}
+            </div>
+          </section>
 
-          {submitStatus === "error" && (
-            <Card className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border border-red-200 dark:border-red-800/30">
-              <CardContent className="p-6 flex items-start space-x-4">
-                <div className="w-12 h-12 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+          {/* 7. Research Interests */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
+              <FileText className="w-5 h-5" /> Research Interests
+            </div>
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="researchInterest1">Primary Research Interest</Label>
+                <Textarea
+                  id="researchInterest1"
+                  {...form.register("researchInterest1")}
+                  placeholder="Describe your primary research interests..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="researchInterest2">Secondary Research Interest (Optional)</Label>
+                <Textarea
+                  id="researchInterest2"
+                  {...form.register("researchInterest2")}
+                  placeholder="Describe your secondary research interests..."
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* 8. OTP Verification */}
+          <section className="space-y-6 bg-slate-50 dark:bg-slate-900/30 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
+              <CheckCircle2 className="w-5 h-5" /> Verification
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Please verify your email address to continue. Click &quot;Send OTP&quot; to receive a code.
+              </p>
+              
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-end">
+                 <div className="flex-1 space-y-2 w-full">
+                  <Label>Enter OTP Code</Label>
+                  <Controller
+                    control={form.control}
+                    name="otp"
+                    render={({ field }) => (
+                      <OTPInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        length={6}
+                        className="justify-start"
+                        disabled={!otpSent}
+                      />
+                    )}
+                  />
+                  {form.formState.errors.otp && (
+                    <p className="text-destructive text-xs">{form.formState.errors.otp.message}</p>
+                  )}
                 </div>
-                <div>
-                  <h5 className="text-lg font-semibold text-foreground mb-2">
-                    Submission Failed
-                  </h5>
-                  <p className="text-muted-foreground">
-                    {formError 
-                      ? formError
-                      : validation.isValid
-                      ? "There was an error submitting your application. Please try again."
-                      : "Please fix the validation errors above before submitting."}
+                
+                <Button
+                  type="button"
+                  onClick={handleSendOTP}
+                  disabled={isSendingOTP || otpSent}
+                  className="min-w-[120px]"
+                >
+                  {isSendingOTP ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : otpSent ? (
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2" />
+                  )}
+                  {isSendingOTP ? "Sending..." : otpSent ? "Sent!" : "Send OTP"}
+                </Button>
+              </div>
+              {otpSent && (
+                <p className="text-sm text-green-600 flex items-center mt-2">
+                  <CheckCircle2 className="w-3 h-3 mr-1" /> OTP sent to {form.getValues("email")}
+                </p>
+              )}
+            </div>
+          </section>
+
+          {/* 9. Documents Upload */}
+          <section className="space-y-6">
+             <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
+              <Upload className="w-5 h-5" /> Required Documents
+            </div>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors cursor-pointer relative">
+                 <input
+                  type="file"
+                  multiple
+                  onChange={handleDocumentsChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className="flex flex-col items-center">
+                  <div className="bg-primary/10 p-4 rounded-full mb-4">
+                    <Upload className="w-8 h-8 text-primary" />
+                  </div>
+                  <h4 className="font-semibold text-lg mb-1">Click to upload documents</h4>
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                    Upload scanned copies of your degrees, certificates, and other relevant documents. (PDF, JPG, PNG)
                   </p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+
+              {documentFiles.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                  {documentFiles.map((file, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                      <div className="flex items-center gap-2 truncate">
+                        <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span className="text-sm truncate max-w-[200px]">{file.name}</span>
+                        <span className="text-xs text-muted-foreground">({(file.size / 1024).toFixed(0)}kb)</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        onClick={() => removeDocument(idx)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
 
           {/* Submit Button */}
-          <div className="border-t border-border pt-8">
+          <div className="pt-6">
             <Button
               type="submit"
-              disabled={isSubmitting || !validation.isValid}
-              className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary disabled:from-muted disabled:to-muted disabled:text-muted-foreground text-primary-foreground py-4 px-8 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none"
+              className="w-full py-6 text-lg font-bold shadow-lg"
+              disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
-                  <span>Sending Verification Code...</span>
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  Submitting Application...
                 </>
               ) : (
-                <>
-                  <Send className="h-5 w-5" />
-                  <span>Send Verification Code</span>
-                </>
+                "Submit Registration"
               )}
             </Button>
             <p className="text-center text-sm text-muted-foreground mt-4">
-              By submitting this form, you agree to our membership terms and conditions. 
-              A verification code will be sent to your email to complete registration.
+              By clicking Submit, you agree to our Terms and Conditions and Privacy Policy.
             </p>
           </div>
         </form>
