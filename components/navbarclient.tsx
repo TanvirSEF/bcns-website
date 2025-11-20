@@ -20,7 +20,7 @@ import {
   LogOut,
   LayoutDashboard,
   Phone,
-  
+  BellRing,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,6 +72,7 @@ const navigationItems = [
     ],
   },
   { name: "Contact us", href: "/contact", icon: Phone },
+  { name: "Notice", href: "/notice-board", icon: BellRing },
   { name: "Our Members", href: "/members", icon: Users, requiresAuth: true },
 ];
 
@@ -281,7 +282,7 @@ export function NavbarClient() {
                             <DropdownMenuItem key={dropdownItem.name} asChild>
                               <Link
                                 href={dropdownItem.href}
-                                className="flex items-center w-full"
+                                className="flex items-center w-full cursor-pointer"
                               >
                                 {dropdownItem.icon && (
                                   <dropdownItem.icon className="mr-3 h-4 w-4 text-gray-400" />
@@ -296,11 +297,17 @@ export function NavbarClient() {
                       <Link
                         href={item.href!}
                         className={cn(
-                          "h-12 px-6 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200",
-                          isActive(item.href!) && "text-blue-600 bg-blue-50"
+                          "h-12 px-6 flex items-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200 relative cursor-pointer",
+                          isActive(item.href!) && "text-blue-600 bg-blue-50",
+                          item.name === "Notice" && "text-red-500 hover:text-red-600"
                         )}
                       >
-                        {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+                        {item.icon && (
+                          <item.icon className={cn(
+                            "mr-2 h-4 w-4",
+                            item.name === "Notice" && "animate-pulse text-red-500 fill-red-500"
+                          )} />
+                        )}
                         {item.name}
                       </Link>
                     )}
@@ -374,9 +381,19 @@ export function NavbarClient() {
                             <Link
                               key={item.name}
                               href={item.href!}
-                              className="block py-3 font-medium"
+                              className={cn(
+                                "block py-3 font-medium flex items-center cursor-pointer",
+                                isActive(item.href!) && "text-blue-600 font-semibold",
+                                item.name === "Notice" && "text-red-500"
+                              )}
                               onClick={() => setIsMobileMenuOpen(false)}
                             >
+                              {item.icon && (
+                                <item.icon className={cn(
+                                  "mr-2 h-4 w-4",
+                                  item.name === "Notice" && "animate-pulse text-red-500 fill-red-500"
+                                )} />
+                              )}
                               {item.name}
                             </Link>
                           )

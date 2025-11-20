@@ -44,7 +44,7 @@ export function UserNavDocuments({
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <a href={item.url} className="cursor-pointer">
                 <item.icon />
                 <span>{item.name}</span>
               </a>

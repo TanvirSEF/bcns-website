@@ -84,7 +84,7 @@ export function LatestPublications() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8 lg:mb-10">
           {/* Featured Publication - Full Width on Mobile, 2/3 on Desktop */}
           <div className="lg:col-span-2">
-            <Link href={featuredPublication.link} className="group block">
+            <Link href={featuredPublication.link} className="group block cursor-pointer">
               <div className="bg-slate-800/60 rounded-xl sm:rounded-2xl overflow-hidden border border-slate-700 hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
                 {/* Featured Image - Full Display */}
                 <div className="relative w-full h-64 sm:h-80 lg:h-96">
@@ -141,7 +141,7 @@ export function LatestPublications() {
               <Link
                 key={publication.id}
                 href={publication.link}
-                className="group block"
+                className="group block cursor-pointer"
               >
                 <div className="bg-slate-800/60 rounded-xl overflow-hidden border border-slate-700 hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/5 transition-all duration-300">
                   {/* Publication Image - Full Display */}

@@ -1,11 +1,10 @@
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { Mail, Phone } from "lucide-react";
 import { generalMembers, type GeneralMember } from "../../../../data/general-members";
 import Image from "next/image";
 
 const MemberCard = ({ member }: { member: GeneralMember }) => (
-  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow duration-300 w-full cursor-pointer">
+  <div className="bg-white rounded-lg shadow-md p-5 sm:p-7 hover:shadow-lg transition-shadow duration-300 w-full cursor-pointer">
     <div className="flex flex-col items-center mb-4">
       <div className="mb-3">
         {member.image ? (
@@ -28,7 +27,7 @@ const MemberCard = ({ member }: { member: GeneralMember }) => (
           </div>
         )}
       </div>
-      <h3 className="text-base sm:text-lg font-semibold text-gray-800 text-center leading-tight">
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center leading-snug mb-2">
         {member.name}
       </h3>
     </div>
@@ -36,36 +35,17 @@ const MemberCard = ({ member }: { member: GeneralMember }) => (
     <div className="space-y-3">
       {member.designation && (
         <div>
-          <p className="text-sm font-medium text-gray-700">Designation:</p>
-          <p className="text-sm text-gray-600">{member.designation}</p>
+          <p className="text-sm sm:text-base font-semibold text-gray-800 mb-1">Designation:</p>
+          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{member.designation}</p>
         </div>
       )}
 
       {member.institute && (
         <div>
-          <p className="text-sm font-medium text-gray-700">Institute:</p>
-          <p className="text-sm text-gray-600">{member.institute}</p>
+          <p className="text-sm sm:text-base font-semibold text-gray-800 mb-1">Institute:</p>
+          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{member.institute}</p>
         </div>
       )}
-
-      <div className="flex flex-col space-y-2 pt-3 border-t border-gray-200">
-        {member.mobile && (
-          <div className="flex items-center space-x-2">
-            <Phone className="w-4 h-4 text-blue-600" />
-            <a href={`tel:${member.mobile}`} className="text-sm text-blue-600 hover:underline cursor-pointer">
-              {member.mobile}
-            </a>
-          </div>
-        )}
-        {member.email && (
-          <div className="flex items-center space-x-2">
-            <Mail className="w-4 h-4 text-blue-600" />
-            <a href={`mailto:${member.email}`} className="text-sm text-blue-600 hover:underline break-all cursor-pointer">
-              {member.email}
-            </a>
-          </div>
-        )}
-      </div>
     </div>
   </div>
 );

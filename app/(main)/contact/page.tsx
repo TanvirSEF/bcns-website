@@ -113,7 +113,7 @@ export default function ContactPage() {
                   {info.href ? (
                     <a
                       href={info.href}
-                      className="text-blue-600 hover:text-blue-700 font-medium text-base sm:text-lg transition-colors duration-200"
+                      className="text-blue-600 hover:text-blue-700 font-medium text-base sm:text-lg transition-colors duration-200 cursor-pointer"
                     >
                       {info.value}
                     </a>

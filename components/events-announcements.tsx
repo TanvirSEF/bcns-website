@@ -152,7 +152,7 @@ export function EventsAnnouncements() {
           <div className="flex bg-white/80 backdrop-blur rounded-xl p-1 shadow-sm border border-blue-100">
             <button
               onClick={() => setActiveTab("events")}
-              className={`inline-flex items-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
+              className={`inline-flex items-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base cursor-pointer ${
                 activeTab === "events"
                   ? "bg-blue-600 text-white shadow-md"
                   : "text-blue-700 hover:bg-blue-50"
@@ -163,7 +163,7 @@ export function EventsAnnouncements() {
             </button>
             <button
               onClick={() => setActiveTab("announcements")}
-              className={`inline-flex items-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
+              className={`inline-flex items-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base cursor-pointer ${
                 activeTab === "announcements"
                   ? "bg-blue-600 text-white shadow-md"
                   : "text-blue-700 hover:bg-blue-50"
@@ -268,7 +268,7 @@ export function EventsAnnouncements() {
                     href={announcement.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`block p-3 sm:p-4 md:p-5 transition-colors duration-300 group hover:bg-blue-50/60 ${
+                    className={`block p-3 sm:p-4 md:p-5 transition-colors duration-300 group hover:bg-blue-50/60 cursor-pointer ${
                       index !== announcements.length - 1
                         ? "border-b border-blue-100"
                         : ""

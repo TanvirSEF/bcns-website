@@ -1,7 +1,6 @@
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import Image from "next/image";
-import { Mail, Phone } from "lucide-react";
 import conveningData from '@/data/convening-committee.json';
 
 const ConveningCommittee = () => {
@@ -12,7 +11,7 @@ const ConveningCommittee = () => {
 
 
   const MemberCard = ({ member }: { member: any }) => (
-    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow duration-300 w-full">
+    <div className="bg-white rounded-lg shadow-md p-5 sm:p-7 hover:shadow-lg transition-shadow duration-300 w-full">
       <div className="flex flex-col items-center mb-4">
         {member.image ? (
           <Image
@@ -29,9 +28,9 @@ const ConveningCommittee = () => {
             </div>
           </div>
         )}
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 text-center leading-tight">{member.name}</h3>
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-center leading-snug mb-2">{member.name}</h3>
         {member.role && (
-          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium mb-2 mt-1">
+          <span className="inline-block bg-blue-100 text-blue-800 text-xs sm:text-sm px-3 py-1 rounded-full font-medium mb-2 mt-1">
             {member.role}
           </span>
         )}
@@ -39,28 +38,13 @@ const ConveningCommittee = () => {
       
       <div className="space-y-3">
         <div>
-          <p className="text-sm font-medium text-gray-700">Designation:</p>
-          <p className="text-sm text-gray-600">{member.designation}</p>
+          <p className="text-sm sm:text-base font-semibold text-gray-800 mb-1">Designation:</p>
+          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{member.designation}</p>
         </div>
         
         <div>
-          <p className="text-sm font-medium text-gray-700">Institute:</p>
-          <p className="text-sm text-gray-600">{member.institute}</p>
-        </div>
-        
-        <div className="flex flex-col space-y-2 pt-3 border-t border-gray-200">
-          <div className="flex items-center space-x-2">
-            <Phone className="w-4 h-4 text-blue-600" />
-            <a href={`tel:${member.mobile}`} className="text-sm text-blue-600 hover:underline">
-              {member.mobile}
-            </a>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Mail className="w-4 h-4 text-blue-600" />
-            <a href={`mailto:${member.email}`} className="text-sm text-blue-600 hover:underline break-all">
-              {member.email}
-            </a>
-          </div>
+          <p className="text-sm sm:text-base font-semibold text-gray-800 mb-1">Institute:</p>
+          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{member.institute}</p>
         </div>
       </div>
     </div>

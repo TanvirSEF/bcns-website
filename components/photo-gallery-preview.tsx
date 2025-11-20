@@ -110,7 +110,7 @@ export function PhotoGalleryPreview() {
             <Link
               key={image.id}
               href={image.href}
-              className={`group relative flex flex-col justify-end overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-blue-100/60 bg-white
+              className={`group relative flex flex-col justify-end overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-blue-100/60 bg-white cursor-pointer
                 ${
                   // Feature the first tile only on large screens
                   index === 0 ? "lg:col-span-2 lg:row-span-2" : "col-span-1"
