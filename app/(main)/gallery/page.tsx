@@ -96,7 +96,7 @@ export default function GalleryPage() {
             <Link
               key={event.id}
               href={`/gallery/${event.id}`}
-              className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+              className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
             >
               {/* Cover Image */}
               <div className="relative h-64 sm:h-72 overflow-hidden">

@@ -27,7 +27,7 @@ export function UserNavSecondary({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild size="sm">
-                <a href={item.url}>
+                <a href={item.url} className="cursor-pointer">
                   <item.icon />
                   <span>{item.title}</span>
                 </a>

@@ -113,7 +113,7 @@ export function Hero() {
         {Array.from({ length: count }).map((_, index) => (
           <button
             key={index}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
               current === index + 1
                 ? "bg-white scale-125"
                 : "bg-white/50 hover:bg-white/75"

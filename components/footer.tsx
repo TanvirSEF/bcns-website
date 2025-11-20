@@ -90,7 +90,7 @@ export function Footer() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="flex items-center space-x-2 sm:space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group"
+                  className="flex items-center space-x-2 sm:space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group cursor-pointer"
                 >
                   <link.icon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-blue-400 transition-colors flex-shrink-0" />
                   <span className="text-xs sm:text-sm font-medium truncate">{link.name}</span>
@@ -109,7 +109,7 @@ export function Footer() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="flex items-center space-x-2 sm:space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group"
+                  className="flex items-center space-x-2 sm:space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group cursor-pointer"
                 >
                   <link.icon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-pink-400 transition-colors flex-shrink-0" />
                   <span className="text-xs sm:text-sm font-medium truncate">{link.name}</span>
@@ -128,7 +128,7 @@ export function Footer() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="flex items-center space-x-2 sm:space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group"
+                  className="flex items-center space-x-2 sm:space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group cursor-pointer"
                 >
                   <link.icon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-pink-400 transition-colors flex-shrink-0" />
                   <span className="text-xs sm:text-sm font-medium truncate">{link.name}</span>
@@ -148,7 +148,7 @@ export function Footer() {
                   <Link
                     key={social.name}
                     href={social.href}
-                    className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition-all duration-200 group flex-shrink-0"
+                    className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition-all duration-200 group flex-shrink-0 cursor-pointer"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

@@ -112,7 +112,7 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
               asChild
               className="data-[slot=sidebar-menu-button]:!p-3 data-[slot=sidebar-menu-button]:hover:bg-white/50 data-[slot=sidebar-menu-button]:rounded-lg"
             >
-              <a href="/user-dashboard" className="flex items-center gap-3">
+              <a href="/user-dashboard" className="flex items-center gap-3 cursor-pointer">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
                   <Building2 className="h-5 w-5 text-white" />
                 </div>
