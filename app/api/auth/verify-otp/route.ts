@@ -86,16 +86,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // OTP is valid, return success
-    // Check if backend returned isValid or otpValid field
-    // If response.ok is true, trust the backend response
-    // If explicit validation fields exist, use them; otherwise assume success for 200 OK responses
-    const isValid = data.isValid !== undefined 
-      ? data.isValid 
-      : (data.otpValid !== undefined ? data.otpValid : (data.success !== undefined ? data.success : true));
+    // OTP validation - require explicit validation fields from backend
+    // Don't default to true if validation fields are missing
+    // Check for explicit validation indicators in order of preference
+    let isValid: boolean | null = null;
+    
+    if (data.isValid !== undefined) {
+      isValid = Boolean(data.isValid);
+    } else if (data.otpValid !== undefined) {
+      isValid = Boolean(data.otpValid);
+    } else if (data.success !== undefined) {
+      // If success field exists, use it but only if it's explicitly true
+      isValid = data.success === true;
+    }
 
-    // Use the calculated isValid variable to check validity
-    // This catches all cases: explicit isValid/otpValid false, or data.success false
+    // If no validation fields are present, treat as error
+    // We require explicit validation from backend, don't assume success
+    if (isValid === null) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid response format from server: missing validation fields",
+          error: 'INVALID_RESPONSE_FORMAT'
+        },
+        {
+          status: 502,
+          headers: corsHeaders
+        }
+      );
+    }
+
+    // If validation explicitly failed, return error
     if (!isValid) {
       // Use 401 (Unauthorized) for validation failures, not 502 (Bad Gateway)
       // 502 should only be used when unable to communicate with backend

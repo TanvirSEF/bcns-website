@@ -17,8 +17,57 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Receive formData from frontend
-    const incomingFormData = await request.formData();
+    // 1. Determine content type and parse request body
+    const contentType = request.headers.get('content-type') || '';
+    let incomingFormData: FormData;
+    let jsonData: any = null;
+
+    if (contentType.includes('application/json')) {
+      // Handle JSON request (legacy verify-email page)
+      try {
+        jsonData = await request.json();
+        // Convert JSON to FormData
+        incomingFormData = new FormData();
+        
+        // Helper to append values to FormData
+        const appendToFormData = (key: string, value: any) => {
+          if (value === null || value === undefined) {
+            return; // Skip null/undefined values
+          }
+          
+          if (Array.isArray(value)) {
+            // For arrays, stringify them (e.g., educationQualifications, training)
+            incomingFormData.append(key, JSON.stringify(value));
+          } else if (typeof value === 'object') {
+            // For objects, stringify them
+            incomingFormData.append(key, JSON.stringify(value));
+          } else {
+            // For primitives, convert to string
+            incomingFormData.append(key, String(value));
+          }
+        };
+
+        // Append all fields from JSON to FormData
+        for (const [key, value] of Object.entries(jsonData)) {
+          appendToFormData(key, value);
+        }
+      } catch (jsonError) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Invalid JSON in request body",
+            error: 'INVALID_JSON',
+          },
+          {
+            status: 400,
+            headers: corsHeaders
+          }
+        );
+      }
+    } else {
+      // Handle FormData request (new membership form)
+      incomingFormData = await request.formData();
+    }
 
     // 2. Validate required fields before proceeding
     // Helper function to safely extract and validate FormData values

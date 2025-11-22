@@ -961,7 +961,14 @@ export function MembershipForm() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setCurrentStep(1)}
+                onClick={() => {
+                  // Clear registration data when going back to step 1
+                  // This ensures user must re-submit step 1 if they modify the form
+                  setRegistrationData(null);
+                  setOtpSent(false);
+                  otpForm.reset(); // Clear OTP input
+                  setCurrentStep(1);
+                }}
                 className="flex-1 w-full sm:w-auto order-2 sm:order-1"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
