@@ -67,7 +67,7 @@ export function CoreActivities() {
         {/* Section Header */}
         <div className="text-center mb-10 md:mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Our Core Pillars
+            Knowledge Environment
           </h2>
           <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
             Advancing pediatric neurology through comprehensive guidelines,
