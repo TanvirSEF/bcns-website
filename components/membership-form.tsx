@@ -295,7 +295,7 @@ export function MembershipForm() {
 
       const result = await response.json();
 
-      if (result.success || response.ok) {
+      if (result.success && response.ok) {
         toast.success("Registration submitted successfully!");
         setCurrentStep(3); // Move to payment step
       } else {
