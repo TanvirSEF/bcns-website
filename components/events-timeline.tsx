@@ -47,8 +47,14 @@ export function EventsTimeline() {
           {filtered.length === 0 && (
             <div className="text-center text-gray-600">No items under {activeTab} right now.</div>
           )}
-          {filtered.map((event) => (
-                <div key={event.slug} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+          {filtered.map((event) => {
+            // Use slug as primary key, fallback to title+date combination for stability
+            const stableKey = ('slug' in event && event.slug) 
+              ? event.slug 
+              : `${event.title}-${event.date}`.replace(/[^a-zA-Z0-9-]/g, '-');
+            
+            return (
+                <div key={stableKey} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
                   <div className="p-5 sm:p-6">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">{event.title}</h3>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -90,7 +96,8 @@ export function EventsTimeline() {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
         </div>
       </div>
     </section>

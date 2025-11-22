@@ -55,24 +55,30 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const educationSchema = z.object({
   qualification: z.string().min(1, "Qualification is required"),
-  year: z.string().regex(/^\d{4}$/, "Year must be 4 digits"),
+  year: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => !val || val === "" || /^\d{4}$/.test(val), {
+      message: "Year must be 4 digits",
+    }),
   institution: z.string().min(1, "Institution is required"),
 });
 
 const trainingSchema = z.object({
-  period: z.string().min(1, "Period is required"),
-  institute: z.string().min(1, "Institute is required"),
+  period: z.string().optional().or(z.literal("")),
+  institute: z.string().optional().or(z.literal("")),
 });
 
 // Step 1: Registration form schema (without OTP)
+// Note: profilePicture, documents, and some fields are optional initially
+// but will be validated in the submit handler to provide better UX
 const registrationSchema = z.object({
   profilePicture: z
-    .custom<File>((v) => v instanceof File, "Profile picture is required")
-    .refine((file) => file?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
-    .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-      "Only .jpg, .jpeg, .png and .webp formats are supported."
-    ),
+    .custom<File | undefined>((v) => !v || v instanceof File, {
+      message: "Profile picture is required",
+    })
+    .optional(),
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
@@ -86,9 +92,7 @@ const registrationSchema = z.object({
   training: z.array(trainingSchema),
   researchInterest1: z.string().optional(),
   researchInterest2: z.string().optional(),
-  documents: z
-    .array(z.instanceof(File))
-    .min(1, "At least one document is required"),
+  documents: z.array(z.instanceof(File)).optional(),
 });
 
 // Step 2: OTP verification schema
@@ -190,13 +194,72 @@ export function MembershipForm() {
 
   // Step 1: Handle registration form submission
   const onRegistrationSubmit = async (data: RegistrationFormValues) => {
-    if (documentFiles.length === 0) {
-      toast.error("Please upload at least one document");
+    // Validate required fields that are optional in schema
+    if (!data.profilePicture) {
+      toast.error("Profile picture is required");
+      registrationForm.setError("profilePicture", { message: "Profile picture is required" });
       return;
     }
 
-    // Store registration data and move to OTP step
-    setRegistrationData(data);
+    // Validate profile picture file size and type
+    if (data.profilePicture.size > MAX_FILE_SIZE) {
+      toast.error("Profile picture size must be less than 5MB");
+      registrationForm.setError("profilePicture", { message: "Max file size is 5MB" });
+      return;
+    }
+
+    if (!ACCEPTED_IMAGE_TYPES.includes(data.profilePicture.type)) {
+      toast.error("Only .jpg, .jpeg, .png and .webp formats are supported");
+      registrationForm.setError("profilePicture", {
+        message: "Only .jpg, .jpeg, .png and .webp formats are supported",
+      });
+      return;
+    }
+
+    if (documentFiles.length === 0) {
+      toast.error("Please upload at least one document");
+      registrationForm.setError("documents", { message: "At least one document is required" });
+      return;
+    }
+
+    // Validate education qualifications
+    // Year is optional/empty per schema, but if provided must be 4 digits
+    for (let i = 0; i < data.educationQualifications.length; i++) {
+      const edu = data.educationQualifications[i];
+      if (!edu) {
+        toast.error(`Education qualification ${i + 1}: Invalid entry`);
+        return;
+      }
+      // If year is provided (not empty/undefined), it must be 4 digits
+      if (edu.year && edu.year.trim() !== "" && !/^\d{4}$/.test(edu.year)) {
+        toast.error(`Education qualification ${i + 1}: Year must be 4 digits`);
+        registrationForm.setError(`educationQualifications.${i}.year`, {
+          message: "Year must be 4 digits",
+        });
+        return;
+      }
+    }
+
+    // Validate training entries - filter out empty ones
+    const validTraining = data.training.filter(
+      (t) => t.period && t.period.trim() !== "" && t.institute && t.institute.trim() !== ""
+    );
+    // Only reject if user attempted to add training but left fields incomplete
+    // Allow empty training array (training is optional)
+    // Check if any training entry has partial data (one field filled but not both)
+    const hasPartialTraining = data.training.some(
+      (t) => (t.period && t.period.trim() !== "") !== (t.institute && t.institute.trim() !== "")
+    );
+    if (hasPartialTraining) {
+      toast.error("Please fill in all training fields or remove incomplete entries");
+      return;
+    }
+
+    // Store registration data with filtered training entries and move to OTP step
+    setRegistrationData({
+      ...data,
+      training: validTraining, // Store only validated training entries
+    });
     
     // Send OTP automatically when moving to step 2
     const email = data.email;
@@ -233,6 +296,7 @@ export function MembershipForm() {
     }
 
     setIsVerifyingOTP(true);
+    setIsSubmitting(false); // Ensure isSubmitting starts as false
     try {
       // First verify OTP
       const verifyResponse = await fetch("/api/auth/verify-otp", {
@@ -248,11 +312,12 @@ export function MembershipForm() {
 
       if (!verifyResult.success || !verifyResult.data?.otpValid) {
         toast.error("Invalid OTP. Please try again.");
-        setIsVerifyingOTP(false);
+        // Don't return early - let finally block handle state cleanup
         return;
       }
 
       // OTP verified, now submit registration
+      setIsVerifyingOTP(false); // OTP verification complete
       setIsSubmitting(true);
       const formData = new FormData();
 
@@ -284,9 +349,11 @@ export function MembershipForm() {
         formData.append("profilePicture", registrationData.profilePicture);
       }
 
-      registrationData.documents.forEach((file) => {
-        formData.append("documents", file);
-      });
+      if (registrationData.documents) {
+        registrationData.documents.forEach((file) => {
+          formData.append("documents", file);
+        });
+      }
 
       const response = await fetch("/api/auth/verify-registration", {
         method: "POST",
@@ -355,8 +422,8 @@ export function MembershipForm() {
     ];
 
     return (
-      <div className="flex items-center justify-center mb-8">
-        <div className="flex items-center space-x-4">
+      <div className="flex items-center justify-center mb-4 sm:mb-6 md:mb-8 mt-4 sm:mt-6 w-full">
+        <div className="flex items-center justify-between w-full max-w-full px-1">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = currentStep === step.number;
@@ -364,9 +431,9 @@ export function MembershipForm() {
             
             return (
               <React.Fragment key={step.number}>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center flex-1 min-w-0">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-colors flex-shrink-0 ${
                       isActive
                         ? "bg-primary text-primary-foreground border-primary"
                         : isCompleted
@@ -375,13 +442,13 @@ export function MembershipForm() {
                     }`}
                   >
                     {isCompleted ? (
-                      <CheckCircle className="w-5 h-5" />
+                      <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                     ) : (
-                      <Icon className="w-5 h-5" />
+                      <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                     )}
                   </div>
                   <span
-                    className={`text-xs mt-2 font-medium ${
+                    className={`text-[9px] sm:text-[10px] md:text-xs mt-1 sm:mt-1.5 md:mt-2 font-medium text-center leading-tight px-0.5 ${
                       isActive ? "text-primary" : "text-muted-foreground"
                     }`}
                   >
@@ -390,7 +457,7 @@ export function MembershipForm() {
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`w-16 h-0.5 ${
+                    className={`w-2 sm:w-4 md:w-8 lg:w-12 h-0.5 flex-shrink-0 mx-0.5 sm:mx-1 ${
                       isCompleted ? "bg-green-500" : "bg-slate-300"
                     }`}
                   />
@@ -404,17 +471,17 @@ export function MembershipForm() {
   };
 
   return (
-    <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-2xl rounded-2xl overflow-hidden w-full max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent p-8">
-        <CardTitle className="text-2xl font-bold text-primary">
+    <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-2xl rounded-xl sm:rounded-2xl overflow-hidden w-full max-w-4xl mx-auto">
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent p-4 sm:p-6 md:p-8">
+        <CardTitle className="text-xl sm:text-2xl font-bold text-primary">
           Member Registration
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-xs sm:text-sm leading-relaxed break-words">
           Join our community of professionals. Please complete the steps below.
         </CardDescription>
         <StepIndicator />
       </CardHeader>
-      <CardContent className="p-8">
+      <CardContent className="p-4 sm:p-6 md:p-8">
         {/* Step 1: Registration Form */}
         {currentStep === 1 && (
           <form onSubmit={registrationForm.handleSubmit(onRegistrationSubmit)} className="space-y-10">
@@ -833,34 +900,36 @@ export function MembershipForm() {
 
         {/* Step 2: OTP Verification */}
         {currentStep === 2 && (
-          <form onSubmit={otpForm.handleSubmit(onOTPSubmit)} className="space-y-6">
-            <section className="space-y-6 bg-slate-50 dark:bg-slate-900/30 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
-                <CheckCircle2 className="w-5 h-5" /> Email Verification
+          <form onSubmit={otpForm.handleSubmit(onOTPSubmit)} className="space-y-4 sm:space-y-6">
+            <section className="space-y-4 sm:space-y-6 bg-slate-50 dark:bg-slate-900/30 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2 border-b pb-2 text-base sm:text-lg font-semibold text-primary">
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" /> Email Verification
               </div>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  We&apos;ve sent a 6-digit OTP to <strong>{registrationData?.email}</strong>. Please enter it below to verify your email address.
+              <div className="space-y-3 sm:space-y-4">
+                <p className="text-xs sm:text-sm text-muted-foreground break-words">
+                  We&apos;ve sent a 6-digit OTP to <strong className="break-all">{registrationData?.email}</strong>. Please enter it below to verify your email address.
                 </p>
                 
-                <div className="flex flex-col md:flex-row gap-4 items-start md:items-end">
-                  <div className="flex-1 space-y-2 w-full">
-                    <Label>Enter OTP Code</Label>
-                    <Controller
-                      control={otpForm.control}
-                      name="otp"
-                      render={({ field }) => (
-                        <OTPInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          length={6}
-                          className="justify-start"
-                          disabled={!otpSent}
-                        />
-                      )}
-                    />
+                <div className="flex flex-col gap-3 sm:gap-4">
+                  <div className="space-y-2 w-full">
+                    <Label className="text-sm sm:text-base">Enter OTP Code</Label>
+                    <div className="flex justify-center sm:justify-start overflow-x-auto pb-2 -mx-2 px-2">
+                      <Controller
+                        control={otpForm.control}
+                        name="otp"
+                        render={({ field }) => (
+                          <OTPInput
+                            value={field.value}
+                            onChange={field.onChange}
+                            length={6}
+                            className="justify-center sm:justify-start"
+                            disabled={!otpSent}
+                          />
+                        )}
+                      />
+                    </div>
                     {otpForm.formState.errors.otp && (
-                      <p className="text-destructive text-xs">{otpForm.formState.errors.otp.message}</p>
+                      <p className="text-destructive text-xs text-center sm:text-left">{otpForm.formState.errors.otp.message}</p>
                     )}
                   </div>
                   
@@ -869,7 +938,7 @@ export function MembershipForm() {
                     onClick={handleResendOTP}
                     disabled={isSendingOTP}
                     variant="outline"
-                    className="min-w-[120px]"
+                    className="w-full sm:w-auto sm:min-w-[140px] self-center sm:self-start"
                   >
                     {isSendingOTP ? (
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -880,37 +949,38 @@ export function MembershipForm() {
                   </Button>
                 </div>
                 {otpSent && (
-                  <p className="text-sm text-green-600 flex items-center mt-2">
-                    <CheckCircle2 className="w-3 h-3 mr-1" /> OTP sent to {registrationData?.email}
+                  <p className="text-xs sm:text-sm text-green-600 flex items-center mt-2 flex-wrap gap-1">
+                    <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> 
+                    <span>OTP sent to <span className="break-all">{registrationData?.email}</span></span>
                   </p>
                 )}
               </div>
             </section>
 
-            <div className="flex gap-4 pt-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setCurrentStep(1)}
-                className="flex-1"
+                className="flex-1 w-full sm:w-auto order-2 sm:order-1"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
               <Button
                 type="submit"
-                className="flex-1"
+                className="flex-1 w-full sm:w-auto order-1 sm:order-2"
                 disabled={isVerifyingOTP || isSubmitting}
               >
                 {isVerifyingOTP || isSubmitting ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin mr-2" />
                     {isVerifyingOTP ? "Verifying..." : "Submitting..."}
                   </>
                 ) : (
                   <>
                     Verify & Submit
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                   </>
                 )}
               </Button>
@@ -920,44 +990,44 @@ export function MembershipForm() {
 
         {/* Step 3: Payment */}
         {currentStep === 3 && (
-          <div className="space-y-6">
-            <section className="space-y-6 bg-slate-50 dark:bg-slate-900/30 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
-                <CreditCard className="w-5 h-5" /> Payment Information
+          <div className="space-y-4 sm:space-y-6">
+            <section className="space-y-4 sm:space-y-6 bg-slate-50 dark:bg-slate-900/30 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2 border-b pb-2 text-base sm:text-lg font-semibold text-primary">
+                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" /> Payment Information
               </div>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-3 sm:space-y-4">
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                   Your registration has been submitted successfully! Please complete the payment to finalize your membership.
                 </p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                  <div className="p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                      <CreditCard className="w-5 h-5 text-green-600" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
+                  <div className="p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                       bKash
                     </h3>
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Account Number</p>
-                      <p className="text-xl font-mono font-bold">017XXXXXXXX</p>
-                      <p className="text-xs text-muted-foreground mt-2">Send money to this number</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Account Number</p>
+                      <p className="text-lg sm:text-xl font-mono font-bold break-all">017XXXXXXXX</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">Send money to this number</p>
                     </div>
                   </div>
 
-                  <div className="p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                      <CreditCard className="w-5 h-5 text-blue-600" />
+                  <div className="p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                       Nagad
                     </h3>
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Account Number</p>
-                      <p className="text-xl font-mono font-bold">017XXXXXXXX</p>
-                      <p className="text-xs text-muted-foreground mt-2">Send money to this number</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Account Number</p>
+                      <p className="text-lg sm:text-xl font-mono font-bold break-all">017XXXXXXXX</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">Send money to this number</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <p className="text-sm text-blue-900 dark:text-blue-100">
+                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-xs sm:text-sm text-blue-900 dark:text-blue-100 leading-relaxed">
                     <strong>Note:</strong> After making the payment, please click &quot;Confirm Payment&quot; below. 
                     Our team will verify your payment and activate your membership within 24-48 hours.
                   </p>
@@ -965,13 +1035,13 @@ export function MembershipForm() {
               </div>
             </section>
 
-            <div className="pt-6">
+            <div className="pt-4 sm:pt-6">
               <Button
                 type="button"
                 onClick={handlePaymentConfirm}
-                className="w-full py-6 text-lg font-bold shadow-lg"
+                className="w-full py-4 sm:py-5 md:py-6 text-base sm:text-lg font-bold shadow-lg"
               >
-                <CheckCircle2 className="w-5 h-5 mr-2" />
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Confirm Payment
               </Button>
             </div>
@@ -980,19 +1050,19 @@ export function MembershipForm() {
 
         {/* Step 4: Completion */}
         {currentStep === 4 && (
-          <div className="space-y-6 text-center py-12">
-            <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400" />
+          <div className="space-y-4 sm:space-y-6 text-center py-8 sm:py-10 md:py-12 px-2">
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-primary">Registration Complete!</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-xl sm:text-2xl font-bold text-primary px-2">Registration Complete!</h2>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed px-2 max-w-md mx-auto">
               Your membership application has been submitted successfully. 
               You will be redirected to the login page shortly.
             </p>
-            <div className="pt-4">
-              <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
+            <div className="pt-3 sm:pt-4">
+              <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin mx-auto text-primary" />
             </div>
           </div>
         )}
