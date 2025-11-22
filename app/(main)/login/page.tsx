@@ -2,10 +2,11 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, ShieldCheck, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, ShieldCheck, Eye, EyeOff, Home } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { authApi } from "@/lib/api";
 import { LoginInput, UserRole } from "@/types/api";
@@ -165,7 +166,27 @@ function LoginPageContent() {
       <div className="bg-gray-50 flex items-center justify-center py-10 sm:py-12">
         <Card className="w-full max-w-md bg-white border border-blue-100/60 shadow-sm">
           <div className="p-6 sm:p-8">
+            {/* Eye-catching BCNS Design at Top */}
             <div className="mb-6 text-center">
+              <div className="relative mb-4">
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl blur-xl opacity-20 animate-pulse"></div>
+                {/* BCNS Logo/Text */}
+                <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-4 sm:p-5 shadow-lg">
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-wider">
+                      BCNS
+                    </div>
+                    <div className="text-xs sm:text-sm text-blue-100 font-medium tracking-wide">
+                      Bangladesh Child Neurology Society
+                    </div>
+                  </div>
+                  {/* Decorative elements */}
+                  <div className="absolute top-2 right-2 w-2 h-2 bg-white/30 rounded-full animate-ping"></div>
+                  <div className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-white/40 rounded-full"></div>
+                </div>
+              </div>
+              
               <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
                 <ShieldCheck className="h-5 w-5" />
               </div>
@@ -250,16 +271,27 @@ function LoginPageContent() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 text-center space-y-3">
               <p className="text-sm text-gray-600">
                 Don&apos;t have an account?{" "}
-                <a
-                  href="/register"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                <Link
+                  href="/membership"
+                  className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
                 >
-                  Contact us to join
-                </a>
+                  Membership
+                </Link>
               </p>
+              
+              {/* Home Link */}
+              <div className="pt-3 border-t border-gray-200">
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors group"
+                >
+                  <Home className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  <span>Back to Home</span>
+                </Link>
+              </div>
             </div>
           </div>
         </Card>
