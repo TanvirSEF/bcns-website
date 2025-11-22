@@ -10,7 +10,6 @@ import {
   Menu,
   Search,
   ChevronDown,
-  Globe,
   User,
   Shield,
   Users,
@@ -21,6 +20,7 @@ import {
   LayoutDashboard,
   Phone,
   BellRing,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +47,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const navigationItems = [
-  { name: "Home", href: "/", icon: null },
+  { name: "Home", href: "/", icon: Home },
   { name: "About Us", href: "/about", icon: Shield },
   {
     name: "Committee",
@@ -315,7 +315,7 @@ export function NavbarClient() {
                 ))}
               </nav>
 
-              <div className="hidden lg:flex items-center gap-4 xl:gap-6">
+              <div className="hidden lg:flex items-center gap-3 xl:gap-4">
                 {/* Search Button */}
                 <Button
                   onClick={() => setIsSearchOpen(true)}
@@ -327,20 +327,34 @@ export function NavbarClient() {
                   <Search className="h-3 w-3 xl:h-4 xl:w-4" />
                 </Button>
 
-                {/* Language Selector */}
-                <div className="flex items-center space-x-1 xl:space-x-2 px-2 xl:px-3 py-1 xl:py-2 rounded-lg hover:bg-gray-50 transition-all duration-200">
-                  <Globe className="h-3 w-3 xl:h-4 xl:w-4 text-gray-600" />
-                  <select className="bg-transparent text-xs xl:text-sm focus:outline-none cursor-pointer text-gray-700 hover:text-blue-600 font-medium">
-                    <option value="en" className="text-black">
-                      EN
-                    </option>
-                    <option value="bn" className="text-black">
-                      বাং
-                    </option>
-                  </select>
-                </div>
+                {/* Login and Membership Buttons - Only show when not authenticated */}
+                {!isAuthenticated && (
+                  <>
+                    <Button
+                      asChild
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
+                    >
+                      <Link href="/login">
+                        <User className="mr-2 h-4 w-4" />
+                        Login
+                      </Link>
+                    </Button>
 
-                <ActionButtons />
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200"
+                    >
+                      <Link href="/membership">
+                        <Shield className="mr-2 h-4 w-4" />
+                        Membership
+                      </Link>
+                    </Button>
+                  </>
+                )}
+
+                {/* User Profile - Only show when authenticated */}
+                {isAuthenticated && <ActionButtons />}
               </div>
 
               <div className="lg:hidden flex items-center justify-between w-full">
@@ -363,15 +377,28 @@ export function NavbarClient() {
                         {visibleNavItems.map((item) =>
                           item.hasDropdown ? (
                             <AccordionItem value={item.name} key={item.name}>
-                              <AccordionTrigger>{item.name}</AccordionTrigger>
+                              <AccordionTrigger className="py-3 text-base font-medium">
+                                <div className="flex items-center">
+                                  {item.icon && (
+                                    <item.icon className={cn(
+                                      "mr-2 h-4 w-4",
+                                      item.name === "Notice" && "animate-pulse text-red-500 fill-red-500"
+                                    )} />
+                                  )}
+                                  {item.name}
+                                </div>
+                              </AccordionTrigger>
                               <AccordionContent className="pl-4">
                                 {item.dropdownItems?.map((dropdownItem) => (
                                   <Link
                                     key={dropdownItem.name}
                                     href={dropdownItem.href}
-                                    className="block py-2"
+                                    className="block py-2 text-base font-medium flex items-center"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                   >
+                                    {dropdownItem.icon && (
+                                      <dropdownItem.icon className="mr-2 h-4 w-4 text-gray-400" />
+                                    )}
                                     {dropdownItem.name}
                                   </Link>
                                 ))}
@@ -382,7 +409,7 @@ export function NavbarClient() {
                               key={item.name}
                               href={item.href!}
                               className={cn(
-                                "block py-3 font-medium flex items-center cursor-pointer",
+                                "block py-3 text-base font-medium flex items-center cursor-pointer",
                                 isActive(item.href!) && "text-blue-600 font-semibold",
                                 item.name === "Notice" && "text-red-500"
                               )}
@@ -434,31 +461,62 @@ export function NavbarClient() {
                   </SheetContent>
                 </Sheet>
 
-                {/* Right side - Search, Language, User Profile */}
-                <div className="flex items-center gap-2 sm:gap-3">
+                {/* Right side - Search, Login, Membership, Notice Icons */}
+                <div className="flex items-center gap-2 sm:gap-2">
                   {/* Mobile Search Button */}
                   <Button
                     onClick={() => setIsSearchOpen(true)}
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 sm:h-9 sm:w-9 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
+                    className="h-9 w-9 sm:h-10 sm:w-10 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
                     aria-label="Open search"
                   >
-                    <Search className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <Search className="h-5 w-5 sm:h-5 sm:w-5" />
                   </Button>
 
-                  {/* Mobile Language Selector */}
-                  <div className="flex items-center px-1 sm:px-2 py-1 rounded-lg hover:bg-gray-50">
-                    <Globe className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
-                    <select className="bg-transparent text-xs focus:outline-none cursor-pointer text-gray-700 ml-1 font-medium">
-                      <option value="en" className="text-black">
-                        EN
-                      </option>
-                      <option value="bn" className="text-black">
-                        বাং
-                      </option>
-                    </select>
-                  </div>
+                  {/* Mobile Login and Membership Buttons - Only show when not authenticated */}
+                  {!isAuthenticated && (
+                    <>
+                      {/* Login Icon Button */}
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 sm:h-10 sm:w-10 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
+                        aria-label="Login"
+                      >
+                        <Link href="/login">
+                          <User className="h-5 w-5 sm:h-5 sm:w-5" />
+                        </Link>
+                      </Button>
+
+                      {/* Membership Icon Button */}
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 sm:h-10 sm:w-10 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
+                        aria-label="Membership"
+                      >
+                        <Link href="/membership">
+                          <Shield className="h-5 w-5 sm:h-5 sm:w-5" />
+                        </Link>
+                      </Button>
+                    </>
+                  )}
+
+                  {/* Mobile Notice Button - Last */}
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 sm:h-10 sm:w-10 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full relative"
+                    aria-label="Notice Board"
+                  >
+                    <Link href="/notice-board">
+                      <BellRing className="h-5 w-5 sm:h-5 sm:w-5 animate-pulse fill-red-500" />
+                    </Link>
+                  </Button>
 
                   {/* Mobile user profile */}
                   {isAuthenticated && user && (

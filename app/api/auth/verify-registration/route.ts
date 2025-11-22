@@ -20,7 +20,57 @@ export async function POST(request: NextRequest) {
     // 1. Receive formData from frontend
     const incomingFormData = await request.formData();
 
-    // 2. Create a NEW FormData object to ensure clean data transmission
+    // 2. Validate required fields before proceeding
+    // Helper function to safely extract and validate FormData values
+    const getFormDataValue = (formData: FormData, key: string): string | null => {
+      const value = formData.get(key);
+      if (value === null || value === undefined) {
+        return null;
+      }
+      const stringValue = value.toString();
+      // Reject literal "undefined" or "null" strings
+      if (stringValue === 'undefined' || stringValue === 'null') {
+        return null;
+      }
+      return stringValue;
+    };
+
+    const name = getFormDataValue(incomingFormData, 'name');
+    const email = getFormDataValue(incomingFormData, 'email');
+    const password = getFormDataValue(incomingFormData, 'password');
+    const otp = getFormDataValue(incomingFormData, 'otp');
+
+    // Validate required fields
+    const missingFields: string[] = [];
+    if (!name || name.trim() === '') {
+      missingFields.push('name');
+    }
+    if (!email || email.trim() === '') {
+      missingFields.push('email');
+    }
+    if (!password || password.trim() === '') {
+      missingFields.push('password');
+    }
+    if (!otp || otp.trim() === '') {
+      missingFields.push('otp');
+    }
+
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Missing required fields: ${missingFields.join(', ')}`,
+          error: 'VALIDATION_ERROR',
+          missingFields
+        },
+        {
+          status: 400,
+          headers: corsHeaders
+        }
+      );
+    }
+
+    // 3. Create a NEW FormData object to ensure clean data transmission
     // This fixes issues where direct proxying of FormData in Node environment fails
     const outgoingFormData = new FormData();
 
@@ -29,11 +79,11 @@ export async function POST(request: NextRequest) {
       outgoingFormData.append(key, value);
     }
 
-    // 3. Backend Endpoint
+    // 4. Backend Endpoint
     const backendUrl = config.backendUrl;
     const verifyEndpoint = `${backendUrl}/api/auth/verify-registration`;
 
-    // 4. Send to Backend
+    // 5. Send to Backend
     const response = await fetch(verifyEndpoint, {
       method: "POST",
       body: outgoingFormData, // Send the clean FormData
@@ -71,12 +121,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. Success Response Handling
+    // 6. Success Response Handling
     const transformedData = {
       user: data.user || {
         id: data.id || "temp",
-        email: incomingFormData.get('email')?.toString(),
-        name: incomingFormData.get('name')?.toString(),
+        email: email || data.email,
+        name: name || data.name,
         role: "member",
       },
       token: data.accessToken || data.token,

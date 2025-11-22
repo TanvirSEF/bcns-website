@@ -87,6 +87,30 @@ export async function POST(request: NextRequest) {
     }
 
     // OTP is valid, return success
+    // Check if backend returned isValid or otpValid field
+    // If response.ok is true, trust the backend response
+    // If explicit validation fields exist, use them; otherwise assume success for 200 OK responses
+    const isValid = data.isValid !== undefined 
+      ? data.isValid 
+      : (data.otpValid !== undefined ? data.otpValid : (data.success !== undefined ? data.success : true));
+
+    // Use the calculated isValid variable to check validity
+    // This catches all cases: explicit isValid/otpValid false, or data.success false
+    if (!isValid) {
+      // Use 401 (Unauthorized) for validation failures, not 502 (Bad Gateway)
+      // 502 should only be used when unable to communicate with backend
+      return NextResponse.json(
+        {
+          success: false,
+          message: "OTP verification failed: Invalid or expired OTP",
+          error: 'OTP_VALIDATION_FAILED'
+        },
+        {
+          status: 401,
+          headers: corsHeaders
+        }
+      );
+    }
 
     return NextResponse.json(
       {
@@ -94,7 +118,7 @@ export async function POST(request: NextRequest) {
         message: "OTP verified successfully",
         data: {
           email: body.email,
-          otpValid: data.isValid || true // Handle both isValid and otpValid
+          otpValid: isValid
         }
       },
       {
