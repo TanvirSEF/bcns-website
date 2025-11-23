@@ -22,27 +22,15 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     
-    // Debug: log all form fields
-    console.log('[Profile Picture Upload] Form fields received:', 
-      Array.from(formData.keys())
-    );
-    
     // Try multiple field names that frontend might send
     const image = (formData.get("profilePicture") || formData.get("image") || formData.get("file")) as File;
 
     if (!image) {
-      console.error('[Profile Picture Upload] No image found in form data');
       return NextResponse.json(
         { success: false, message: "No profile picture file provided" },
         { status: 400 }
       );
     }
-    
-    console.log('✅ [Profile Picture Upload] Image received:', {
-      name: image.name,
-      type: image.type,
-      size: image.size
-    });
 
     // Validate file type
     if (!image.type.startsWith("image/")) {
@@ -64,27 +52,22 @@ export async function POST(request: NextRequest) {
     // Upload to backend using profilePicture field
     const backendFormData = new FormData();
     backendFormData.append("profilePicture", image);
-    
-    console.log('🚀 [Profile Picture Upload] Sending to backend...');
 
     const response = await fetch(`${config.backendUrl}/api/users/me/profile-picture`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: backendFormData,
     });
-    
-    console.log('📥 [Profile Picture Upload] Backend response status:', response.status);
 
     if (!response.ok) {
       const errorData = await response
         .json()
         .catch(() => ({ message: "Profile picture upload failed" }));
-      console.error('❌ [Profile Picture Upload] Backend error:', errorData);
+      console.error('[Profile Picture Upload] Backend error:', errorData);
       throw new Error(errorData.message || "Profile picture upload failed");
     }
     
     const data = await response.json();
-    console.log('✅ [Profile Picture Upload] Backend response:', data);
 
     // Extract URL from backend response
     const extractedUrl = data.profilePictureUrl || data.imageUrl || data.url;

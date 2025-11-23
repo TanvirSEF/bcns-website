@@ -385,17 +385,6 @@ export class ApiClient {
   }
 
   /**
-   * Create request timeout promise
-   */
-  private createTimeoutPromise(timeout: number): Promise<never> {
-    return new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new ApiError('Request timeout', 408, 'TIMEOUT'));
-      }, timeout);
-    });
-  }
-
-  /**
    * Perform HTTP request with comprehensive error handling
    */
   private async performRequest<T>(
@@ -413,8 +402,6 @@ export class ApiClient {
 
     const url = `${this.baseURL}${endpoint}`;
     
-    // Prepare request
-
     // Prepare headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -447,27 +434,58 @@ export class ApiClient {
       }
     }
 
+    // Create AbortController for timeout handling
+    const controller = new AbortController();
+    let timeoutId: NodeJS.Timeout | null = null;
+    let responseReceived = false;
+    let timeoutAborted = false;
+    
+    // Set timeout only if specified and > 0
+    if (timeout > 0) {
+      timeoutId = setTimeout(() => {
+        // Only abort if we haven't received a response yet
+        // This prevents aborting during response body parsing
+        if (!responseReceived && !controller.signal.aborted) {
+          timeoutAborted = true;
+          controller.abort();
+        }
+      }, timeout);
+    }
+
     const fetchPromise = fetch(url, {
       ...fetchOptions,
       headers,
       body: requestBody,
+      signal: controller.signal,
     });
 
     let response: Response;
     
     try {
-      // Race between fetch and timeout
-      response = await Promise.race([
-        fetchPromise,
-        this.createTimeoutPromise(timeout),
-      ]);
+      response = await fetchPromise;
+      // Mark that we received a response before parsing
+      responseReceived = true;
       
-      // Handle response
+      // Clear timeout if response received successfully
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       
     } catch (error) {
+      // Clear timeout on error
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       
       if (error instanceof ApiError) {
         throw error;
+      }
+      
+      // Handle abort/timeout errors
+      // Only throw timeout error if we actually aborted due to timeout AND didn't receive response
+      // Check timeoutAborted flag to ensure this AbortError is from our timeout, not another source
+      if (timeoutAborted && !responseReceived && error instanceof Error && error.name === 'AbortError') {
+        throw new ApiError('Request timeout', 408, 'TIMEOUT', error);
       }
       
       // Network error
@@ -480,7 +498,8 @@ export class ApiClient {
       );
     }
 
-    // Handle response
+    // Handle response parsing
+    // Note: responseReceived is already true, so timeout won't abort during parsing
     let responseData: any;
     const contentType = response.headers.get('content-type');
     
@@ -491,6 +510,10 @@ export class ApiClient {
         responseData = await response.text();
       }
     } catch (error) {
+      // Only log parsing errors, don't expose to client
+      if (process.env.NODE_ENV !== 'production') {
+        console.error(`[ApiClient] Failed to parse response from ${url}:`, error);
+      }
       throw new ApiError(
         'Invalid response format',
         response.status,

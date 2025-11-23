@@ -37,9 +37,6 @@ export async function POST(request: NextRequest) {
     const backendUrl = config.backendUrl;
     const resendOtpEndpoint = `${backendUrl}/api/auth/resend-otp`;
 
-    console.log('Resending OTP to:', body.email);
-    console.log('Backend endpoint:', resendOtpEndpoint);
-
     const response = await fetch(resendOtpEndpoint, {
       method: "POST",
       headers: {
@@ -49,14 +46,11 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    console.log('Backend response status:', response.status);
-
     let data;
     try {
       data = await response.json();
-      console.log('Backend response data:', data);
     } catch (parseError) {
-      console.error('Failed to parse backend response:', parseError);
+      console.error('[Resend OTP] Failed to parse backend response:', parseError);
       return NextResponse.json(
         { 
           success: false, 
@@ -71,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorMessage = data?.message || data?.error || "Failed to resend OTP";
-      console.error('Backend error:', errorMessage);
+      console.error('[Resend OTP] Backend error:', errorMessage);
 
       return NextResponse.json(
         {
@@ -86,7 +80,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Return successful response
-    console.log('OTP resent successfully for:', body.email);
     return NextResponse.json(
       {
         success: true,
