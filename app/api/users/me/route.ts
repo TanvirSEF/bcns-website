@@ -109,12 +109,12 @@ export async function PATCH(request: NextRequest) {
         errorData = { message: `Backend request failed with status ${response.status}` };
       }
       console.error('[PATCH /api/users/me] Backend error:', errorData);
-      // Only return user-friendly message, don't expose backend error details
-      const userMessage = errorData.message || "Failed to update profile. Please try again.";
       return NextResponse.json(
         { 
           success: false, 
-          message: userMessage
+          message: errorData.message || errorData.error || `Update failed with status ${response.status}`,
+          error: errorData.error,
+          details: errorData
         },
         { status: response.status }
       );
@@ -141,8 +141,9 @@ export async function PATCH(request: NextRequest) {
       userData = data.user;
     } else if (data.data) {
       userData = data.data;
+    } else if (data.success && data.data) {
+      userData = data.data;
     } else {
-      // If no nested structure, assume data is the user object directly
       userData = data;
     }
 
@@ -158,13 +159,12 @@ export async function PATCH(request: NextRequest) {
     
     return NextResponse.json(finalResponse);
   } catch (error) {
-    // Log full error details on server side for debugging
     console.error("[PATCH /api/users/me] Unexpected error:", error);
-    // Only return user-friendly message, don't expose stack traces or internal error details
     return NextResponse.json(
       { 
         success: false, 
-        message: "Failed to update profile. Please try again."
+        message: error instanceof Error ? error.message : "Failed to update profile",
+        error: error instanceof Error ? error.stack : String(error)
       },
       { status: 500 }
     );

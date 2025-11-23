@@ -59,8 +59,7 @@ export async function fetchWithTimeout(
 
     // Handle abort (timeout) specifically
     // Only throw timeout error if we actually aborted due to timeout AND didn't receive response
-    // AbortController throws 'AbortError', not 'TimeoutError'
-    if (isAborted && !responseReceived && error instanceof Error && error.name === 'AbortError') {
+    if (isAborted && !responseReceived && error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError')) {
       const timeoutMsg = `Request timeout after ${timeout}ms`;
       throw new Error(timeoutMsg);
     }

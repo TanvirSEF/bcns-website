@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, type ChangeEvent } from "react";
+import { useState, useEffect, type ChangeEvent } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,9 +44,6 @@ function ProfilePageContent() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  
-  // Synchronous flag to prevent race conditions in handleSave
-  const isSavingRef = useRef(false);
   
   const [formData, setFormData] = useState({
     formNo: "",
@@ -181,16 +178,11 @@ function ProfilePageContent() {
         
         // Check if data actually changed
         const hasChanged = 
-          prev.formNo !== newFormData.formNo ||
-          prev.refNo !== newFormData.refNo ||
           prev.name !== newFormData.name ||
-          prev.email !== newFormData.email ||
           prev.phone !== newFormData.phone ||
           prev.affiliation !== newFormData.affiliation ||
           prev.mailingAddress !== newFormData.mailingAddress ||
           prev.permanentAddress !== newFormData.permanentAddress ||
-          prev.primaryResearchInterest !== newFormData.primaryResearchInterest ||
-          prev.secondaryResearchInterest !== newFormData.secondaryResearchInterest ||
           JSON.stringify(prev.educationQualifications) !== JSON.stringify(newFormData.educationQualifications) ||
           JSON.stringify(prev.training) !== JSON.stringify(newFormData.training);
         
@@ -229,14 +221,10 @@ function ProfilePageContent() {
   };
 
   const handleSave = async () => {
-    // Prevent multiple simultaneous calls using synchronous ref check
-    // This prevents race conditions where React state updates haven't propagated yet
-    if (isSavingRef.current || isSaving || updateLoading) {
+    // Prevent multiple simultaneous calls
+    if (isSaving || updateLoading) {
       return;
     }
-
-    // Set synchronous flag immediately to prevent concurrent calls
-    isSavingRef.current = true;
 
     try {
       setIsSaving(true);
@@ -320,24 +308,19 @@ function ProfilePageContent() {
           ? error.message
           : "Failed to update profile. Please try again.";
         toast.error(message);
-        // Don't re-throw - error is already handled with toast notification
-        // Re-throwing would cause the outer catch to show a duplicate error message
+        throw error;
       } finally {
         setUpdateLoading(false);
       }
     } catch (error) {
-      // This catch only handles errors from the outer try block (e.g., setIsSaving, formData preparation)
-      // API errors are already handled in the inner catch block
-      console.error('[Profile Save] Error saving profile:', error);
-      console.error('[Profile Save] Error details:', {
+      console.error('❌ [Profile Save] Error saving profile:', error);
+      console.error('❌ [Profile Save] Error details:', {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
       });
       toast.error("Failed to save profile. Please check the console for details.");
     } finally {
       setIsSaving(false);
-      // Reset synchronous flag after all operations complete
-      isSavingRef.current = false;
     }
   };
 
