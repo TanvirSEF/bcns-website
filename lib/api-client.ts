@@ -385,7 +385,7 @@ export class ApiClient {
   }
 
   /**
-   * Create request timeout promise
+   * Create request timeout promise (deprecated - using AbortSignal.timeout instead)
    */
   private createTimeoutPromise(timeout: number): Promise<never> {
     return new Promise((_, reject) => {
@@ -413,8 +413,8 @@ export class ApiClient {
 
     const url = `${this.baseURL}${endpoint}`;
     
-    // Prepare request
-
+    const method = fetchOptions.method || 'GET';
+    
     // Prepare headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -447,27 +447,41 @@ export class ApiClient {
       }
     }
 
+    // Create AbortController for timeout handling
+    const controller = new AbortController();
+    // Only set timeout if it's a positive number to prevent immediate abort
+    const timeoutId = timeout > 0 ? setTimeout(() => controller.abort(), timeout) : null;
+
     const fetchPromise = fetch(url, {
       ...fetchOptions,
       headers,
       body: requestBody,
+      signal: controller.signal,
     });
 
     let response: Response;
     
     try {
-      // Race between fetch and timeout
-      response = await Promise.race([
-        fetchPromise,
-        this.createTimeoutPromise(timeout),
-      ]);
+      response = await fetchPromise;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       
       // Handle response
       
     } catch (error) {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       
       if (error instanceof ApiError) {
         throw error;
+      }
+      
+      // Handle abort/timeout errors
+      // Check for AbortError from fetch abort, TimeoutError from fetchWithTimeout, or timeout message
+      if (error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError' || error.message.includes('timeout'))) {
+        throw new ApiError('Request timeout', 408, 'TIMEOUT', error);
       }
       
       // Network error
@@ -491,6 +505,7 @@ export class ApiClient {
         responseData = await response.text();
       }
     } catch (error) {
+      console.error(`[ApiClient] Failed to parse response from ${url}:`, error);
       throw new ApiError(
         'Invalid response format',
         response.status,
@@ -554,6 +569,7 @@ export class ApiClient {
           lastError.status === 401 || // Unauthorized
           lastError.status === 403 || // Forbidden
           lastError.status === 404 || // Not Found
+          lastError.status === 408 || // Request Timeout (non-idempotent operations shouldn't retry)
           lastError.status === 422 || // Unprocessable Entity
           attempt === retries // Last attempt
         ) {

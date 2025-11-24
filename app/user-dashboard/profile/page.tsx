@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, type ChangeEvent } from "react";
+import { useState, useEffect, useRef, type ChangeEvent } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { 
@@ -23,7 +23,10 @@ import {
   Eye,
   EyeOff,
   Lock,
-  Loader2
+  Loader2,
+  Plus,
+  Trash2,
+  GraduationCap
 } from "lucide-react";
 import { useRequireAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -40,19 +43,24 @@ function ProfilePageContent() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Use ref for synchronous checking to prevent race conditions
+  const isSavingRef = useRef(false);
   
   const [formData, setFormData] = useState({
+    formNo: "",
+    refNo: "",
     name: "",
     email: "",
     phone: "",
     affiliation: "",
     mailingAddress: "",
     permanentAddress: "",
-    specialization: "",
-    institution: "",
-    bio: "",
     primaryResearchInterest: "",
     secondaryResearchInterest: "",
+    educationQualifications: [] as Array<{ qualification: string; year: string; institution: string }>,
+    training: [] as Array<{ period: string; institute: string }>,
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
@@ -79,26 +87,8 @@ function ProfilePageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount - refreshUser is stable from useCallback
 
-  // Profile update with proper async handling
-  const { loading: updateLoading, execute: executeUpdate } = useAsyncSubmit(
-    async (updateData: Partial<typeof formData>) => {
-      const updatedUser = await api.users.updateProfile(updateData);
-      updateUser(updatedUser);
-      setIsEditing(false);
-      return updatedUser;
-    },
-    {
-      onSuccess: () => {
-        toast.success("Profile updated successfully!");
-      },
-      onError: (error) => {
-        const message = error instanceof ApiError 
-          ? error.getUserFriendlyMessage()
-          : "Failed to update profile. Please try again.";
-        toast.error(message);
-      }
-    }
-  );
+  // Loading state for profile update
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   // Password change with proper async handling
   const { loading: passwordLoading, execute: executePasswordChange } = useAsyncSubmit(
@@ -155,23 +145,61 @@ function ProfilePageContent() {
     }
   );
 
-  // Update form data when user data is loaded
+  // Update form data when user data is loaded or updated
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({
-        ...prev,
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        affiliation: user.affiliation || "",
-        mailingAddress: user.mailingAddress || "",
-        permanentAddress: user.permanentAddress || "",
-        specialization: user.specialization || "",
-        institution: user.institution || "",
-        bio: user.bio || "",
-        primaryResearchInterest: user.primaryResearchInterest || "",
-        secondaryResearchInterest: user.secondaryResearchInterest || "",
-      }));
+      setFormData(prev => {
+        // Only update if user data has actually changed to avoid unnecessary re-renders
+        const newFormData = {
+          formNo: (user as any).formNo || "",
+          refNo: (user as any).refNo || "",
+          name: user.name || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          affiliation: user.affiliation || "",
+          mailingAddress: user.mailingAddress || "",
+          permanentAddress: user.permanentAddress || "",
+          primaryResearchInterest: user.primaryResearchInterest || "",
+          secondaryResearchInterest: user.secondaryResearchInterest || "",
+          educationQualifications: user.educationQualifications && user.educationQualifications.length > 0 
+            ? user.educationQualifications.map(edu => ({
+                qualification: edu.qualification || "",
+                year: edu.year || "",
+                institution: edu.institution || ""
+              }))
+            : [{ qualification: "", year: "", institution: "" }],
+          training: user.training && user.training.length > 0
+            ? user.training.map(t => ({
+                period: t.period || "",
+                institute: t.institute || ""
+              }))
+            : [{ period: "", institute: "" }],
+          currentPassword: prev.currentPassword,
+          newPassword: prev.newPassword,
+          confirmPassword: prev.confirmPassword
+        };
+        
+        // Check if data actually changed
+        const hasChanged = 
+          prev.formNo !== newFormData.formNo ||
+          prev.refNo !== newFormData.refNo ||
+          prev.name !== newFormData.name ||
+          prev.email !== newFormData.email ||
+          prev.phone !== newFormData.phone ||
+          prev.affiliation !== newFormData.affiliation ||
+          prev.mailingAddress !== newFormData.mailingAddress ||
+          prev.permanentAddress !== newFormData.permanentAddress ||
+          prev.primaryResearchInterest !== newFormData.primaryResearchInterest ||
+          prev.secondaryResearchInterest !== newFormData.secondaryResearchInterest ||
+          JSON.stringify(prev.educationQualifications) !== JSON.stringify(newFormData.educationQualifications) ||
+          JSON.stringify(prev.training) !== JSON.stringify(newFormData.training);
+        
+        if (hasChanged) {
+          return newFormData;
+        }
+        
+        return prev;
+      });
     }
   }, [user]);
 
@@ -201,20 +229,148 @@ function ProfilePageContent() {
   };
 
   const handleSave = async () => {
+    // Prevent multiple simultaneous calls using ref for synchronous check
+    if (isSavingRef.current || updateLoading) {
+      return;
+    }
+
+    // Set ref immediately to prevent race conditions
+    isSavingRef.current = true;
+
+    setIsSaving(true);
+    
     // Prepare data for API call (excluding read-only fields)
-    const updateData = {
+    const updateData: any = {
+      formNo: formData.formNo || undefined,
+      refNo: formData.refNo || undefined,
       name: formData.name,
-      // email, specialization, and institution are read-only
       phone: formData.phone,
       affiliation: formData.affiliation,
       mailingAddress: formData.mailingAddress,
       permanentAddress: formData.permanentAddress,
-      bio: formData.bio,
-      primaryResearchInterest: formData.primaryResearchInterest,
-      secondaryResearchInterest: formData.secondaryResearchInterest,
+      primaryResearchInterest: formData.primaryResearchInterest || undefined,
+      secondaryResearchInterest: formData.secondaryResearchInterest || undefined,
+      educationQualifications: formData.educationQualifications
+        .filter(edu => edu.qualification.trim() !== "" && edu.institution.trim() !== "")
+        .map(edu => ({
+          qualification: edu.qualification,
+          year: edu.year,
+          institution: edu.institution
+        })),
+      training: formData.training
+        .filter(t => t.period.trim() !== "" && t.institute.trim() !== "")
+        .map(t => ({
+          period: t.period,
+          institute: t.institute
+        })),
     };
 
-    await executeUpdate(updateData);
+    // Remove undefined values
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === undefined) {
+        delete updateData[key];
+      }
+    });
+
+    // Direct API call to ensure it actually happens
+    setUpdateLoading(true);
+    try {
+      const updatedUser = await api.users.updateProfile(updateData);
+      
+      // Update local state with the updated user data from API response
+      updateUser(updatedUser);
+      
+      // Update form data directly with the updated user data
+      // No need to refresh from server since we already have the latest data
+      setFormData(prev => ({
+        ...prev,
+        formNo: (updatedUser as any).formNo || "",
+        refNo: (updatedUser as any).refNo || "",
+        name: updatedUser.name || "",
+        phone: updatedUser.phone || "",
+        affiliation: updatedUser.affiliation || "",
+        mailingAddress: updatedUser.mailingAddress || "",
+        permanentAddress: updatedUser.permanentAddress || "",
+        primaryResearchInterest: updatedUser.primaryResearchInterest || "",
+        secondaryResearchInterest: updatedUser.secondaryResearchInterest || "",
+        educationQualifications: updatedUser.educationQualifications && updatedUser.educationQualifications.length > 0 
+          ? updatedUser.educationQualifications.map(edu => ({
+              qualification: edu.qualification || "",
+              year: edu.year || "",
+              institution: edu.institution || ""
+            }))
+          : [{ qualification: "", year: "", institution: "" }],
+        training: updatedUser.training && updatedUser.training.length > 0
+          ? updatedUser.training.map(t => ({
+              period: t.period || "",
+              institute: t.institute || ""
+            }))
+          : [{ period: "", institute: "" }],
+      }));
+      
+      setIsEditing(false);
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error('[Profile Save] API call failed:', error);
+      const message = error instanceof ApiError 
+        ? error.getUserFriendlyMessage()
+        : error instanceof Error
+        ? error.message
+        : "Failed to update profile. Please try again.";
+      toast.error(message);
+    } finally {
+      setUpdateLoading(false);
+      setIsSaving(false);
+      isSavingRef.current = false;
+    }
+  };
+
+  // Handlers for education qualifications
+  const addEducation = () => {
+    setFormData(prev => ({
+      ...prev,
+      educationQualifications: [...prev.educationQualifications, { qualification: "", year: "", institution: "" }]
+    }));
+  };
+
+  const removeEducation = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      educationQualifications: prev.educationQualifications.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateEducation = (index: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      educationQualifications: prev.educationQualifications.map((edu, i) =>
+        i === index ? { ...edu, [field]: value } : edu
+      )
+    }));
+  };
+
+  // Handlers for training
+  const addTraining = () => {
+    setFormData(prev => ({
+      ...prev,
+      training: [...prev.training, { period: "", institute: "" }]
+    }));
+  };
+
+  const removeTraining = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      training: prev.training.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateTraining = (index: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      training: prev.training.map((t, i) =>
+        i === index ? { ...t, [field]: value } : t
+      )
+    }));
   };
 
   const handlePasswordChange = async () => {
@@ -265,39 +421,50 @@ function ProfilePageContent() {
         <div className="lg:col-span-1">
           <Card>
             <CardHeader className="text-center">
-              <div className="relative mx-auto">
-                <Avatar className="h-32 w-32 mx-auto">
-                  <AvatarImage 
-                    src={user?.profilePictureUrl || user?.avatar || "/images/logo.png"} 
-                    alt={user?.name || "User"}
-                  />
-                  <AvatarFallback className="text-2xl bg-emerald-100 text-emerald-700">
-                    {user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2) : "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <label htmlFor="profile-picture" className={`absolute bottom-0 right-0 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-2 cursor-pointer transition-colors ${uploadLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                  {uploadLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Camera className="h-4 w-4" />
-                  )}
-                  <input
-                    id="profile-picture"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleProfilePictureUpload}
-                    disabled={uploadLoading}
-                  />
-                </label>
-                {uploadLoading && uploadProgress > 0 && (
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-600">
-                    {Math.round(uploadProgress)}%
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <div className="relative group">
+                  <div className="w-48 h-60 rounded-lg overflow-hidden border-4 border-primary/20 bg-slate-100 flex items-center justify-center shadow-lg relative">
+                    {user?.profilePictureUrl || user?.avatar ? (
+                      <Image
+                        src={user.profilePictureUrl || user.avatar || "/images/logo.png"}
+                        alt={user?.name || "User"}
+                        fill
+                        className="object-contain"
+                        sizes="192px"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <User className="w-16 h-16 text-slate-400" />
+                        <p className="text-xs text-slate-400 text-center px-4">Passport Size Photo</p>
+                      </div>
+                    )}
                   </div>
-                )}
+                  <label
+                    htmlFor="profile-picture"
+                    className={`absolute bottom-2 right-2 bg-primary text-white p-2.5 rounded-lg cursor-pointer shadow-lg hover:bg-primary/90 transition-colors z-10 ${uploadLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {uploadLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5" />
+                    )}
+                    <input
+                      id="profile-picture"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleProfilePictureUpload}
+                      disabled={uploadLoading}
+                    />
+                  </label>
+                  {uploadLoading && uploadProgress > 0 && (
+                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-600">
+                      {Math.round(uploadProgress)}%
+                    </div>
+                  )}
+                </div>
               </div>
               <CardTitle className="mt-4">{user?.name || "User"}</CardTitle>
-              <CardDescription>{formData.specialization}</CardDescription>
               <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
                 Active Member
               </Badge>
@@ -307,21 +474,31 @@ function ProfilePageContent() {
                 <Mail className="h-4 w-4" />
                 <span>{user?.email || "user@example.com"}</span>
               </div>
+              {user?.phone && (
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Phone className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">{user.phone}</span>
+                </div>
+              )}
+              {user?.mailingAddress && (
+                <div className="flex items-start space-x-2 text-sm text-gray-600">
+                  <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span className="break-words">{user.mailingAddress}</span>
+                </div>
+              )}
+              {user?.affiliation && (
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <Award className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-words">{user.affiliation}</span>
+                </div>
+              )}
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Phone className="h-4 w-4" />
-                <span>{formData.phone || "Not provided"}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <MapPin className="h-4 w-4" />
-                <span>{formData.mailingAddress || "Not provided"}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-4 w-4 flex-shrink-0" />
                 <span>Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : "2020"}</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Award className="h-4 w-4" />
-                <span>{user?.membershipStatus || "Professional Member"}</span>
+                <Award className="h-4 w-4 flex-shrink-0" />
+                <span className="capitalize">{user?.membershipStatus?.replace('_', ' ') || "Professional Member"}</span>
               </div>
             </CardContent>
           </Card>
@@ -372,8 +549,17 @@ function ProfilePageContent() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                disabled={updateLoading}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (isEditing) {
+                    handleSave();
+                  } else {
+                    setIsEditing(true);
+                  }
+                }}
+                disabled={updateLoading || isSaving}
+                type="button"
               >
                 {updateLoading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -382,11 +568,31 @@ function ProfilePageContent() {
                 ) : (
                   <Edit className="h-4 w-4 mr-2" />
                 )}
-                {updateLoading ? "Saving..." : isEditing ? "Save" : "Edit"}
+                {updateLoading || isSaving ? "Saving..." : isEditing ? "Save" : "Edit"}
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="formNo">Form No</Label>
+                  <Input
+                    id="formNo"
+                    value={formData.formNo}
+                    onChange={(e) => handleInputChange("formNo", e.target.value)}
+                    disabled={!isEditing}
+                    placeholder="Form number (optional)"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="refNo">Reference No</Label>
+                  <Input
+                    id="refNo"
+                    value={formData.refNo}
+                    onChange={(e) => handleInputChange("refNo", e.target.value)}
+                    disabled={!isEditing}
+                    placeholder="Reference number (optional)"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input
@@ -452,50 +658,6 @@ function ProfilePageContent() {
             </CardContent>
           </Card>
 
-          {/* Professional Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Professional Information</CardTitle>
-              <CardDescription>
-                Your professional background and specialization.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="specialization">Specialization</Label>
-                  <Input
-                    id="specialization"
-                    value={formData.specialization}
-                    disabled
-                    className="bg-gray-50 cursor-not-allowed"
-                    title="Specialization is set during registration and cannot be changed"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="institution">Institution</Label>
-                  <Input
-                    id="institution"
-                    value={formData.institution}
-                    disabled
-                    className="bg-gray-50 cursor-not-allowed"
-                    title="Institution is set during registration and cannot be changed"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bio">Professional Bio</Label>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) => handleInputChange("bio", e.target.value)}
-                  disabled={!isEditing}
-                  rows={4}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Research Interests */}
           <Card>
             <CardHeader>
@@ -531,51 +693,140 @@ function ProfilePageContent() {
           </Card>
 
           {/* Education & Training */}
-          {user?.educationQualifications && user.educationQualifications.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Education Qualifications</CardTitle>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5" />
+                  Education Qualifications
+                </CardTitle>
                 <CardDescription>
                   Your academic background and qualifications.
                 </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {user.educationQualifications.map((edu, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <span className="font-medium">{edu.qualification}</span>
-                        <span className="text-gray-600 ml-2">({edu.year})</span>
-                      </div>
-                      <span className="text-sm text-gray-600">{edu.institution}</span>
+              </div>
+              {isEditing && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addEducation}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {formData.educationQualifications.map((edu, index) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 bg-gray-50 rounded-lg">
+                    <div className="md:col-span-4 space-y-2">
+                      <Label>Qualification</Label>
+                      <Input
+                        value={edu.qualification}
+                        onChange={(e) => updateEducation(index, "qualification", e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="e.g. MBBS"
+                      />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                    <div className="md:col-span-3 space-y-2">
+                      <Label>Year</Label>
+                      <Input
+                        value={edu.year}
+                        onChange={(e) => updateEducation(index, "year", e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="YYYY"
+                      />
+                    </div>
+                    <div className="md:col-span-4 space-y-2">
+                      <Label>Institution</Label>
+                      <Input
+                        value={edu.institution}
+                        onChange={(e) => updateEducation(index, "institution", e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Institution name"
+                      />
+                    </div>
+                    {isEditing && (
+                      <div className="md:col-span-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeEducation(index)}
+                          disabled={formData.educationQualifications.length === 1}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Training */}
-          {user?.training && user.training.length > 0 && (
-            <Card>
-              <CardHeader>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
                 <CardTitle>Professional Training</CardTitle>
                 <CardDescription>
                   Your training and professional development experience.
                 </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {user.training.map((training, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <span className="font-medium">{training.period}</span>
-                      <span className="text-sm text-gray-600">{training.institute}</span>
+              </div>
+              {isEditing && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addTraining}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {formData.training.map((training, index) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 bg-gray-50 rounded-lg">
+                    <div className="md:col-span-5 space-y-2">
+                      <Label>Period</Label>
+                      <Input
+                        value={training.period}
+                        onChange={(e) => updateTraining(index, "period", e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="e.g. 2020-2022"
+                      />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                    <div className="md:col-span-6 space-y-2">
+                      <Label>Institute</Label>
+                      <Input
+                        value={training.institute}
+                        onChange={(e) => updateTraining(index, "institute", e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Institute name"
+                      />
+                    </div>
+                    {isEditing && (
+                      <div className="md:col-span-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeTraining(index)}
+                          disabled={formData.training.length === 1}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Security Settings */}
           <Card>

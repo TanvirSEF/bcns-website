@@ -176,8 +176,10 @@ export function useAsyncSubmit<T = any>(
     [asyncResult]
   );
 
+  // Return execute directly so it can be called
   return {
     ...asyncResult,
+    execute: asyncResult.execute, // Make sure execute is returned
     handleSubmit,
   };
 }

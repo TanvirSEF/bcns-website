@@ -44,7 +44,15 @@ function handleApiResponse<T>(response: unknown): T {
     if (apiResponse.success === true && 'data' in apiResponse) {
       return apiResponse.data as T;
     }
+    
+    if (apiResponse.success === true && !('data' in apiResponse)) {
+      // Return apiResponse without the success wrapper field to maintain type contract
+      const { success, ...dataWithoutWrapper } = apiResponse;
+      return dataWithoutWrapper as T;
+    }
   }
+  
+  // If response doesn't have success field, assume it's the data directly
   return response as T;
 }
 

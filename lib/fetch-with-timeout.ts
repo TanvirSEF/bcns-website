@@ -19,7 +19,20 @@ export async function fetchWithTimeout(
 
   // Create AbortController for timeout handling
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  let timeoutId: NodeJS.Timeout | null = null;
+  let isAborted = false;
+  let responseReceived = false;
+  
+  // Set timeout only if specified and > 0
+  if (timeout > 0) {
+    timeoutId = setTimeout(() => {
+      // Only abort if we haven't received a response yet
+      if (!responseReceived && !controller.signal.aborted) {
+        isAborted = true;
+        controller.abort();
+      }
+    }, timeout);
+  }
 
   try {
     const response = await fetch(url, {
@@ -27,14 +40,30 @@ export async function fetchWithTimeout(
       signal: controller.signal,
     });
 
-    clearTimeout(timeoutId);
+    // Mark that we received a response
+    responseReceived = true;
+
+    // Clear timeout if response received successfully
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    
+    // If we got a response, it means the request succeeded
+    // Even if timeout was triggered, if response arrived, we return it
     return response;
   } catch (error) {
-    clearTimeout(timeoutId);
+    // Clear timeout on error
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
 
     // Handle abort (timeout) specifically
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error(`Request timeout after ${timeout}ms`);
+    // Only throw timeout error if we actually aborted due to timeout AND didn't receive response
+    if (isAborted && !responseReceived && error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError')) {
+      const timeoutMsg = `Request timeout after ${timeout}ms`;
+      const timeoutError = new Error(timeoutMsg);
+      timeoutError.name = 'TimeoutError';
+      throw timeoutError;
     }
 
     // Re-throw other errors
