@@ -6,20 +6,13 @@ import {
   Calendar,
   BookOpen,
   Users,
-  Award,
-  MessageSquare,
-  Settings,
-  HelpCircle,
-  Heart,
   Building2,
-  Activity,
   FileText,
 } from "lucide-react";
 import { UserNavMain } from "./UserNavMain";
-import { UserNavSecondary } from "./UserNavSecondary";
-import { UserNavDocuments } from "./UserNavDocuments";
 import { UserNavUser } from "./UserNavUser";
 import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +25,24 @@ import {
 
 export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
+  const [upcomingEventsCount, setUpcomingEventsCount] = React.useState<string | undefined>(undefined);
+
+  React.useEffect(() => {
+    const fetchUpcomingEventsCount = async () => {
+      try {
+        const events = await api.events.getEvents();
+        const now = new Date();
+        const upcomingCount = events.filter((event) => new Date(event.date) >= now).length;
+        setUpcomingEventsCount(upcomingCount > 0 ? upcomingCount.toString() : undefined);
+      } catch (error) {
+        console.error("Failed to fetch upcoming events count:", error);
+        // Don't show badge if API fails
+        setUpcomingEventsCount(undefined);
+      }
+    };
+
+    fetchUpcomingEventsCount();
+  }, []);
 
   const data = {
     user: {
@@ -47,59 +58,24 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
       },
       {
         title: "Events",
-        url: "/activities/conference",
+        url: "/user-dashboard/events",
         icon: Calendar,
-        badge: "3",
+        ...(upcomingEventsCount && { badge: upcomingEventsCount }),
       },
       {
         title: "Publications",
-        url: "/activities/research",
+        url: "/user-dashboard/publications",
         icon: BookOpen,
-        badge: "New",
       },
       {
         title: "Members",
-        url: "/members",
+        url: "/user-dashboard/members",
         icon: Users,
       },
       {
-        title: "My Activities",
-        url: "/user-dashboard/activities",
-        icon: Activity,
-      },
-    ],
-    navSecondary: [
-      {
-        title: "Settings",
-        url: "/user-dashboard/settings",
-        icon: Settings,
-      },
-      {
-        title: "Help & Support",
-        url: "/contact",
-        icon: HelpCircle,
-      },
-    ],
-    documents: [
-      {
-        name: "My Documents",
+        title: "My Documents",
         url: "/user-dashboard/documents",
         icon: FileText,
-      },
-      {
-        name: "Certificates",
-        url: "/user-dashboard/certificates",
-        icon: Award,
-      },
-      {
-        name: "Communications",
-        url: "/user-dashboard/messages",
-        icon: MessageSquare,
-      },
-      {
-        name: "Favorites",
-        url: "/user-dashboard/favorites",
-        icon: Heart,
       },
     ],
   };
@@ -127,13 +103,6 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
       </SidebarHeader>
       <SidebarContent className="px-3 py-4">
         <UserNavMain items={data.navMain} />
-        <div className="my-4">
-          <div className="px-2 py-2">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">My Resources</h4>
-          </div>
-          <UserNavDocuments items={data.documents} />
-        </div>
-        <UserNavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter className="border-t bg-gray-50/50 p-3">
         <UserNavUser user={data.user} />
