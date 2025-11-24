@@ -385,17 +385,6 @@ export class ApiClient {
   }
 
   /**
-   * Create request timeout promise (deprecated - using AbortSignal.timeout instead)
-   */
-  private createTimeoutPromise(timeout: number): Promise<never> {
-    return new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new ApiError('Request timeout', 408, 'TIMEOUT'));
-      }, timeout);
-    });
-  }
-
-  /**
    * Perform HTTP request with comprehensive error handling
    */
   private async performRequest<T>(
@@ -412,8 +401,6 @@ export class ApiClient {
     } = config;
 
     const url = `${this.baseURL}${endpoint}`;
-    
-    const method = fetchOptions.method || 'GET';
     
     // Prepare headers
     const headers: Record<string, string> = {
