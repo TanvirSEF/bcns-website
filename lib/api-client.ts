@@ -449,7 +449,8 @@ export class ApiClient {
 
     // Create AbortController for timeout handling
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    // Only set timeout if it's a positive number to prevent immediate abort
+    const timeoutId = timeout > 0 ? setTimeout(() => controller.abort(), timeout) : null;
 
     const fetchPromise = fetch(url, {
       ...fetchOptions,
@@ -462,19 +463,24 @@ export class ApiClient {
     
     try {
       response = await fetchPromise;
-      clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       
       // Handle response
       
     } catch (error) {
-      clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       
       if (error instanceof ApiError) {
         throw error;
       }
       
       // Handle abort/timeout errors
-      if (error instanceof Error && error.name === 'AbortError') {
+      // Check for AbortError from fetch abort, TimeoutError from fetchWithTimeout, or timeout message
+      if (error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError' || error.message.includes('timeout'))) {
         throw new ApiError('Request timeout', 408, 'TIMEOUT', error);
       }
       
@@ -563,6 +569,7 @@ export class ApiClient {
           lastError.status === 401 || // Unauthorized
           lastError.status === 403 || // Forbidden
           lastError.status === 404 || // Not Found
+          lastError.status === 408 || // Request Timeout (non-idempotent operations shouldn't retry)
           lastError.status === 422 || // Unprocessable Entity
           attempt === retries // Last attempt
         ) {

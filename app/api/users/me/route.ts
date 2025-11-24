@@ -112,9 +112,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false, 
-          message: errorData.message || errorData.error || `Update failed with status ${response.status}`,
-          error: errorData.error,
-          details: errorData
+          message: errorData.message || errorData.error || `Update failed with status ${response.status}`
         },
         { status: response.status }
       );
@@ -163,8 +161,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        message: error instanceof Error ? error.message : "Failed to update profile",
-        error: error instanceof Error ? error.stack : String(error)
+        message: "Failed to update profile"
       },
       { status: 500 }
     );

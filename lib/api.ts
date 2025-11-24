@@ -29,10 +29,7 @@ import {
 } from '@/types/api';
 
 function handleApiResponse<T>(response: unknown): T {
-  console.log('[handleApiResponse] Processing response:', JSON.stringify(response, null, 2));
-  
   if (typeof response !== 'object' || response === null) {
-    console.error('[handleApiResponse] Invalid response type:', typeof response);
     throw new Error('Invalid API response');
   }
   
@@ -41,23 +38,21 @@ function handleApiResponse<T>(response: unknown): T {
   if ('success' in apiResponse) {
     if (apiResponse.success === false) {
       const errorMessage = (apiResponse.message as string) || 'API request failed';
-      console.error('[handleApiResponse] API error - success is false:', errorMessage, apiResponse);
       throw new Error(errorMessage);
     }
     
     if (apiResponse.success === true && 'data' in apiResponse) {
-      console.log('[handleApiResponse] Success response with data:', apiResponse.data);
       return apiResponse.data as T;
     }
     
     if (apiResponse.success === true && !('data' in apiResponse)) {
-      console.warn('[handleApiResponse] Success is true but no data field, returning full response');
-      return response as T;
+      // Return apiResponse without the success wrapper field to maintain type contract
+      const { success, ...dataWithoutWrapper } = apiResponse;
+      return dataWithoutWrapper as T;
     }
   }
   
   // If response doesn't have success field, assume it's the data directly
-  console.log('[handleApiResponse] No success field, returning response as-is:', response);
   return response as T;
 }
 

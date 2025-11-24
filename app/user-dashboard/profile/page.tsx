@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ChangeEvent } from "react";
+import { useState, useEffect, useRef, type ChangeEvent } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,9 @@ function ProfilePageContent() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Use ref for synchronous checking to prevent race conditions
+  const isSavingRef = useRef(false);
   
   const [formData, setFormData] = useState({
     formNo: "",
@@ -178,11 +181,16 @@ function ProfilePageContent() {
         
         // Check if data actually changed
         const hasChanged = 
+          prev.formNo !== newFormData.formNo ||
+          prev.refNo !== newFormData.refNo ||
           prev.name !== newFormData.name ||
+          prev.email !== newFormData.email ||
           prev.phone !== newFormData.phone ||
           prev.affiliation !== newFormData.affiliation ||
           prev.mailingAddress !== newFormData.mailingAddress ||
           prev.permanentAddress !== newFormData.permanentAddress ||
+          prev.primaryResearchInterest !== newFormData.primaryResearchInterest ||
+          prev.secondaryResearchInterest !== newFormData.secondaryResearchInterest ||
           JSON.stringify(prev.educationQualifications) !== JSON.stringify(newFormData.educationQualifications) ||
           JSON.stringify(prev.training) !== JSON.stringify(newFormData.training);
         
@@ -221,106 +229,99 @@ function ProfilePageContent() {
   };
 
   const handleSave = async () => {
-    // Prevent multiple simultaneous calls
-    if (isSaving || updateLoading) {
+    // Prevent multiple simultaneous calls using ref for synchronous check
+    if (isSavingRef.current || updateLoading) {
       return;
     }
 
-    try {
-      setIsSaving(true);
-      
-      // Prepare data for API call (excluding read-only fields)
-      const updateData: any = {
-        formNo: formData.formNo || undefined,
-        refNo: formData.refNo || undefined,
-        name: formData.name,
-        phone: formData.phone,
-        affiliation: formData.affiliation,
-        mailingAddress: formData.mailingAddress,
-        permanentAddress: formData.permanentAddress,
-        primaryResearchInterest: formData.primaryResearchInterest || undefined,
-        secondaryResearchInterest: formData.secondaryResearchInterest || undefined,
-        educationQualifications: formData.educationQualifications
-          .filter(edu => edu.qualification.trim() !== "" || edu.institution.trim() !== "")
-          .map(edu => ({
-            qualification: edu.qualification,
-            year: edu.year,
-            institution: edu.institution
-          })),
-        training: formData.training
-          .filter(t => t.period.trim() !== "" || t.institute.trim() !== "")
-          .map(t => ({
-            period: t.period,
-            institute: t.institute
-          })),
-      };
+    // Set ref immediately to prevent race conditions
+    isSavingRef.current = true;
 
-      // Remove undefined values
-      Object.keys(updateData).forEach(key => {
-        if (updateData[key] === undefined) {
-          delete updateData[key];
-        }
-      });
+    setIsSaving(true);
+    
+    // Prepare data for API call (excluding read-only fields)
+    const updateData: any = {
+      formNo: formData.formNo || undefined,
+      refNo: formData.refNo || undefined,
+      name: formData.name,
+      phone: formData.phone,
+      affiliation: formData.affiliation,
+      mailingAddress: formData.mailingAddress,
+      permanentAddress: formData.permanentAddress,
+      primaryResearchInterest: formData.primaryResearchInterest || undefined,
+      secondaryResearchInterest: formData.secondaryResearchInterest || undefined,
+      educationQualifications: formData.educationQualifications
+        .filter(edu => edu.qualification.trim() !== "" && edu.institution.trim() !== "")
+        .map(edu => ({
+          qualification: edu.qualification,
+          year: edu.year,
+          institution: edu.institution
+        })),
+      training: formData.training
+        .filter(t => t.period.trim() !== "" && t.institute.trim() !== "")
+        .map(t => ({
+          period: t.period,
+          institute: t.institute
+        })),
+    };
 
-      // Direct API call to ensure it actually happens
-      setUpdateLoading(true);
-      try {
-        const updatedUser = await api.users.updateProfile(updateData);
-        
-        // Update local state with the updated user data from API response
-        updateUser(updatedUser);
-        
-        // Update form data directly with the updated user data
-        // No need to refresh from server since we already have the latest data
-        setFormData(prev => ({
-          ...prev,
-          formNo: (updatedUser as any).formNo || "",
-          refNo: (updatedUser as any).refNo || "",
-          name: updatedUser.name || "",
-          phone: updatedUser.phone || "",
-          affiliation: updatedUser.affiliation || "",
-          mailingAddress: updatedUser.mailingAddress || "",
-          permanentAddress: updatedUser.permanentAddress || "",
-          primaryResearchInterest: updatedUser.primaryResearchInterest || "",
-          secondaryResearchInterest: updatedUser.secondaryResearchInterest || "",
-          educationQualifications: updatedUser.educationQualifications && updatedUser.educationQualifications.length > 0 
-            ? updatedUser.educationQualifications.map(edu => ({
-                qualification: edu.qualification || "",
-                year: edu.year || "",
-                institution: edu.institution || ""
-              }))
-            : [{ qualification: "", year: "", institution: "" }],
-          training: updatedUser.training && updatedUser.training.length > 0
-            ? updatedUser.training.map(t => ({
-                period: t.period || "",
-                institute: t.institute || ""
-              }))
-            : [{ period: "", institute: "" }],
-        }));
-        
-        setIsEditing(false);
-        toast.success("Profile updated successfully!");
-      } catch (error) {
-        console.error('[Profile Save] API call failed:', error);
-        const message = error instanceof ApiError 
-          ? error.getUserFriendlyMessage()
-          : error instanceof Error
-          ? error.message
-          : "Failed to update profile. Please try again.";
-        toast.error(message);
-        throw error;
-      } finally {
-        setUpdateLoading(false);
+    // Remove undefined values
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === undefined) {
+        delete updateData[key];
       }
+    });
+
+    // Direct API call to ensure it actually happens
+    setUpdateLoading(true);
+    try {
+      const updatedUser = await api.users.updateProfile(updateData);
+      
+      // Update local state with the updated user data from API response
+      updateUser(updatedUser);
+      
+      // Update form data directly with the updated user data
+      // No need to refresh from server since we already have the latest data
+      setFormData(prev => ({
+        ...prev,
+        formNo: (updatedUser as any).formNo || "",
+        refNo: (updatedUser as any).refNo || "",
+        name: updatedUser.name || "",
+        phone: updatedUser.phone || "",
+        affiliation: updatedUser.affiliation || "",
+        mailingAddress: updatedUser.mailingAddress || "",
+        permanentAddress: updatedUser.permanentAddress || "",
+        primaryResearchInterest: updatedUser.primaryResearchInterest || "",
+        secondaryResearchInterest: updatedUser.secondaryResearchInterest || "",
+        educationQualifications: updatedUser.educationQualifications && updatedUser.educationQualifications.length > 0 
+          ? updatedUser.educationQualifications.map(edu => ({
+              qualification: edu.qualification || "",
+              year: edu.year || "",
+              institution: edu.institution || ""
+            }))
+          : [{ qualification: "", year: "", institution: "" }],
+        training: updatedUser.training && updatedUser.training.length > 0
+          ? updatedUser.training.map(t => ({
+              period: t.period || "",
+              institute: t.institute || ""
+            }))
+          : [{ period: "", institute: "" }],
+      }));
+      
+      setIsEditing(false);
+      toast.success("Profile updated successfully!");
     } catch (error) {
-      console.error('❌ [Profile Save] Error saving profile:', error);
-      console.error('❌ [Profile Save] Error details:', {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      toast.error("Failed to save profile. Please check the console for details.");
+      console.error('[Profile Save] API call failed:', error);
+      const message = error instanceof ApiError 
+        ? error.getUserFriendlyMessage()
+        : error instanceof Error
+        ? error.message
+        : "Failed to update profile. Please try again.";
+      toast.error(message);
     } finally {
+      setUpdateLoading(false);
       setIsSaving(false);
+      isSavingRef.current = false;
     }
   };
 
