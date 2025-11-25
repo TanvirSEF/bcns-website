@@ -6,18 +6,20 @@ import Image from "next/image";
 const MemberCard = ({ member }: { member: GeneralMember }) => (
   <div className="bg-white rounded-lg shadow-md p-5 sm:p-7 hover:shadow-lg transition-shadow duration-300 w-full cursor-pointer">
     <div className="flex flex-col items-center mb-4">
-      <div className="mb-3">
+      <div className="mb-3 w-full flex justify-center">
         {member.image ? (
-          <Image
-            src={member.image}
-            alt={member.name}
-            width={160}
-            height={200}
-            className="w-24 h-28 sm:w-28 sm:h-32 md:w-32 md:h-40 object-contain bg-white"
-            priority
-          />
+          <div className="relative w-32 h-40 sm:w-36 sm:h-44 md:w-40 md:h-48 overflow-hidden rounded-lg border border-gray-300">
+            <Image
+              src={member.image}
+              alt={member.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 128px, (max-width: 768px) 144px, 160px"
+              priority
+            />
+          </div>
         ) : (
-          <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-base md:text-lg">
+          <div className="w-32 h-40 sm:w-36 sm:h-44 md:w-40 md:h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-base md:text-lg rounded-lg border border-gray-300">
             {member.name
               .split(" ")
               .map((n: string) => n[0])
