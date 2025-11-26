@@ -241,11 +241,63 @@ export const eventApi = {
   },
 };
 
+// Gallery API
+export const galleryApi = {
+  getAlbums: async (): Promise<readonly Album[]> => {
+    const response = await apiClient.get<readonly Album[]>('/gallery/albums');
+    return handleApiResponse<readonly Album[]>(response);
+  },
+
+  createAlbum: async (albumData: { title: string; description?: string; coverPhoto?: string }): Promise<Album> => {
+    const response = await apiClient.post<Album>('/gallery/albums', albumData);
+    return handleApiResponse<Album>(response);
+  },
+
+  getAlbumPhotos: async (albumId: string): Promise<readonly Photo[]> => {
+    const response = await apiClient.get<readonly Photo[]>(`/gallery/albums/${albumId}/photos`);
+    return handleApiResponse<readonly Photo[]>(response);
+  },
+
+  uploadPhoto: async (
+    albumId: string, 
+    photoData: { 
+      caption?: string; 
+      imageUrl?: string;
+      photo?: File;
+    }
+  ): Promise<Photo> => {
+    // If photo file is provided, use FormData upload
+    if (photoData.photo) {
+      const formData = new FormData();
+      formData.append("photo", photoData.photo);
+      if (photoData.caption) formData.append("caption", photoData.caption);
+      
+      const response = await apiClient.post<Photo>(
+        `/gallery/albums/${albumId}/photos`,
+        formData
+      );
+      return handleApiResponse<Photo>(response);
+    }
+    
+    // Otherwise, use FormData with imageUrl (backend expects FormData)
+    const formData = new FormData();
+    if (photoData.imageUrl) formData.append("imageUrl", photoData.imageUrl);
+    if (photoData.caption) formData.append("caption", photoData.caption);
+    
+    const response = await apiClient.post<Photo>(
+      `/gallery/albums/${albumId}/photos`,
+      formData
+    );
+    return handleApiResponse<Photo>(response);
+  },
+};
+
 export const api = {
   auth: authApi,
   users: userApi,
   admin: adminApi,
   events: eventApi,
+  gallery: galleryApi,
 };
 
 // Backward compatibility exports
@@ -298,9 +350,12 @@ export const getAllDocuments = (): Promise<readonly Document[]> => Promise.resol
 export const updateDocumentStatus = (): Promise<OperationResponse> => 
   Promise.resolve({ success: true, message: 'Success' });
 
-export const getAlbums = (): Promise<readonly Album[]> => Promise.resolve([]);
-export const createAlbum = (): Promise<Album> => Promise.reject(new Error('Not implemented'));
-export const getAlbumPhotos = (): Promise<readonly Photo[]> => Promise.resolve([]);
+// Gallery backward compatibility exports
+export const getAlbums = (): Promise<readonly Album[]> => galleryApi.getAlbums();
+export const createAlbum = (albumData: { title: string; description?: string; coverPhoto?: string }): Promise<Album> => 
+  galleryApi.createAlbum(albumData);
+export const getAlbumPhotos = (albumId: string): Promise<readonly Photo[]> => 
+  galleryApi.getAlbumPhotos(albumId);
 
 export const getPolls = (): Promise<readonly Poll[]> => Promise.resolve([]);
 export const createPoll = (): Promise<Poll> => Promise.reject(new Error('Not implemented'));
