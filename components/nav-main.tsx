@@ -1,8 +1,7 @@
 "use client"
 
-import { Plus, Mail, type LucideIcon } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
+import { type LucideIcon } from "lucide-react"
+import { usePathname } from "next/navigation"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -10,6 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 
 export function NavMain({
   items,
@@ -20,39 +20,71 @@ export function NavMain({
     icon?: LucideIcon
   }[]
 }) {
+  const pathname = usePathname()
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            <SidebarMenuButton
-              tooltip="Quick Create"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-            >
-              <Plus className="size-4" />
-              <span className="truncate text-sm">Quick Create</span>
-            </SidebarMenuButton>
-            <Button
-              size="icon"
-              className="size-8 group-data-[collapsible=icon]:opacity-0 shrink-0"
-              variant="outline"
-            >
-              <Mail className="size-4" />
-              <span className="sr-only">Inbox</span>
-            </Button>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild tooltip={item.title} className="min-w-0">
-                <a href={item.url} className="flex items-center gap-2 w-full">
-                  {item.icon && <item.icon className="shrink-0 size-4" />}
-                  <span className="truncate text-sm">{item.title}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            // Exact match only - no nested route support for better UX
+            // Special case for dashboard: only active on exact /admin path
+            const isActive = pathname === item.url
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  isActive={isActive}
+                  className={cn(
+                    "min-w-0 cursor-pointer transition-colors duration-200",
+                    isActive &&
+                      "[&[data-active=true]]:!bg-gray-900 [&[data-active=true]]:!text-white [&[data-active=true]]:hover:!bg-gray-800 [&[data-active=true]]:hover:!text-white"
+                  )}
+                  style={
+                    isActive
+                      ? {
+                          backgroundColor: "#111827", // gray-900
+                          color: "#ffffff", // white
+                        }
+                      : undefined
+                  }
+                >
+                  <a
+                    href={item.url}
+                    className={cn(
+                      "flex items-center gap-2 w-full",
+                      isActive && "text-white"
+                    )}
+                    style={
+                      isActive
+                        ? {
+                            color: "#ffffff",
+                          }
+                        : undefined
+                    }
+                  >
+                    {item.icon && (
+                      <item.icon
+                        className={cn(
+                          "shrink-0 size-4",
+                          isActive ? "text-white" : "text-muted-foreground"
+                        )}
+                        style={
+                          isActive
+                            ? {
+                                color: "#ffffff",
+                              }
+                            : undefined
+                        }
+                      />
+                    )}
+                    <span className="truncate text-sm">{item.title}</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
