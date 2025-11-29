@@ -29,21 +29,45 @@ export default function UserDocumentsPage() {
       try {
         setLoading(true);
         setError(null);
+        
+        // Fetch user profile which includes documents array from backend
         const userData = await api.auth.getProfile();
-        // Handle documents from user data (documents field may exist in API response)
-        const userDocs = (userData as any).documents || [];
+        
+        // Extract documents from user data (backend returns documents array in user profile)
+        // Type assertion needed because User type doesn't include documents field
+        const userWithDocs = userData as typeof userData & { documents?: unknown[] };
+        const userDocs = Array.isArray(userWithDocs.documents) ? userWithDocs.documents : [];
+        
         // Transform documents to match our interface
-        const formattedDocs: Document[] = userDocs.map((doc: any) => ({
-          id: doc._id || doc.id,
-          title: doc.title || "Untitled Document",
-          fileUrl: doc.fileUrl || "",
-          status: doc.status || DocumentStatus.PENDING,
-          uploadedAt: doc.uploadedAt || doc.createdAt,
-        }));
+        const formattedDocs: Document[] = userDocs.map((doc: unknown) => {
+          const docData = doc as {
+            _id?: string;
+            id?: string;
+            title?: string;
+            fileUrl?: string;
+            status?: string;
+            uploadedAt?: string;
+            createdAt?: string;
+          };
+          
+          const uploadedAt = docData.uploadedAt || docData.createdAt;
+          
+          return {
+            id: docData._id || docData.id || "",
+            title: docData.title || "Untitled Document",
+            fileUrl: docData.fileUrl || "",
+            status: docData.status || DocumentStatus.PENDING,
+            ...(uploadedAt && { uploadedAt }),
+          };
+        });
+        
         setDocuments(formattedDocs);
       } catch (err) {
         console.error("Failed to fetch documents:", err);
-        setError("Failed to load documents. Please try again later.");
+        const errorMessage = err instanceof Error 
+          ? err.message 
+          : "Failed to load documents. Please try again later.";
+        setError(errorMessage);
         toast.error("Failed to load documents");
       } finally {
         setLoading(false);

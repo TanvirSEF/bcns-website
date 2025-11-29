@@ -34,6 +34,15 @@ interface BackendUser {
     period: string;
     institute: string;
   }>;
+  documents?: Array<{
+    _id?: string;
+    id?: string;
+    title?: string;
+    fileUrl?: string;
+    status?: string;
+    uploadedAt?: string;
+    createdAt?: string;
+  }>;
 }
 
 function getToken(request: NextRequest): string | null {
@@ -116,6 +125,7 @@ export async function GET(request: NextRequest) {
       secondaryResearchInterest: user.secondaryResearchInterest || "",
       educationQualifications: user.educationQualifications || [],
       training: user.training || [],
+      documents: user.documents || [],
     }));
 
     return NextResponse.json({

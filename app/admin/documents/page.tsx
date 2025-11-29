@@ -3,29 +3,24 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Download, Eye, Clock, User, CheckCircle, XCircle } from "lucide-react";
+import { Download, Clock, User, Search, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { Document, DocumentStatus } from "@/types/api";
+import { api } from "@/lib/api";
+import { Input } from "@/components/ui/input";
+
+interface DocumentWithUser extends Document {
+  uploadedBy: string;
+  userEmail: string;
+}
 
 export default function DocumentsManagement() {
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<DocumentWithUser[]>([]);
+  const [filteredDocuments, setFilteredDocuments] = useState<DocumentWithUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [, setEditingDocument] = useState<Document | null>(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    fileUrl: "",
-    status: DocumentStatus.PENDING,
-  });
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchDocuments();
@@ -34,92 +29,94 @@ export default function DocumentsManagement() {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      // Mock data
-      setDocuments([
-        {
-          id: "1",
-          title: "Annual Report 2023",
-          description: "Complete annual report of BCNS activities",
-          fileUrl: "/documents/annual-report-2023.pdf",
-          status: DocumentStatus.APPROVED,
-          uploadedBy: "admin@bcns.org.bd",
-          createdAt: "2024-01-01",
-          updatedAt: "2024-01-01",
-        },
-        {
-          id: "2",
-          title: "Research Proposal - Pediatric Neurology",
-          description: "Research proposal for pediatric neurology study",
-          fileUrl: "/documents/research-proposal.pdf",
-          status: DocumentStatus.PENDING,
-          uploadedBy: "dr.smith@bcns.org.bd",
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-        {
-          id: "3",
-          title: "Conference Guidelines",
-          description: "Guidelines for organizing BCNS conferences",
-          fileUrl: "/documents/conference-guidelines.pdf",
-          status: DocumentStatus.APPROVED,
-          uploadedBy: "admin@bcns.org.bd",
-          createdAt: "2024-01-10",
-          updatedAt: "2024-01-10",
-        },
-      ]);
+      
+      // Fetch all users
+      const users = await api.admin.getAllUsers();
+      
+      // Extract all documents from all users
+      const allDocuments: DocumentWithUser[] = [];
+      
+      users.forEach((user) => {
+        const userWithDocs = user as typeof user & { documents?: unknown[] };
+        const userDocs = Array.isArray(userWithDocs.documents) ? userWithDocs.documents : [];
+        
+        userDocs.forEach((doc: unknown) => {
+          const docData = doc as {
+            _id?: string;
+            id?: string;
+            title?: string;
+            fileUrl?: string;
+            status?: string;
+            uploadedAt?: string;
+            createdAt?: string;
+            description?: string;
+          };
+          
+          const uploadedAt = docData.uploadedAt || docData.createdAt;
+          
+          // Convert date to ISO string format
+          let createdAtValue: string;
+          if (uploadedAt) {
+            createdAtValue = typeof uploadedAt === 'string' 
+              ? uploadedAt 
+              : new Date(uploadedAt).toISOString();
+          } else {
+            createdAtValue = new Date().toISOString();
+          }
+          
+          const updatedAtValue = docData.createdAt 
+            ? (typeof docData.createdAt === 'string' ? docData.createdAt : new Date(docData.createdAt).toISOString())
+            : createdAtValue;
+          
+          allDocuments.push({
+            id: docData._id || docData.id || "",
+            title: docData.title || "Untitled Document",
+            fileUrl: docData.fileUrl || "",
+            status: (docData.status as DocumentStatus) || DocumentStatus.PENDING,
+            uploadedBy: user.id || "",
+            userEmail: user.email,
+            createdAt: createdAtValue,
+            updatedAt: updatedAtValue,
+            ...(docData.description && { description: docData.description }),
+          });
+        });
+      });
+      
+      setDocuments(allDocuments);
+      setFilteredDocuments(allDocuments);
     } catch (error) {
+      console.error("Failed to fetch documents:", error);
       toast.error("Failed to fetch documents");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateDocument = async () => {
-    try {
-      // API call will be implemented
-      
-      toast.success("Document created successfully");
-      setIsCreateDialogOpen(false);
-      setFormData({ title: "", description: "", fileUrl: "", status: DocumentStatus.PENDING });
-      fetchDocuments();
-    } catch (error) {
-      toast.error("Failed to create document");
+  // Filter documents by user email or document title
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredDocuments(documents);
+      return;
     }
-  };
 
-  const handleUpdateStatus = async (_documentId: string, status: DocumentStatus.APPROVED | DocumentStatus.REJECTED) => {
-    try {
-      // API call will be implemented
+    const query = searchQuery.toLowerCase().trim();
+    const filtered = documents.filter((doc) => {
+      const emailMatch = doc.userEmail.toLowerCase().includes(query);
+      const titleMatch = doc.title.toLowerCase().includes(query);
+      const descriptionMatch = doc.description?.toLowerCase().includes(query);
       
-      toast.success(`Document ${status} successfully`);
-      fetchDocuments();
-    } catch (error) {
-      toast.error("Failed to update document status");
-    }
-  };
-
-  const handleDeleteDocument = async (_documentId: string) => {
-    if (!confirm("Are you sure you want to delete this document?")) return;
-    
-    try {
-      // API call will be implemented
-      
-      toast.success("Document deleted successfully");
-      fetchDocuments();
-    } catch (error) {
-      toast.error("Failed to delete document");
-    }
-  };
-
-  const openEditDialog = (document: Document) => {
-    setEditingDocument(document);
-    setFormData({
-      title: document.title,
-      description: document.description || "",
-      fileUrl: document.fileUrl,
-      status: document.status,
+      return emailMatch || titleMatch || descriptionMatch;
     });
-    setIsEditDialogOpen(true);
+
+    setFilteredDocuments(filtered);
+  }, [searchQuery, documents]);
+
+  const handleDownload = (fileUrl: string) => {
+    if (fileUrl) {
+      window.open(fileUrl, "_blank");
+    } else {
+      toast.error("Document URL not available");
+    }
   };
 
   const getStatusBadge = (status: DocumentStatus) => {
@@ -145,108 +142,70 @@ export default function DocumentsManagement() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading documents...</div>
+      <div className="space-y-8">
+        <div className="p-6 bg-card rounded-lg border shadow-sm">
+          <h1 className="text-3xl font-bold tracking-tight mb-4">Documents Management</h1>
+          <p className="text-muted-foreground">
+            Manage society documents, reports, and publications
+          </p>
+        </div>
+        <Card>
+          <CardContent className="p-8">
+            <div className="flex items-center justify-center h-64">
+              <div className="text-lg text-muted-foreground">Loading documents...</div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-6 bg-card rounded-lg border shadow-sm">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Documents Management</h1>
-          <p className="text-muted-foreground">
-            Manage society documents, reports, and publications
-          </p>
-        </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Upload Document
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-sm">
-            <DialogHeader>
-              <DialogTitle>Upload New Document</DialogTitle>
-              <DialogDescription>
-                Add a new document to the society library
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="title" className="text-right">
-                  Title
-                </Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="description" className="text-right">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="fileUrl" className="text-right">
-                  File URL
-                </Label>
-                <Input
-                  id="fileUrl"
-                  value={formData.fileUrl}
-                  onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                  className="col-span-3"
-                  placeholder="https://example.com/document.pdf"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="status" className="text-right">
-                  Status
-                </Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value: DocumentStatus) => 
-                    setFormData({ ...formData, status: value })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={DocumentStatus.PENDING}>Pending</SelectItem>
-                    <SelectItem value={DocumentStatus.APPROVED}>Approved</SelectItem>
-                    <SelectItem value={DocumentStatus.REJECTED}>Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" onClick={handleCreateDocument}>
-                Upload Document
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      <div className="p-6 bg-card rounded-lg border shadow-sm">
+        <h1 className="text-3xl font-bold tracking-tight mb-4">Documents Management</h1>
+        <p className="text-muted-foreground">
+          Manage society documents, reports, and publications
+        </p>
       </div>
 
       <Card className="border-2 shadow-lg">
         <CardHeader className="bg-muted/50 border-b">
-          <CardTitle>All Documents</CardTitle>
-          <CardDescription>
-            Review and manage document submissions
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle>All Documents</CardTitle>
+              <CardDescription>
+                Review and manage document submissions
+              </CardDescription>
+            </div>
+            <div className="relative w-full sm:w-auto sm:min-w-[300px]">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by user email, title..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-9"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
+          {searchQuery && (
+            <div className="mb-4 text-sm text-muted-foreground">
+              Showing {filteredDocuments.length} of {documents.length} documents
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow>
@@ -258,167 +217,82 @@ export default function DocumentsManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {documents.map((document) => (
-                <TableRow key={document.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{document.title}</div>
-                      {document.description && (
-                        <div className="text-sm text-muted-foreground line-clamp-2">
-                          {document.description}
-                        </div>
+              {filteredDocuments.length > 0 ? (
+                filteredDocuments.map((document) => (
+                  <TableRow key={document.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{document.title}</div>
+                        {document.description && (
+                          <div className="text-sm text-muted-foreground line-clamp-2">
+                            {document.description}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(document.status)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{document.userEmail}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">
+                          {document.createdAt ? formatDate(document.createdAt) : "N/A"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(document.fileUrl)}
+                        className="hover:bg-primary hover:text-primary-foreground"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    <div className="flex flex-col items-center gap-2">
+                      <Download className="h-12 w-12 text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        {searchQuery ? "No documents found matching your search" : "No documents found"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {searchQuery 
+                          ? "Try a different search term or clear the search to see all documents."
+                          : "Documents will appear here once users upload them."
+                        }
+                      </p>
+                      {searchQuery && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSearchQuery("")}
+                          className="mt-2"
+                        >
+                          Clear Search
+                        </Button>
                       )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(document.status)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      {document.uploadedBy}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      {formatDate(document.createdAt || "")}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(document.fileUrl, '_blank')}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(document.fileUrl, '_blank')}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      {document.status === DocumentStatus.PENDING && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUpdateStatus(document.id, DocumentStatus.APPROVED)}
-                            className="text-green-600 hover:text-green-700"
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUpdateStatus(document.id, DocumentStatus.REJECTED)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEditDialog(document)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteDocument(document.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      {/* Edit Document Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Edit Document</DialogTitle>
-            <DialogDescription>
-              Update document information
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-title" className="text-right">
-                Title
-              </Label>
-              <Input
-                id="edit-title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-description" className="text-right">
-                Description
-              </Label>
-              <Textarea
-                id="edit-description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-fileUrl" className="text-right">
-                File URL
-              </Label>
-              <Input
-                id="edit-fileUrl"
-                value={formData.fileUrl}
-                onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-status" className="text-right">
-                Status
-              </Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value: DocumentStatus) => 
-                  setFormData({ ...formData, status: value })
-                }
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={DocumentStatus.PENDING}>Pending</SelectItem>
-                  <SelectItem value={DocumentStatus.APPROVED}>Approved</SelectItem>
-                  <SelectItem value={DocumentStatus.REJECTED}>Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit" onClick={() => {
-              // TODO: Implement edit functionality
-              toast.success("Document updated successfully");
-              setIsEditDialogOpen(false);
-            }}>
-              Update Document
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

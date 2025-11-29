@@ -7,14 +7,8 @@ import {
   UserCheck,
   FileText,
   Calendar,
-  CreditCard,
-  MessageSquare,
   BarChart3,
-  Settings,
-  HelpCircle,
   Search,
-  Database,
-  FileBarChart,
   Building2,
   Image,
   BookOpen,
@@ -22,9 +16,7 @@ import {
   Activity,
 } from "lucide-react"
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -99,45 +91,6 @@ const data = {
       icon: Search,
     },
   ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/admin/settings",
-      icon: Settings,
-    },
-    {
-      title: "Get Help",
-      url: "/admin/help",
-      icon: HelpCircle,
-    },
-    {
-      title: "Search",
-      url: "/admin/search",
-      icon: Search,
-    },
-  ],
-  documents: [
-    {
-      name: "Database",
-      url: "/admin/database",
-      icon: Database,
-    },
-    {
-      name: "Reports",
-      url: "/admin/reports",
-      icon: FileBarChart,
-    },
-    {
-      name: "Communications",
-      url: "/admin/communications",
-      icon: MessageSquare,
-    },
-    {
-      name: "Payments",
-      url: "/admin/payments",
-      icon: CreditCard,
-    },
-  ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -160,8 +113,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

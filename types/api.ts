@@ -129,6 +129,7 @@ export interface Photo {
 export interface Poll {
   readonly id: UUID;
   readonly question: string;
+  readonly description?: string;
   readonly options: readonly PollOption[];
   readonly isActive: boolean;
   readonly createdBy: UUID;
@@ -151,10 +152,15 @@ export interface Publication {
 export interface ZoomMeeting {
   readonly id: UUID;
   readonly topic: string;
+  readonly agenda?: string;
   readonly startTime: ISODateString;
   readonly duration: number;
+  readonly durationMinutes?: number;
   readonly joinUrl: URL;
-  readonly createdBy: UUID;
+  readonly startUrl?: string;
+  readonly zoomMeetingId?: string;
+  readonly timezone?: string;
+  readonly createdBy: UUID | string;
   readonly createdAt: ISODateString;
   readonly password?: string;
 }
