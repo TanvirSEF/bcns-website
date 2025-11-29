@@ -9,24 +9,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, User, Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Eye, User, Calendar, FileText, Upload, Loader2, Download } from "lucide-react";
 import { toast } from "react-toastify";
 import { Publication } from "@/types/api";
+import { api } from "@/lib/api";
 
 export default function PublicationsManagement() {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingPublication, setEditingPublication] = useState<Publication | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
-    content: "",
-    author: "",
-    tags: [] as string[],
-    publishedAt: "",
+    description: "",
+    category: "",
   });
-  const [tagInput, setTagInput] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPublications();
@@ -35,116 +35,78 @@ export default function PublicationsManagement() {
   const fetchPublications = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await getPublications();
-      // setPublications(response);
-      
-      // Mock data for now
-      setPublications([
-        {
-          id: "1",
-          title: "Advances in Pediatric Neurology: A Comprehensive Review",
-          content: "This comprehensive review covers the latest developments in pediatric neurology...",
-          author: "Dr. Ahmed Rahman",
-          tags: ["pediatric", "neurology", "research", "review"],
-          publishedAt: "2024-01-15",
-          createdAt: "2024-01-01",
-          updatedAt: "2024-01-01",
-        },
-        {
-          id: "2",
-          title: "Case Study: Rare Neurological Disorder in Children",
-          content: "A detailed case study of a rare neurological disorder...",
-          author: "Dr. Fatima Khan",
-          tags: ["case-study", "rare-disorder", "children"],
-          publishedAt: "2024-01-20",
-          createdAt: "2024-01-10",
-          updatedAt: "2024-01-10",
-        },
-        {
-          id: "3",
-          title: "Treatment Guidelines for Childhood Epilepsy",
-          content: "Updated treatment guidelines for managing childhood epilepsy...",
-          author: "Dr. Mohammad Ali",
-          tags: ["epilepsy", "treatment", "guidelines", "children"],
-          publishedAt: "2024-01-25",
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-      ]);
+      const response = await api.publications.getPublications();
+      setPublications([...response]);
     } catch (error) {
+      console.error("Failed to fetch publications:", error);
       toast.error("Failed to fetch publications");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type (PDF only)
+    if (file.type !== "application/pdf") {
+      toast.error("Please select a PDF file");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+
+    setSelectedFile(file);
+    setFilePreview(file.name);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      category: "",
+    });
+    setSelectedFile(null);
+    setFilePreview(null);
+  };
+
   const handleCreatePublication = async () => {
+    // Validate required fields
+    if (!formData.title || !formData.description || !formData.category) {
+      toast.error("Please fill in all required fields (Title, Description, Category)");
+      return;
+    }
+
+    if (!selectedFile) {
+      toast.error("Please select a PDF file");
+      return;
+    }
+
     try {
-      // TODO: Replace with actual API call
-      // await createPublication(formData);
+      setIsSubmitting(true);
+      await api.publications.createPublication({
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        file: selectedFile,
+      });
       
       toast.success("Publication created successfully");
       setIsCreateDialogOpen(false);
-      setFormData({ title: "", content: "", author: "", tags: [], publishedAt: "" });
+      resetForm();
       fetchPublications();
     } catch (error) {
-      toast.error("Failed to create publication");
+      console.error("Failed to create publication:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create publication");
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const handleEditPublication = async () => {
-    if (!editingPublication) return;
-    
-    try {
-      // TODO: Replace with actual API call
-      // await updatePublication(editingPublication.id, formData);
-      
-      toast.success("Publication updated successfully");
-      setIsEditDialogOpen(false);
-      setEditingPublication(null);
-      setFormData({ title: "", content: "", author: "", tags: [], publishedAt: "" });
-      fetchPublications();
-    } catch (error) {
-      toast.error("Failed to update publication");
-    }
-  };
-
-  const handleDeletePublication = async (_publicationId: string) => {
-    if (!confirm("Are you sure you want to delete this publication?")) return;
-    
-    try {
-      // TODO: Replace with actual API call
-      // await deletePublication(_publicationId);
-      
-      toast.success("Publication deleted successfully");
-      fetchPublications();
-    } catch (error) {
-      toast.error("Failed to delete publication");
-    }
-  };
-
-  const openEditDialog = (publication: Publication) => {
-    setEditingPublication(publication);
-    setFormData({
-      title: publication.title,
-      content: publication.content,
-      author: publication.author,
-      tags: [...(publication.tags || [])],
-      publishedAt: publication.publishedAt || "",
-    });
-    setIsEditDialogOpen(true);
-  };
-
-  const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({ ...formData, tags: [...formData.tags, tagInput.trim()] });
-      setTagInput("");
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setFormData({ ...formData, tags: formData.tags.filter(tag => tag !== tagToRemove) });
   };
 
   const formatDate = (dateString: string) => {
@@ -189,7 +151,7 @@ export default function PublicationsManagement() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="title" className="text-right">
-                  Title
+                  Title <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="title"
@@ -197,77 +159,94 @@ export default function PublicationsManagement() {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="col-span-3"
                   placeholder="Publication title"
+                  required
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="author" className="text-right">
-                  Author
-                </Label>
-                <Input
-                  id="author"
-                  value={formData.author}
-                  onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                  className="col-span-3"
-                  placeholder="Author name"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="publishedAt" className="text-right">
-                  Publish Date
-                </Label>
-                <Input
-                  id="publishedAt"
-                  type="date"
-                  value={formData.publishedAt}
-                  onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="content" className="text-right">
-                  Content
+                <Label htmlFor="description" className="text-right">
+                  Description <span className="text-red-500">*</span>
                 </Label>
                 <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="col-span-3"
-                  rows={6}
-                  placeholder="Publication content or abstract"
+                  rows={4}
+                  placeholder="Publication description"
+                  required
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="tags" className="text-right">
-                  Tags
+                <Label htmlFor="category" className="text-right">
+                  Category <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="research">Research</SelectItem>
+                    <SelectItem value="case-study">Case Study</SelectItem>
+                    <SelectItem value="review">Review</SelectItem>
+                    <SelectItem value="guideline">Guideline</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="file" className="text-right">
+                  PDF File <span className="text-red-500">*</span>
                 </Label>
                 <div className="col-span-3 space-y-2">
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <Input
-                      id="tags"
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      placeholder="Add a tag"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                      id="file"
+                      type="file"
+                      accept="application/pdf"
+                      onChange={handleFileChange}
+                      className="cursor-pointer"
+                      required
                     />
-                    <Button type="button" variant="outline" onClick={addTag}>
-                      Add
-                    </Button>
+                    {filePreview && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <FileText className="h-4 w-4" />
+                        <span>{filePreview}</span>
+                      </div>
+                    )}
                   </div>
-                  {formData.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.tags.map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="cursor-pointer" onClick={() => removeTag(tag)}>
-                          {tag} ×
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Maximum file size: 10MB. Only PDF files are allowed.
+                  </p>
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={handleCreatePublication}>
-                Create Publication
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsCreateDialogOpen(false);
+                  resetForm();
+                }}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" onClick={handleCreatePublication} disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Create Publication
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -286,173 +265,111 @@ export default function PublicationsManagement() {
             <TableHeader>
               <TableRow>
                 <TableHead>Publication</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Author</TableHead>
-                <TableHead>Tags</TableHead>
+                <TableHead>File</TableHead>
                 <TableHead>Published</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {publications.map((publication) => (
-                <TableRow key={publication.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{publication.title}</div>
-                      {publication.content && (
-                        <div className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                          {publication.content}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      {publication.author}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {publication.tags?.map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {publication.publishedAt ? formatDate(publication.publishedAt) : "Not published"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // TODO: Implement view functionality
-                          toast.info("View functionality coming soon");
-                        }}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEditDialog(publication)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeletePublication(publication.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {publications.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No publications found. Create your first publication to get started.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                publications.map((publication) => {
+                  // Type assertion to access category and fileUrl
+                  const pub = publication as any;
+                  return (
+                    <TableRow key={publication.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{publication.title}</div>
+                          {publication.content && (
+                            <div className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                              {publication.content}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {pub.category ? (
+                          <Badge variant="secondary" className="capitalize">
+                            {pub.category}
+                          </Badge>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">N/A</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4" />
+                          {publication.author || "N/A"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {pub.fileUrl ? (
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(pub.fileUrl, '_blank')}
+                              className="h-8"
+                            >
+                              <FileText className="h-3 w-3 mr-1" />
+                              <span className="text-xs">View PDF</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = pub.fileUrl;
+                                link.download = `${publication.title}.pdf`;
+                                link.target = '_blank';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }}
+                              className="h-8"
+                            >
+                              <Download className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">No file</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          {publication.publishedAt ? formatDate(publication.publishedAt) : "Not published"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {pub.fileUrl && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(pub.fileUrl, '_blank')}
+                            title="View PDF"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      {/* Edit Publication Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Edit Publication</DialogTitle>
-            <DialogDescription>
-              Update publication information
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-title" className="text-right">
-                Title
-              </Label>
-              <Input
-                id="edit-title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-author" className="text-right">
-                Author
-              </Label>
-              <Input
-                id="edit-author"
-                value={formData.author}
-                onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-publishedAt" className="text-right">
-                Publish Date
-              </Label>
-              <Input
-                id="edit-publishedAt"
-                type="date"
-                value={formData.publishedAt}
-                onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-content" className="text-right">
-                Content
-              </Label>
-              <Textarea
-                id="edit-content"
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="col-span-3"
-                rows={6}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-tags" className="text-right">
-                Tags
-              </Label>
-              <div className="col-span-3 space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    id="edit-tags"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    placeholder="Add a tag"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  />
-                  <Button type="button" variant="outline" onClick={addTag}>
-                    Add
-                  </Button>
-                </div>
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="cursor-pointer" onClick={() => removeTag(tag)}>
-                        {tag} ×
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit" onClick={handleEditPublication}>
-              Update Publication
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

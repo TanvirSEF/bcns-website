@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Video, Plus, Edit, Trash2, ExternalLink, Clock, Calendar, Copy, Users } from "lucide-react";
+import { Video, Plus, ExternalLink, Clock, Calendar, Copy, Users, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { ZoomMeeting } from "@/types/api";
+import { api } from "@/lib/api";
 
 export default function ZoomMeetingsManagement() {
   const [meetings, setMeetings] = useState<ZoomMeeting[]>([]);
@@ -19,11 +21,13 @@ export default function ZoomMeetingsManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<ZoomMeeting | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     topic: "",
+    agenda: "",
     startTime: "",
-    duration: 60,
-    joinUrl: "",
+    durationMinutes: 60,
+    timezone: "Asia/Dhaka",
     password: "",
   });
 
@@ -34,44 +38,10 @@ export default function ZoomMeetingsManagement() {
   const fetchMeetings = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await getZoomMeetings();
-      // setMeetings(response);
-      
-      // Mock data for now
-      setMeetings([
-        {
-          id: "1",
-          topic: "Monthly Neurology Case Discussion",
-          startTime: "2024-02-01T14:00:00Z",
-          duration: 90,
-          joinUrl: "https://zoom.us/j/123456789",
-          password: "neurology2024",
-          createdBy: "admin@bcns.org.bd",
-          createdAt: "2024-01-20",
-        },
-        {
-          id: "2",
-          topic: "Research Paper Review Session",
-          startTime: "2024-02-05T16:00:00Z",
-          duration: 120,
-          joinUrl: "https://zoom.us/j/987654321",
-          password: "research2024",
-          createdBy: "admin@bcns.org.bd",
-          createdAt: "2024-01-22",
-        },
-        {
-          id: "3",
-          topic: "Pediatric Neurology Workshop",
-          startTime: "2024-02-10T10:00:00Z",
-          duration: 180,
-          joinUrl: "https://zoom.us/j/456789123",
-          password: "pediatric2024",
-          createdBy: "admin@bcns.org.bd",
-          createdAt: "2024-01-25",
-        },
-      ]);
+      const response = await api.zoom.getMeetings();
+      setMeetings([...response]);
     } catch (error) {
+      console.error("Failed to fetch zoom meetings:", error);
       toast.error("Failed to fetch zoom meetings");
     } finally {
       setLoading(false);
@@ -79,70 +49,101 @@ export default function ZoomMeetingsManagement() {
   };
 
   const handleCreateMeeting = async () => {
+    // Validate required fields
+    if (!formData.topic || !formData.agenda || !formData.startTime) {
+      toast.error("Please fill in all required fields (Topic, Agenda, Start Time)");
+      return;
+    }
+
+    // Convert datetime-local to ISO string
+    const startTimeIso = new Date(formData.startTime).toISOString();
+
     try {
-      // API call will be implemented
+      setIsSubmitting(true);
+      const meetingData: any = {
+        topic: formData.topic,
+        agenda: formData.agenda,
+        startTimeIso,
+        durationMinutes: formData.durationMinutes,
+        timezone: formData.timezone,
+      };
+      
+      // Only include password if provided
+      if (formData.password && formData.password.trim()) {
+        meetingData.password = formData.password;
+      }
+      
+      const meeting = await api.zoom.createMeeting(meetingData);
       
       toast.success("Zoom meeting created successfully");
       setIsCreateDialogOpen(false);
-      setFormData({
-        topic: "",
-        startTime: "",
-        duration: 60,
-        joinUrl: "",
-        password: "",
-      });
+      resetForm();
       fetchMeetings();
-    } catch (error) {
-      toast.error("Failed to create zoom meeting");
-    }
-  };
-
-  const handleEditMeeting = async () => {
-    if (!editingMeeting) return;
-    
-    try {
-      // API call will be implemented
       
-      toast.success("Zoom meeting updated successfully");
-      setIsEditDialogOpen(false);
-      setEditingMeeting(null);
-      setFormData({
-        topic: "",
-        startTime: "",
-        duration: 60,
-        joinUrl: "",
-        password: "",
-      });
-      fetchMeetings();
+      // Log meeting details for debugging
+      console.log("Created meeting:", meeting);
     } catch (error) {
-      toast.error("Failed to update zoom meeting");
+      console.error("Failed to create zoom meeting:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create zoom meeting");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleDeleteMeeting = async (_meetingId: string) => {
-    if (!confirm("Are you sure you want to delete this zoom meeting?")) return;
-    
-    try {
-      // API call will be implemented
-      
-      toast.success("Zoom meeting deleted successfully");
-      fetchMeetings();
-    } catch (error) {
-      toast.error("Failed to delete zoom meeting");
-    }
-  };
-
-  const openEditDialog = (meeting: ZoomMeeting) => {
-    setEditingMeeting(meeting);
+  const resetForm = () => {
     setFormData({
-      topic: meeting.topic,
-      startTime: meeting.startTime,
-      duration: meeting.duration,
-      joinUrl: meeting.joinUrl,
-      password: meeting.password || "",
+      topic: "",
+      agenda: "",
+      startTime: "",
+      durationMinutes: 60,
+      timezone: "Asia/Dhaka",
+      password: "",
     });
-    setIsEditDialogOpen(true);
   };
+
+  // TODO: Implement when update endpoint is available
+  // const handleEditMeeting = async () => {
+  //   if (!editingMeeting) return;
+  //   
+  //   try {
+  //     const meeting = await api.zoom.updateMeeting(editingMeeting.id, formData);
+  //     toast.success("Zoom meeting updated successfully");
+  //     setIsEditDialogOpen(false);
+  //     setEditingMeeting(null);
+  //     resetForm();
+  //     fetchMeetings();
+  //   } catch (error) {
+  //     toast.error("Failed to update zoom meeting");
+  //   }
+  // };
+
+  // TODO: Implement when delete endpoint is available
+  // const handleDeleteMeeting = async (_meetingId: string) => {
+  //   if (!confirm("Are you sure you want to delete this zoom meeting?")) return;
+  //   
+  //   try {
+  //     // API call will be implemented
+  //     toast.success("Zoom meeting deleted successfully");
+  //     fetchMeetings();
+  //   } catch (error) {
+  //     toast.error("Failed to delete zoom meeting");
+  //   }
+  // };
+
+  // TODO: Implement when edit endpoint is available
+  // const openEditDialog = (meeting: ZoomMeeting) => {
+  //   setEditingMeeting(meeting);
+  //   const meetingData = meeting as any;
+  //   setFormData({
+  //     topic: meeting.topic,
+  //     agenda: meetingData.agenda || "",
+  //     startTime: meeting.startTime ? new Date(meeting.startTime).toISOString().slice(0, 16) : "",
+  //     durationMinutes: meeting.duration,
+  //     timezone: meetingData.timezone || "Asia/Dhaka",
+  //     password: meeting.password || "",
+  //   });
+  //   setIsEditDialogOpen(true);
+  // };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -221,7 +222,7 @@ export default function ZoomMeetingsManagement() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="topic" className="text-right">
-                  Topic
+                  Topic <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="topic"
@@ -229,11 +230,26 @@ export default function ZoomMeetingsManagement() {
                   onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
                   className="col-span-3"
                   placeholder="Meeting topic"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="agenda" className="text-right">
+                  Agenda <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  id="agenda"
+                  value={formData.agenda}
+                  onChange={(e) => setFormData({ ...formData, agenda: e.target.value })}
+                  className="col-span-3"
+                  placeholder="Meeting agenda"
+                  rows={3}
+                  required
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="startTime" className="text-right">
-                  Start Time
+                  Start Time <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="startTime"
@@ -241,15 +257,16 @@ export default function ZoomMeetingsManagement() {
                   value={formData.startTime}
                   onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                   className="col-span-3"
+                  required
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="duration" className="text-right">
-                  Duration
+                <Label htmlFor="durationMinutes" className="text-right">
+                  Duration <span className="text-red-500">*</span>
                 </Label>
                 <Select
-                  value={formData.duration.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, duration: parseInt(value) })}
+                  value={formData.durationMinutes.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, durationMinutes: parseInt(value) })}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
@@ -265,16 +282,23 @@ export default function ZoomMeetingsManagement() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="joinUrl" className="text-right">
-                  Join URL
+                <Label htmlFor="timezone" className="text-right">
+                  Timezone
                 </Label>
-                <Input
-                  id="joinUrl"
-                  value={formData.joinUrl}
-                  onChange={(e) => setFormData({ ...formData, joinUrl: e.target.value })}
-                  className="col-span-3"
-                  placeholder="https://zoom.us/j/..."
-                />
+                <Select
+                  value={formData.timezone}
+                  onValueChange={(value) => setFormData({ ...formData, timezone: value })}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Asia/Dhaka">Asia/Dhaka (Bangladesh)</SelectItem>
+                    <SelectItem value="UTC">UTC</SelectItem>
+                    <SelectItem value="America/New_York">America/New_York</SelectItem>
+                    <SelectItem value="Europe/London">Europe/London</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="password" className="text-right">
@@ -282,6 +306,7 @@ export default function ZoomMeetingsManagement() {
                 </Label>
                 <Input
                   id="password"
+                  type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="col-span-3"
@@ -290,8 +315,26 @@ export default function ZoomMeetingsManagement() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={handleCreateMeeting}>
-                Schedule Meeting
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsCreateDialogOpen(false);
+                  resetForm();
+                }}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" onClick={handleCreateMeeting} disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                    "Schedule Meeting"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -375,106 +418,128 @@ export default function ZoomMeetingsManagement() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Meeting</TableHead>
+                <TableHead>Topic</TableHead>
+                <TableHead>Agenda</TableHead>
                 <TableHead>Date & Time</TableHead>
                 <TableHead>Duration</TableHead>
+                <TableHead>Timezone</TableHead>
+                <TableHead>Zoom Meeting ID</TableHead>
+                <TableHead>Password</TableHead>
+                <TableHead>Join URL</TableHead>
+                <TableHead>Created By</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Join Details</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {meetings.map((meeting) => {
-                const status = getMeetingStatus(meeting.startTime, meeting.duration);
-                return (
-                  <TableRow key={meeting.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{meeting.topic}</div>
-                        <div className="text-sm text-muted-foreground">
-                          Created by {meeting.createdBy}
+              {meetings.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                    No meetings found. Create your first meeting to get started.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                meetings.map((meeting) => {
+                  const status = getMeetingStatus(meeting.startTime, meeting.duration);
+                  const meetingData = meeting as any;
+                  return (
+                    <TableRow key={meeting.id}>
+                      <TableCell>
+                        <div className="font-medium">{meeting.topic || "N/A"}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm max-w-xs line-clamp-2">
+                          {meetingData.agenda || "N/A"}
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <div>
-                          <div>{formatDate(meeting.startTime)}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {formatTime(meeting.startTime)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <div>{formatDate(meeting.startTime)}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {formatTime(meeting.startTime)}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        {formatDuration(meeting.duration)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={status.color}>
-                        {status.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-2">
+                      </TableCell>
+                      <TableCell>
                         <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(meeting.joinUrl, '_blank')}
-                          >
-                            <ExternalLink className="h-3 w-3 mr-1" />
-                            Join
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => copyToClipboard(meeting.joinUrl)}
-                          >
-                            <Copy className="h-3 w-3" />
-                          </Button>
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          {formatDuration(meeting.duration)}
                         </div>
-                        {meeting.password && (
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">{meetingData.timezone || "N/A"}</div>
+                      </TableCell>
+                      <TableCell>
+                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                          {meetingData.zoomMeetingId || "N/A"}
+                        </code>
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          // Direct access to password field
+                          const password = String((meeting as any).password || meetingData.password || "").trim();
+                          
+                          if (password) {
+                            return (
+                              <div className="flex items-center gap-2">
+                                <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                                  {password}
+                                </code>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => copyToClipboard(password)}
+                                  title="Copy password"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            );
+                          }
+                          return <span className="text-sm text-muted-foreground">No password</span>;
+                        })()}
+                      </TableCell>
+                      <TableCell>
+                        {meeting.joinUrl ? (
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">Password:</span>
-                            <code className="text-xs bg-muted px-2 py-1 rounded">
-                              {meeting.password}
-                            </code>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(meeting.joinUrl, '_blank')}
+                              title="Join meeting"
+                            >
+                              <ExternalLink className="h-3 w-3 mr-1" />
+                              Join
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => copyToClipboard(meeting.password || "")}
+                              onClick={() => copyToClipboard(meeting.joinUrl)}
+                              title="Copy join URL"
                             >
                               <Copy className="h-3 w-3" />
                             </Button>
                           </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">N/A</span>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditDialog(meeting)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteMeeting(meeting.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {meeting.createdBy || "N/A"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={status.color}>
+                          {status.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -486,80 +551,18 @@ export default function ZoomMeetingsManagement() {
           <DialogHeader>
             <DialogTitle>Edit Zoom Meeting</DialogTitle>
             <DialogDescription>
-              Update meeting information
+              {editingMeeting ? `Update meeting: ${editingMeeting.topic}` : "Update meeting information"}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-topic" className="text-right">
-                Topic
-              </Label>
-              <Input
-                id="edit-topic"
-                value={formData.topic}
-                onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-startTime" className="text-right">
-                Start Time
-              </Label>
-              <Input
-                id="edit-startTime"
-                type="datetime-local"
-                value={formData.startTime}
-                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-duration" className="text-right">
-                Duration
-              </Label>
-              <Select
-                value={formData.duration.toString()}
-                onValueChange={(value) => setFormData({ ...formData, duration: parseInt(value) })}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">30 minutes</SelectItem>
-                  <SelectItem value="60">1 hour</SelectItem>
-                  <SelectItem value="90">1.5 hours</SelectItem>
-                  <SelectItem value="120">2 hours</SelectItem>
-                  <SelectItem value="180">3 hours</SelectItem>
-                  <SelectItem value="240">4 hours</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-joinUrl" className="text-right">
-                Join URL
-              </Label>
-              <Input
-                id="edit-joinUrl"
-                value={formData.joinUrl}
-                onChange={(e) => setFormData({ ...formData, joinUrl: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-password" className="text-right">
-                Password
-              </Label>
-              <Input
-                id="edit-password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
+          <div className="py-4 text-center text-muted-foreground">
+            Edit functionality will be available soon.
           </div>
           <DialogFooter>
-            <Button type="submit" onClick={handleEditMeeting}>
-              Update Meeting
+            <Button type="button" variant="outline" onClick={() => {
+              setIsEditDialogOpen(false);
+              setEditingMeeting(null);
+            }}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

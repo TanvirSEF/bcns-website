@@ -9,21 +9,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { BarChart3, Plus, Edit, Trash2, Vote, Calendar } from "lucide-react";
+import { BarChart3, Plus, Vote, Calendar, Loader2, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { Poll } from "@/types/api";
+import { api, PollResults } from "@/lib/api";
 
 export default function PollsManagement() {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingPoll, setEditingPoll] = useState<Poll | null>(null);
+  const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
+  const [selectedPollResults, setSelectedPollResults] = useState<PollResults | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    question: "",
-    options: [{ id: "1", text: "", votes: 0 }],
-    isActive: true,
+    title: "",
+    description: "",
+    options: [{ name: "" }],
+    startDate: "",
     endDate: "",
   });
   const [optionInput, setOptionInput] = useState("");
@@ -35,149 +37,110 @@ export default function PollsManagement() {
   const fetchPolls = async () => {
     try {
       setLoading(true);
-      // Mock data
-      setPolls([
-        {
-          id: "1",
-          question: "What should be the main focus of our next conference?",
-          options: [
-            { id: "1", text: "Pediatric Neurology", votes: 45 },
-            { id: "2", text: "Research Methodologies", votes: 32 },
-            { id: "3", text: "Clinical Cases", votes: 28 },
-            { id: "4", text: "Technology in Neurology", votes: 15 },
-          ],
-          isActive: true,
-          endDate: "2024-12-31",
-          createdBy: "admin@bcns.org.bd",
-          createdAt: "2024-01-01",
-          updatedAt: "2024-01-01",
-        },
-        {
-          id: "2",
-          question: "Which workshop topic interests you most?",
-          options: [
-            { id: "1", text: "EEG Interpretation", votes: 38 },
-            { id: "2", text: "Neuroimaging", votes: 42 },
-            { id: "3", text: "Genetic Testing", votes: 25 },
-            { id: "4", text: "Treatment Protocols", votes: 35 },
-          ],
-          isActive: false,
-          endDate: "2024-11-30",
-          createdBy: "admin@bcns.org.bd",
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-      ]);
+      const response = await api.polls.getPolls();
+      setPolls([...response]);
     } catch (error) {
+      console.error("Failed to fetch polls:", error);
       toast.error("Failed to fetch polls");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreatePoll = async () => {
+  const fetchPollResults = async (pollId: string) => {
     try {
-      // API call will be implemented
+      const results = await api.polls.getPollResults(pollId);
+      setSelectedPollResults(results);
+      setIsResultsDialogOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch poll results:", error);
+      toast.error("Failed to fetch poll results");
+    }
+  };
+
+  const handleCreatePoll = async () => {
+    // Validate required fields
+    if (!formData.title || !formData.description || !formData.startDate || !formData.endDate) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Validate options
+    const validOptions = formData.options.filter(opt => opt.name.trim() !== "");
+    if (validOptions.length === 0) {
+      toast.error("At least one option is required");
+      return;
+    }
+
+    // Validate dates
+    const startDate = new Date(formData.startDate);
+    const endDate = new Date(formData.endDate);
+    if (endDate <= startDate) {
+      toast.error("End date must be after start date");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await api.polls.createPoll({
+        title: formData.title,
+        description: formData.description,
+        options: validOptions,
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: new Date(formData.endDate).toISOString(),
+      });
       
       toast.success("Poll created successfully");
       setIsCreateDialogOpen(false);
-      setFormData({
-        question: "",
-        options: [{ id: "1", text: "", votes: 0 }],
-        isActive: true,
-        endDate: "",
-      });
+      resetForm();
       fetchPolls();
     } catch (error) {
-      toast.error("Failed to create poll");
+      console.error("Failed to create poll:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create poll");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleEditPoll = async () => {
-    if (!editingPoll) return;
-    
-    try {
-      // API call will be implemented
-      
-      toast.success("Poll updated successfully");
-      setIsEditDialogOpen(false);
-      setEditingPoll(null);
-      setFormData({
-        question: "",
-        options: [{ id: "1", text: "", votes: 0 }],
-        isActive: true,
-        endDate: "",
-      });
-      fetchPolls();
-    } catch (error) {
-      toast.error("Failed to update poll");
-    }
-  };
-
-  const handleDeletePoll = async (_pollId: string) => {
-    if (!confirm("Are you sure you want to delete this poll?")) return;
-
-    try {
-      // API call will be implemented
-      
-      toast.success("Poll deleted successfully");
-      fetchPolls();
-    } catch (error) {
-      toast.error("Failed to delete poll");
-    }
-  };
-
-  const openEditDialog = (poll: Poll) => {
-    setEditingPoll(poll);
+  const resetForm = () => {
     setFormData({
-      question: poll.question,
-      options: [...poll.options],
-      isActive: poll.isActive,
-      endDate: poll.endDate || "",
+      title: "",
+      description: "",
+      options: [{ name: "" }],
+      startDate: "",
+      endDate: "",
     });
-    setIsEditDialogOpen(true);
+    setOptionInput("");
   };
 
   const addOption = () => {
     if (optionInput.trim()) {
-      const newOption = {
-        id: Date.now().toString(),
-        text: optionInput.trim(),
-        votes: 0,
-      };
       setFormData({
         ...formData,
-        options: [...formData.options, newOption],
+        options: [...formData.options, { name: optionInput.trim() }],
       });
       setOptionInput("");
     }
   };
 
-  const removeOption = (optionId: string) => {
+  const removeOption = (index: number) => {
     if (formData.options.length > 1) {
       setFormData({
         ...formData,
-        options: formData.options.filter(option => option.id !== optionId),
+        options: formData.options.filter((_, i) => i !== index),
       });
     }
   };
 
-  const updateOptionText = (optionId: string, text: string) => {
+  const updateOption = (index: number, name: string) => {
     setFormData({
       ...formData,
-      options: formData.options.map(option =>
-        option.id === optionId ? { ...option, text } : option
-      ),
+      options: formData.options.map((opt, i) => (i === index ? { name } : opt)),
     });
   };
 
   const getTotalVotes = (options: Poll["options"]) => {
     return options.reduce((total, option) => total + option.votes, 0);
-  };
-
-  const getVotePercentage = (votes: number, total: number) => {
-    if (total === 0) return 0;
-    return Math.round((votes / total) * 100);
   };
 
   const formatDate = (dateString: string) => {
@@ -212,7 +175,7 @@ export default function PollsManagement() {
               Create Poll
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Poll</DialogTitle>
               <DialogDescription>
@@ -221,51 +184,68 @@ export default function PollsManagement() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="question" className="text-right">
-                  Question
+                <Label htmlFor="title" className="text-right">
+                  Title <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="col-span-3"
+                  placeholder="Poll title"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="description" className="text-right">
+                  Description <span className="text-red-500">*</span>
                 </Label>
                 <Textarea
-                  id="question"
-                  value={formData.question}
-                  onChange={(e) => setFormData({ ...formData, question: e.target.value })}
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="col-span-3"
-                  placeholder="What would you like to ask?"
+                  placeholder="Poll description"
                   rows={3}
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="startDate" className="text-right">
+                  Start Date <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="startDate"
+                  type="datetime-local"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  className="col-span-3"
+                  required
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="endDate" className="text-right">
-                  End Date
+                  End Date <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="endDate"
-                  type="date"
+                  type="datetime-local"
                   value={formData.endDate}
                   onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                   className="col-span-3"
+                  required
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="isActive" className="text-right">
-                  Active
+                <Label className="text-right">
+                  Options <span className="text-red-500">*</span>
                 </Label>
-                <div className="col-span-3 flex items-center space-x-2">
-                  <Switch
-                    id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                  />
-                  <Label htmlFor="isActive">Poll is currently active</Label>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Options</Label>
-                <div className="col-span-3 space-y-3">
+                <div className="col-span-3 space-y-2">
                   {formData.options.map((option, index) => (
-                    <div key={option.id} className="flex gap-2">
+                    <div key={index} className="flex gap-2">
                       <Input
-                        value={option.text}
-                        onChange={(e) => updateOptionText(option.id, e.target.value)}
+                        value={option.name}
+                        onChange={(e) => updateOption(index, e.target.value)}
                         placeholder={`Option ${index + 1}`}
                         className="flex-1"
                       />
@@ -274,31 +254,52 @@ export default function PollsManagement() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => removeOption(option.id)}
+                          onClick={() => removeOption(index)}
                         >
-                          Remove
+                          <X className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
                   ))}
-                  <div className="flex gap-2">
-                    <Input
-                      value={optionInput}
-                      onChange={(e) => setOptionInput(e.target.value)}
-                      placeholder="Add new option"
-                      className="flex-1"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addOption())}
-                    />
-                    <Button type="button" variant="outline" onClick={addOption}>
-                      Add Option
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addOption}
+                    className="w-full"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Option
+                  </Button>
+                  <Input
+                    value={optionInput}
+                    onChange={(e) => setOptionInput(e.target.value)}
+                    placeholder="Type option name and click Add Option"
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addOption())}
+                  />
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={handleCreatePoll}>
-                Create Poll
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsCreateDialogOpen(false);
+                  resetForm();
+                }}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" onClick={handleCreatePoll} disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Poll"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -317,6 +318,7 @@ export default function PollsManagement() {
             <TableHeader>
               <TableRow>
                 <TableHead>Poll Question</TableHead>
+                <TableHead>Options</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Total Votes</TableHead>
                 <TableHead>End Date</TableHead>
@@ -324,191 +326,126 @@ export default function PollsManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {polls.map((poll) => (
-                <TableRow key={poll.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{poll.question}</div>
-                      <div className="text-sm text-muted-foreground mt-1">
-                        {poll.options.length} options
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={poll.isActive ? "default" : "secondary"}>
-                      {poll.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Vote className="h-4 w-4" />
-                      {getTotalVotes(poll.options)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {poll.endDate ? formatDate(poll.endDate) : "No end date"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // TODO: Implement view results functionality
-                          toast.info("View results functionality coming soon");
-                        }}
-                      >
-                        <BarChart3 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEditDialog(poll)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeletePoll(poll.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {polls.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No polls found. Create your first poll to get started.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                polls.map((poll) => {
+                  const pollData = poll as any;
+                  return (
+                    <TableRow key={poll.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{poll.question || pollData.title}</div>
+                          {pollData.description && (
+                            <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                              {pollData.description}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {poll.options.length > 0 ? (
+                            poll.options.slice(0, 3).map((option, index) => (
+                              <div key={option.id || index} className="text-sm">
+                                {index + 1}. {option.text}
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No options</span>
+                          )}
+                          {poll.options.length > 3 && (
+                            <div className="text-xs text-muted-foreground">
+                              +{poll.options.length - 3} more
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={poll.isActive ? "default" : "secondary"}>
+                          {poll.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Vote className="h-4 w-4" />
+                          {getTotalVotes(poll.options)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          {poll.endDate ? formatDate(poll.endDate) : "No end date"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fetchPollResults(poll.id)}
+                        >
+                          <BarChart3 className="h-4 w-4 mr-2" />
+                          View Results
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      {/* Poll Results Preview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {polls.map((poll) => (
-          <Card key={poll.id}>
-            <CardHeader>
-              <CardTitle className="text-lg">{poll.question}</CardTitle>
-              <CardDescription>
-                {poll.isActive ? "Active Poll" : "Closed Poll"} • {getTotalVotes(poll.options)} total votes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {poll.options.map((option) => {
-                  const percentage = getVotePercentage(option.votes, getTotalVotes(poll.options));
-                  return (
-                    <div key={option.id} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>{option.text}</span>
-                        <span className="font-medium">{option.votes} votes ({percentage}%)</span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Edit Poll Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+      {/* Poll Results Dialog */}
+      <Dialog open={isResultsDialogOpen} onOpenChange={setIsResultsDialogOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Poll</DialogTitle>
+            <DialogTitle>Poll Results</DialogTitle>
             <DialogDescription>
-              Update poll information and options
+              Detailed voting results and statistics
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-question" className="text-right">
-                Question
-              </Label>
-              <Textarea
-                id="edit-question"
-                value={formData.question}
-                onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-                className="col-span-3"
-                rows={3}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-endDate" className="text-right">
-                End Date
-              </Label>
-              <Input
-                id="edit-endDate"
-                type="date"
-                value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-isActive" className="text-right">
-                Active
-              </Label>
-              <div className="col-span-3 flex items-center space-x-2">
-                <Switch
-                  id="edit-isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                />
-                <Label htmlFor="edit-isActive">Poll is currently active</Label>
+          {selectedPollResults && (
+            <div className="space-y-4 py-4">
+              <div>
+                <h3 className="font-semibold text-lg">{selectedPollResults.question}</h3>
+                {selectedPollResults.description && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {selectedPollResults.description}
+                  </p>
+                )}
+                <p className="text-sm text-muted-foreground mt-2">
+                  Total Votes: <span className="font-medium">{selectedPollResults.totalVotes}</span>
+                </p>
               </div>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Options</Label>
-              <div className="col-span-3 space-y-3">
-                {formData.options.map((option, index) => (
-                  <div key={option.id} className="flex gap-2">
-                    <Input
-                      value={option.text}
-                      onChange={(e) => updateOptionText(option.id, e.target.value)}
-                      placeholder={`Option ${index + 1}`}
-                      className="flex-1"
-                    />
-                    {formData.options.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeOption(option.id)}
-                      >
-                        Remove
-                      </Button>
-                    )}
+              <div className="space-y-4">
+                {selectedPollResults.options.map((option) => (
+                  <div key={option.id} className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium">{option.text}</span>
+                      <span className="text-muted-foreground">
+                        {option.votes} votes ({option.percentage}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-3">
+                      <div
+                        className="bg-primary h-3 rounded-full transition-all duration-300"
+                        style={{ width: `${option.percentage}%` }}
+                      />
+                    </div>
                   </div>
                 ))}
-                <div className="flex gap-2">
-                  <Input
-                    value={optionInput}
-                    onChange={(e) => setOptionInput(e.target.value)}
-                    placeholder="Add new option"
-                    className="flex-1"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addOption())}
-                  />
-                  <Button type="button" variant="outline" onClick={addOption}>
-                    Add Option
-                  </Button>
-                </div>
               </div>
             </div>
-          </div>
+          )}
           <DialogFooter>
-            <Button type="submit" onClick={handleEditPoll}>
-              Update Poll
+            <Button variant="outline" onClick={() => setIsResultsDialogOpen(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

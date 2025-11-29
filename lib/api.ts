@@ -292,12 +292,123 @@ export const galleryApi = {
   },
 };
 
+// Publication API
+export const publicationApi = {
+  getPublications: async (): Promise<readonly Publication[]> => {
+    const response = await apiClient.get<readonly Publication[]>('/publications');
+    return handleApiResponse<readonly Publication[]>(response);
+  },
+
+  createPublication: async (publicationData: {
+    title: string;
+    description: string;
+    category: string;
+    file: File;
+  }): Promise<Publication> => {
+    const formData = new FormData();
+    formData.append('title', publicationData.title);
+    formData.append('description', publicationData.description);
+    formData.append('category', publicationData.category);
+    formData.append('file', publicationData.file);
+
+    const response = await apiClient.post<Publication>(
+      '/publications',
+      formData
+    );
+    return handleApiResponse<Publication>(response);
+  },
+
+  getPublication: async (publicationId: string): Promise<Publication> => {
+    const response = await apiClient.get<Publication>(`/publications/${publicationId}`);
+    return handleApiResponse<Publication>(response);
+  },
+};
+
+// Poll API
+export interface PollCreateInput {
+  title: string;
+  description: string;
+  options: Array<{ name: string }>;
+  startDate: string;
+  endDate: string;
+}
+
+export interface PollResults extends Poll {
+  totalVotes: number;
+  options: Array<{
+    id: string;
+    text: string;
+    votes: number;
+    percentage: number;
+  }>;
+}
+
+export const pollApi = {
+  getPolls: async (): Promise<readonly Poll[]> => {
+    const response = await apiClient.get<readonly Poll[]>('/polls');
+    return handleApiResponse<readonly Poll[]>(response);
+  },
+
+  getPoll: async (pollId: string): Promise<Poll> => {
+    const response = await apiClient.get<Poll>(`/polls/${pollId}`);
+    return handleApiResponse<Poll>(response);
+  },
+
+  createPoll: async (pollData: PollCreateInput): Promise<Poll> => {
+    const response = await apiClient.post<Poll>('/polls', pollData);
+    return handleApiResponse<Poll>(response);
+  },
+
+  voteInPoll: async (pollId: string, optionId: string): Promise<OperationResponse> => {
+    const response = await apiClient.post<OperationResponse>(
+      `/polls/${pollId}/vote`,
+      { optionId }
+    );
+    return handleApiResponse<OperationResponse>(response);
+  },
+
+  getPollResults: async (pollId: string): Promise<PollResults> => {
+    const response = await apiClient.get<PollResults>(`/polls/${pollId}/results`);
+    return handleApiResponse<PollResults>(response);
+  },
+};
+
+// Zoom Meeting API
+export interface ZoomMeetingCreateInput {
+  topic: string;
+  agenda: string;
+  startTimeIso: string;
+  durationMinutes: number;
+  timezone?: string;
+  password?: string;
+}
+
+export const zoomApi = {
+  getMeetings: async (): Promise<readonly ZoomMeeting[]> => {
+    const response = await apiClient.get<readonly ZoomMeeting[]>('/zoom/meetings');
+    return handleApiResponse<readonly ZoomMeeting[]>(response);
+  },
+
+  getMeeting: async (meetingId: string): Promise<ZoomMeeting> => {
+    const response = await apiClient.get<ZoomMeeting>(`/zoom/meetings/${meetingId}`);
+    return handleApiResponse<ZoomMeeting>(response);
+  },
+
+  createMeeting: async (meetingData: ZoomMeetingCreateInput): Promise<ZoomMeeting> => {
+    const response = await apiClient.post<ZoomMeeting>('/zoom/meetings', meetingData);
+    return handleApiResponse<ZoomMeeting>(response);
+  },
+};
+
 export const api = {
   auth: authApi,
   users: userApi,
   admin: adminApi,
   events: eventApi,
   gallery: galleryApi,
+  publications: publicationApi,
+  polls: pollApi,
+  zoom: zoomApi,
 };
 
 // Backward compatibility exports
@@ -357,16 +468,24 @@ export const createAlbum = (albumData: { title: string; description?: string; co
 export const getAlbumPhotos = (albumId: string): Promise<readonly Photo[]> => 
   galleryApi.getAlbumPhotos(albumId);
 
-export const getPolls = (): Promise<readonly Poll[]> => Promise.resolve([]);
-export const createPoll = (): Promise<Poll> => Promise.reject(new Error('Not implemented'));
-export const getPoll = (): Promise<Poll> => Promise.reject(new Error('Not implemented'));
-export const voteInPoll = (): Promise<OperationResponse> => 
-  Promise.resolve({ success: true, message: 'Success' });
-export const getPollResults = (): Promise<Poll> => Promise.reject(new Error('Not implemented'));
+export const getPolls = (): Promise<readonly Poll[]> => pollApi.getPolls();
+export const createPoll = (pollData: PollCreateInput): Promise<Poll> => pollApi.createPoll(pollData);
+export const getPoll = (pollId: string): Promise<Poll> => pollApi.getPoll(pollId);
+export const voteInPoll = (pollId: string, optionId: string): Promise<OperationResponse> => 
+  pollApi.voteInPoll(pollId, optionId);
+export const getPollResults = (pollId: string): Promise<PollResults> => pollApi.getPollResults(pollId);
 
-export const getPublications = (): Promise<readonly Publication[]> => Promise.resolve([]);
-export const createPublication = (): Promise<Publication> => Promise.reject(new Error('Not implemented'));
-export const getPublication = (): Promise<Publication> => Promise.reject(new Error('Not implemented'));
+export const getPublications = (): Promise<readonly Publication[]> => 
+  publicationApi.getPublications();
+export const createPublication = (publicationData: {
+  title: string;
+  description: string;
+  category: string;
+  file: File;
+}): Promise<Publication> => 
+  publicationApi.createPublication(publicationData);
+export const getPublication = (publicationId: string): Promise<Publication> => 
+  publicationApi.getPublication(publicationId);
 
 export const globalSearch = (): Promise<readonly unknown[]> => Promise.resolve([]);
 
@@ -384,7 +503,6 @@ export const turnOff2FA = (): Promise<OperationResponse> =>
 export const authenticate2FA = (): Promise<OperationResponse> => 
   Promise.resolve({ success: true, message: 'Success' });
 
-export const createZoomMeeting = (): Promise<ZoomMeeting> => Promise.reject(new Error('Not implemented'));
 export const getActivityLogs = (): Promise<readonly ActivityLog[]> => Promise.resolve([]);
 
 export { apiClient };
