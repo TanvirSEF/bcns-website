@@ -2,17 +2,16 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { 
   CreditCard, 
-  Smartphone, 
   CheckCircle2, 
   Copy, 
   ArrowRight,
   Check,
-  Wallet,
   Building2,
   AlertCircle
 } from 'lucide-react'
@@ -33,56 +32,30 @@ const paymentMethods: PaymentMethod[] = [
   {
     id: 'bkash',
     name: 'bKash',
-    icon: <Smartphone className="h-6 w-6" />,
-    number: '01712345',
-    accountType: 'Personal',
+    icon: <Image src="/images/bkash.png" alt="bKash" width={24} height={24} className="h-6 w-6 object-contain" />,
+    number: '01879235494',
+    accountType: 'Bkash',
     instructions: [
       'Go to your bKash app or dial *247#',
-      `Send money to: ${'0171234'}`,
+      'Send money to: 01879235494',
       'Enter the amount: ৳2,000',
       'Enter your reference: BCNS Membership',
-      'Complete the transaction'
-    ]
-  },
-  {
-    id: 'nagad',
-    name: 'Nagad',
-    icon: <Wallet className="h-6 w-6" />,
-    number: '017123456',
-    accountType: 'Personal',
-    instructions: [
-      'Go to your Nagad app or dial *167#',
-      `Send money to: ${'01712345'}`,
-      'Enter the amount: ৳2,000',
-      'Enter your reference: BCNS Membership',
-      'Complete the transaction'
-    ]
-  },
-  {
-    id: 'rocket',
-    name: 'Rocket',
-    icon: <CreditCard className="h-6 w-6" />,
-    number: '01712345',
-    accountType: 'Personal',
-    instructions: [
-      'Go to your Rocket app or dial *322#',
-      `Send money to: ${'01712345670'}`,
-      'Enter the amount: ৳2,000',
-      'Enter your reference: BCNS Membership',
-      'Complete the transaction'
+      'Complete the transaction and save the transaction ID'
     ]
   },
   {
     id: 'bank',
     name: 'Bank Transfer',
     icon: <Building2 className="h-6 w-6" />,
-    number: '1234567890',
+    number: '08536000112',
     accountType: 'BCNS Account',
     instructions: [
-      'Account Name: BCNS',
-      'Bank: Bank Name',
-      `Account Number: ${'12345678903'}`,
-      'Branch: Main Branch',
+      'Account Name: Bangladesh Child Neurology Society (BCNS)',
+      'Bank: Bank Asia PLC',
+      'Account Number: 08536000112',
+      'Routing Number: 070270202',
+      'Branch: BSMMU',
+      'Amount: ৳2,000',
       'Reference: BCNS Membership'
     ]
   }
@@ -281,7 +254,9 @@ function PaymentPageContent() {
                               <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-semibold">
                                 {index + 1}
                               </span>
-                              <span className="flex-1 pt-0.5">{instruction}</span>
+                              <span className={`flex-1 pt-0.5 ${instruction.startsWith('Account Name:') ? 'text-base sm:text-lg font-semibold text-gray-900' : ''}`}>
+                                {instruction}
+                              </span>
                             </li>
                           ))}
                         </ol>

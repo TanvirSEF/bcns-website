@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -1010,12 +1011,12 @@ export function MembershipForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
                   <div className="p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
                     <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-                      <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                      <Image src="/images/bkash.png" alt="bKash" width={24} height={24} className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
                       bKash
                     </h3>
                     <div className="space-y-2">
                       <p className="text-xs sm:text-sm text-muted-foreground">Account Number</p>
-                      <p className="text-lg sm:text-xl font-mono font-bold break-all">017XXXXXXXX</p>
+                      <p className="text-lg sm:text-xl font-mono font-bold break-all">01879235494</p>
                       <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">Send money to this number</p>
                     </div>
                   </div>
@@ -1023,12 +1024,25 @@ export function MembershipForm() {
                   <div className="p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
                     <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
                       <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                      Nagad
+                      Bank Transfer
                     </h3>
                     <div className="space-y-2">
-                      <p className="text-xs sm:text-sm text-muted-foreground">Account Number</p>
-                      <p className="text-lg sm:text-xl font-mono font-bold break-all">017XXXXXXXX</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">Send money to this number</p>
+                      <div>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Bank</p>
+                        <p className="text-sm sm:text-base font-semibold">Bank Asia PLC</p>
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Account Number</p>
+                        <p className="text-base sm:text-lg font-mono font-bold break-all">08536000112</p>
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Account Name</p>
+                        <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100">Bangladesh Child Neurology Society (BCNS)</p>
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Branch</p>
+                        <p className="text-xs sm:text-sm">BSMMU</p>
+                      </div>
                     </div>
                   </div>
                 </div>
