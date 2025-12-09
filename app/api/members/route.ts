@@ -12,6 +12,7 @@ interface BackendUser {
   phone?: string;
   mailingAddress?: string;
   address?: string;
+  affiliation?: string;
   bio?: string;
   profilePictureUrl?: string;
   profile_picture_url?: string;
@@ -69,6 +70,7 @@ export async function GET(request: NextRequest) {
       role: user.role,
       phone: user.phone,
       address: user.mailingAddress || user.address,
+      affiliation: user.affiliation,
       bio: user.bio,
       profilePictureUrl: user.profilePictureUrl || user.profile_picture_url,
       createdAt: user.createdAt || user.created_at,

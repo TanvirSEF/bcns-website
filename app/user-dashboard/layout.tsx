@@ -30,7 +30,7 @@ export default function UserDashboardLayout({
         <SidebarProvider>
           <UserSidebar variant="inset" />
           <SidebarInset>
-            <SiteHeader />
+            <SiteHeader title="Member Dashboard" />
             <div className="flex flex-1 flex-col relative">
               <div className="@container/main flex flex-1 flex-col gap-2">
                 <div className="flex flex-col gap-6 py-6 px-6 md:gap-8 md:py-8 md:px-8 relative">
