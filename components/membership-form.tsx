@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +40,9 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
+  AtSign,
+  Check,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -71,6 +74,41 @@ const trainingSchema = z.object({
   institute: z.string().optional().or(z.literal("")),
 });
 
+// Username validation regex: lowercase, numbers, underscores only
+const usernameRegex = /^[a-z0-9_]+$/;
+
+// Password validation: minimum 6 characters with number, letter, and special character
+const passwordSchema = z
+  .string()
+  .min(6, "Password must be at least 6 characters")
+  .refine(
+    (password) => {
+      // Must contain at least one number (0-9)
+      return /\d/.test(password);
+    },
+    {
+      message: "Password must contain at least one number (0-9)",
+    }
+  )
+  .refine(
+    (password) => {
+      // Must contain at least one letter (a-z, A-Z)
+      return /[a-zA-Z]/.test(password);
+    },
+    {
+      message: "Password must contain at least one letter (a-z, A-Z)",
+    }
+  )
+  .refine(
+    (password) => {
+      // Must contain at least one special character
+      return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    },
+    {
+      message: "Password must contain at least one special character (!@#$%^&* etc.)",
+    }
+  );
+
 // Step 1: Registration form schema (without OTP)
 // Note: profilePicture, documents, and some fields are optional initially
 // but will be validated in the submit handler to provide better UX
@@ -81,9 +119,14 @@ const registrationSchema = z.object({
     })
     .optional(),
   name: z.string().min(2, "Name must be at least 2 characters"),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username must be at most 30 characters")
+    .regex(usernameRegex, "Username can only contain lowercase letters, numbers, and underscores"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: passwordSchema,
   affiliation: z.string().min(2, "Affiliation is required"),
   formNo: z.string().optional(),
   refNo: z.string().optional(),
@@ -117,12 +160,23 @@ export function MembershipForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [usernameAvailability, setUsernameAvailability] = useState<{
+    checking: boolean;
+    available: boolean | null;
+  }>({ checking: false, available: null });
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    minLength: false,
+    hasNumber: false,
+    hasLetter: false,
+    hasSpecialChar: false,
+  });
 
   // Main form for registration data
   const registrationForm = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       name: "",
+      username: "",
       email: "",
       phone: "",
       password: "",
@@ -138,6 +192,74 @@ export function MembershipForm() {
       documents: [],
     },
   });
+
+  // Watch username and password for real-time validation
+  const watchedUsername = registrationForm.watch("username");
+  const watchedPassword = registrationForm.watch("password");
+
+  // Debounced username availability check
+  useEffect(() => {
+    const username = watchedUsername?.trim().toLowerCase();
+    
+    // Reset availability state if username is empty or invalid
+    if (!username || username.length < 3 || !usernameRegex.test(username)) {
+      setUsernameAvailability({ checking: false, available: null });
+      return;
+    }
+
+    // Set checking state
+    setUsernameAvailability({ checking: true, available: null });
+
+    // Debounce the API call
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/users/check-username?username=${encodeURIComponent(username)}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const data = await response.json();
+        
+        // Check if username is available (assuming backend returns { available: boolean })
+        const available = data.available !== false; // Default to true if not specified
+        setUsernameAvailability({ checking: false, available });
+        
+        // Set validation error if username is not available
+        if (!available) {
+          registrationForm.setError("username", {
+            type: "manual",
+            message: "Username is already taken",
+          });
+        } else {
+          registrationForm.clearErrors("username");
+        }
+      } catch (error) {
+        console.error("Error checking username availability:", error);
+        setUsernameAvailability({ checking: false, available: null });
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [watchedUsername, registrationForm]);
+
+  // Update password requirements validation in real-time
+  useEffect(() => {
+    if (watchedPassword) {
+      setPasswordRequirements({
+        minLength: watchedPassword.length >= 6,
+        hasNumber: /\d/.test(watchedPassword),
+        hasLetter: /[a-zA-Z]/.test(watchedPassword),
+        hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(watchedPassword),
+      });
+    } else {
+      setPasswordRequirements({
+        minLength: false,
+        hasNumber: false,
+        hasLetter: false,
+        hasSpecialChar: false,
+      });
+    }
+  }, [watchedPassword]);
 
   // Separate form for OTP
   const otpForm = useForm<OTPFormValues>({
@@ -324,6 +446,7 @@ export function MembershipForm() {
 
       // Text Fields
       formData.append("name", registrationData.name);
+      formData.append("username", registrationData.username);
       formData.append("email", registrationData.email);
       formData.append("phone", registrationData.phone);
       formData.append("password", registrationData.password);
@@ -553,6 +676,48 @@ export function MembershipForm() {
                 )}
               </div>
               <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <div className="relative">
+                  <AtSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    placeholder="johndoe123"
+                    {...registrationForm.register("username", {
+                      onChange: (e) => {
+                        // Convert to lowercase as user types
+                        const lowerValue = e.target.value.toLowerCase();
+                        if (e.target.value !== lowerValue) {
+                          e.target.value = lowerValue;
+                          registrationForm.setValue("username", lowerValue, { shouldValidate: true });
+                        }
+                      },
+                    })}
+                    className={`pl-9 pr-9 ${
+                      registrationForm.formState.errors.username ? "border-destructive" : ""
+                    } ${
+                      usernameAvailability.available === true ? "border-green-500" : ""
+                    }`}
+                  />
+                  {usernameAvailability.checking && (
+                    <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                  )}
+                  {!usernameAvailability.checking && usernameAvailability.available === true && (
+                    <Check className="absolute right-3 top-2.5 h-4 w-4 text-green-500" />
+                  )}
+                  {!usernameAvailability.checking && usernameAvailability.available === false && (
+                    <X className="absolute right-3 top-2.5 h-4 w-4 text-destructive" />
+                  )}
+                </div>
+                {registrationForm.formState.errors.username && (
+                  <p className="text-destructive text-xs">{registrationForm.formState.errors.username.message}</p>
+                )}
+                {watchedUsername && watchedUsername.length >= 3 && !registrationForm.formState.errors.username && (
+                  <p className="text-xs text-muted-foreground">
+                    Only lowercase letters, numbers, and underscores allowed
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -607,8 +772,56 @@ export function MembershipForm() {
                     )}
                   </button>
                 </div>
-                {registrationForm.formState.errors.password && (
-                  <p className="text-destructive text-xs">{registrationForm.formState.errors.password.message}</p>
+                {registrationForm.formState.errors.password ? (
+                  <p className="text-destructive text-xs mt-1">
+                    {registrationForm.formState.errors.password.message}
+                  </p>
+                ) : (
+                  <div className="space-y-1.5 mt-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Password Requirements:</p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordRequirements.minLength ? (
+                          <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+                        ) : (
+                          <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                        )}
+                        <span className={passwordRequirements.minLength ? "text-green-600" : "text-muted-foreground"}>
+                          Minimum 6 characters
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordRequirements.hasNumber ? (
+                          <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+                        ) : (
+                          <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                        )}
+                        <span className={passwordRequirements.hasNumber ? "text-green-600" : "text-muted-foreground"}>
+                          At least one number (0-9)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordRequirements.hasLetter ? (
+                          <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+                        ) : (
+                          <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                        )}
+                        <span className={passwordRequirements.hasLetter ? "text-green-600" : "text-muted-foreground"}>
+                          At least one letter (a-z, A-Z)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordRequirements.hasSpecialChar ? (
+                          <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+                        ) : (
+                          <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                        )}
+                        <span className={passwordRequirements.hasSpecialChar ? "text-green-600" : "text-muted-foreground"}>
+                          At least one special character (!@#$%^&* etc.)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

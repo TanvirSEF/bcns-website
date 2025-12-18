@@ -412,8 +412,8 @@ export const api = {
 };
 
 // Backward compatibility exports
-export const loginUser = (email: string, password: string): Promise<LoginResponse> => 
-  authApi.login({ email, password });
+export const loginUser = (usernameOrEmail: string, password: string): Promise<LoginResponse> => 
+  authApi.login({ usernameOrEmail, password });
 
 // DEPRECATED: Use OTP flow instead
 export const registerUser = (_name: string, _email: string, _password: string): Promise<RegisterResponse> => {
@@ -421,14 +421,14 @@ export const registerUser = (_name: string, _email: string, _password: string): 
 };
 
 // OTP functions
-export const sendRegistrationOTP = (name: string, email: string, password: string): Promise<SendOTPResponse> =>
-  authApi.sendRegistrationOTP({ name, email, password });
+export const sendRegistrationOTP = (name: string, username: string, email: string, password: string): Promise<SendOTPResponse> =>
+  authApi.sendRegistrationOTP({ name, username, email, password });
 
 export const verifyOTP = (email: string, otp: string): Promise<{ success: boolean; message: string; data: { email: string; otpValid: boolean } }> =>
   authApi.verifyOTP(email, otp);
 
-export const verifyRegistrationOTP = (name: string, email: string, password: string, otp: string): Promise<VerifyOTPResponse> =>
-  authApi.verifyRegistrationOTP({ name, email, password, otp });
+export const verifyRegistrationOTP = (name: string, username: string, email: string, password: string, otp: string): Promise<VerifyOTPResponse> =>
+  authApi.verifyRegistrationOTP({ name, username, email, password, otp });
 
 export const resendRegistrationOTP = (email: string): Promise<SendOTPResponse> =>
   authApi.resendRegistrationOTP({ email });
