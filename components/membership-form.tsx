@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { OTPInput } from "@/components/ui/otp-input";
 import {
   User,
@@ -67,11 +68,13 @@ const educationSchema = z.object({
       message: "Year must be 4 digits",
     }),
   institution: z.string().min(1, "Institution is required"),
+  document: z.instanceof(File).optional(),
 });
 
 const trainingSchema = z.object({
   period: z.string().optional().or(z.literal("")),
   institute: z.string().optional().or(z.literal("")),
+  document: z.instanceof(File).optional(),
 });
 
 // Username validation regex: lowercase, numbers, underscores only
@@ -136,7 +139,9 @@ const registrationSchema = z.object({
   training: z.array(trainingSchema),
   researchInterest1: z.string().optional(),
   researchInterest2: z.string().optional(),
-  documents: z.array(z.instanceof(File)).optional(),
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must accept the Terms and Conditions to continue",
+  }),
 });
 
 // Step 2: OTP verification schema
@@ -153,7 +158,7 @@ export function MembershipForm() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [documentFiles, setDocumentFiles] = useState<File[]>([]);
+  // Files are now stored in each education/training entry, not separately
   const [isSendingOTP, setIsSendingOTP] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
@@ -184,12 +189,12 @@ export function MembershipForm() {
       mailingAddress: "",
       permanentAddress: "",
       educationQualifications: [
-        { qualification: "MBBS", year: "", institution: "" },
+        { qualification: "MBBS", year: "", institution: "", document: undefined },
       ],
-      training: [{ period: "", institute: "" }],
+      training: [{ period: "", institute: "", document: undefined }],
       researchInterest1: "",
       researchInterest2: "",
-      documents: [],
+      termsAccepted: false,
     },
   });
 
@@ -300,19 +305,30 @@ export function MembershipForm() {
     }
   };
 
-  const handleDocumentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      const updatedFiles = [...documentFiles, ...newFiles];
-      setDocumentFiles(updatedFiles);
-      registrationForm.setValue("documents", updatedFiles, { shouldValidate: true });
+  // Handle file upload for education qualifications
+  const handleEducationDocumentChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      registrationForm.setValue(`educationQualifications.${index}.document`, file, { shouldValidate: true });
     }
   };
 
-  const removeDocument = (index: number) => {
-    const newFiles = documentFiles.filter((_, i) => i !== index);
-    setDocumentFiles(newFiles);
-    registrationForm.setValue("documents", newFiles, { shouldValidate: true });
+  // Handle file upload for training
+  const handleTrainingDocumentChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      registrationForm.setValue(`training.${index}.document`, file, { shouldValidate: true });
+    }
+  };
+
+  // Remove document from education qualification
+  const removeEducationDocument = (index: number) => {
+    registrationForm.setValue(`educationQualifications.${index}.document`, undefined, { shouldValidate: true });
+  };
+
+  // Remove document from training
+  const removeTrainingDocument = (index: number) => {
+    registrationForm.setValue(`training.${index}.document`, undefined, { shouldValidate: true });
   };
 
   // Step 1: Handle registration form submission
@@ -339,11 +355,7 @@ export function MembershipForm() {
       return;
     }
 
-    if (documentFiles.length === 0) {
-      toast.error("Please upload at least one document");
-      registrationForm.setError("documents", { message: "At least one document is required" });
-      return;
-    }
+    // Documents are now validated separately in education/training sections
 
     // Validate education qualifications
     // Year is optional/empty per schema, but if provided must be 4 digits
@@ -461,23 +473,34 @@ export function MembershipForm() {
         formData.append("researchInterest2", registrationData.researchInterest2);
       formData.append("otp", data.otp);
 
-      // JSON Stringify Arrays
+      // JSON Stringify Arrays (without document files - they'll be sent separately)
+      const educationWithoutFiles = registrationData.educationQualifications.map(({ document, ...rest }) => rest);
+      const trainingWithoutFiles = registrationData.training.map(({ document, ...rest }) => rest);
+      
       formData.append(
         "educationQualifications",
-        JSON.stringify(registrationData.educationQualifications)
+        JSON.stringify(educationWithoutFiles)
       );
-      formData.append("training", JSON.stringify(registrationData.training));
+      formData.append("training", JSON.stringify(trainingWithoutFiles));
 
       // Files
       if (registrationData.profilePicture instanceof File) {
         formData.append("profilePicture", registrationData.profilePicture);
       }
 
-      if (registrationData.documents) {
-        registrationData.documents.forEach((file) => {
-          formData.append("documents", file);
-        });
-      }
+      // Add documents from education qualifications
+      registrationData.educationQualifications.forEach((edu, index) => {
+        if (edu.document instanceof File) {
+          formData.append(`educationDocument_${index}`, edu.document);
+        }
+      });
+
+      // Add documents from training
+      registrationData.training.forEach((train, index) => {
+        if (train.document instanceof File) {
+          formData.append(`trainingDocument_${index}`, train.document);
+        }
+      });
 
       const response = await fetch("/api/auth/verify-registration", {
         method: "POST",
@@ -910,53 +933,97 @@ export function MembershipForm() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => appendEdu({ qualification: "", year: "", institution: "" })}
+                onClick={() => appendEdu({ qualification: "", year: "", institution: "", document: undefined })}
               >
                 <Plus className="w-4 h-4 mr-1" /> Add
               </Button>
             </div>
             <div className="space-y-4">
-              {eduFields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-                  <div className="md:col-span-3 space-y-2">
-                    <Label>Qualification</Label>
-                    <Input
-                      {...registrationForm.register(`educationQualifications.${index}.qualification`)}
-                      placeholder="e.g. MBBS"
-                      className={registrationForm.formState.errors.educationQualifications?.[index]?.qualification ? "border-destructive" : ""}
-                    />
+              {eduFields.map((field, index) => {
+                const documentFile = registrationForm.watch(`educationQualifications.${index}.document`);
+                return (
+                  <div key={field.id} className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                      <div className="md:col-span-3 space-y-2">
+                        <Label>Qualification</Label>
+                        <Input
+                          {...registrationForm.register(`educationQualifications.${index}.qualification`)}
+                          placeholder="e.g. MBBS"
+                          className={registrationForm.formState.errors.educationQualifications?.[index]?.qualification ? "border-destructive" : ""}
+                        />
+                      </div>
+                      <div className="md:col-span-3 space-y-2">
+                        <Label>Year</Label>
+                        <Input
+                          {...registrationForm.register(`educationQualifications.${index}.year`)}
+                          placeholder="YYYY"
+                          className={registrationForm.formState.errors.educationQualifications?.[index]?.year ? "border-destructive" : ""}
+                        />
+                      </div>
+                      <div className="md:col-span-5 space-y-2">
+                        <Label>Institution</Label>
+                        <Input
+                          {...registrationForm.register(`educationQualifications.${index}.institution`)}
+                          placeholder="Institution Name"
+                          className={registrationForm.formState.errors.educationQualifications?.[index]?.institution ? "border-destructive" : ""}
+                        />
+                      </div>
+                      <div className="md:col-span-1 flex justify-center">
+                        {eduFields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive/90"
+                            onClick={() => removeEdu(index)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    {/* Document Upload for this Education Entry */}
+                    <div className="space-y-2">
+                      <Label className="text-sm">Document (Certificate/Degree)</Label>
+                      {!documentFile ? (
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={(e) => handleEducationDocumentChange(index, e)}
+                            className="hidden"
+                            id={`edu-doc-${index}`}
+                          />
+                          <label
+                            htmlFor={`edu-doc-${index}`}
+                            className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          >
+                            <Upload className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Upload Document</span>
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                          <div className="flex items-center gap-2 truncate">
+                            <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                            <span className="text-sm truncate max-w-[250px]">{documentFile.name}</span>
+                            <span className="text-xs text-muted-foreground">({(documentFile.size / 1024).toFixed(0)}kb)</span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => removeEducationDocument(index)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="md:col-span-3 space-y-2">
-                    <Label>Year</Label>
-                    <Input
-                      {...registrationForm.register(`educationQualifications.${index}.year`)}
-                      placeholder="YYYY"
-                      className={registrationForm.formState.errors.educationQualifications?.[index]?.year ? "border-destructive" : ""}
-                    />
-                  </div>
-                  <div className="md:col-span-5 space-y-2">
-                    <Label>Institution</Label>
-                    <Input
-                      {...registrationForm.register(`educationQualifications.${index}.institution`)}
-                      placeholder="Institution Name"
-                      className={registrationForm.formState.errors.educationQualifications?.[index]?.institution ? "border-destructive" : ""}
-                    />
-                  </div>
-                  <div className="md:col-span-1 flex justify-center">
-                    {eduFields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive/90"
-                        onClick={() => removeEdu(index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -970,45 +1037,89 @@ export function MembershipForm() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => appendTraining({ period: "", institute: "" })}
+                onClick={() => appendTraining({ period: "", institute: "", document: undefined })}
               >
                 <Plus className="w-4 h-4 mr-1" /> Add
               </Button>
             </div>
             <div className="space-y-4">
-              {trainingFields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-                  <div className="md:col-span-5 space-y-2">
-                    <Label>Period</Label>
-                    <Input
-                      {...registrationForm.register(`training.${index}.period`)}
-                      placeholder="e.g. Jan 2020 - Dec 2021"
-                      className={registrationForm.formState.errors.training?.[index]?.period ? "border-destructive" : ""}
-                    />
+              {trainingFields.map((field, index) => {
+                const documentFile = registrationForm.watch(`training.${index}.document`);
+                return (
+                  <div key={field.id} className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                      <div className="md:col-span-5 space-y-2">
+                        <Label>Period</Label>
+                        <Input
+                          {...registrationForm.register(`training.${index}.period`)}
+                          placeholder="e.g. Jan 2020 - Dec 2021"
+                          className={registrationForm.formState.errors.training?.[index]?.period ? "border-destructive" : ""}
+                        />
+                      </div>
+                      <div className="md:col-span-6 space-y-2">
+                        <Label>Institute</Label>
+                        <Input
+                          {...registrationForm.register(`training.${index}.institute`)}
+                          placeholder="Training Institute"
+                          className={registrationForm.formState.errors.training?.[index]?.institute ? "border-destructive" : ""}
+                        />
+                      </div>
+                      <div className="md:col-span-1 flex justify-center">
+                        {trainingFields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive/90"
+                            onClick={() => removeTraining(index)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    {/* Document Upload for this Training Entry */}
+                    <div className="space-y-2">
+                      <Label className="text-sm">Document (Certificate)</Label>
+                      {!documentFile ? (
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={(e) => handleTrainingDocumentChange(index, e)}
+                            className="hidden"
+                            id={`training-doc-${index}`}
+                          />
+                          <label
+                            htmlFor={`training-doc-${index}`}
+                            className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          >
+                            <Upload className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Upload Document</span>
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                          <div className="flex items-center gap-2 truncate">
+                            <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                            <span className="text-sm truncate max-w-[250px]">{documentFile.name}</span>
+                            <span className="text-xs text-muted-foreground">({(documentFile.size / 1024).toFixed(0)}kb)</span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => removeTrainingDocument(index)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="md:col-span-6 space-y-2">
-                    <Label>Institute</Label>
-                    <Input
-                      {...registrationForm.register(`training.${index}.institute`)}
-                      placeholder="Training Institute"
-                      className={registrationForm.formState.errors.training?.[index]?.institute ? "border-destructive" : ""}
-                    />
-                  </div>
-                  <div className="md:col-span-1 flex justify-center">
-                     {trainingFields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive/90"
-                        onClick={() => removeTraining(index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -1037,52 +1148,40 @@ export function MembershipForm() {
             </div>
           </section>
 
-          {/* 8. Documents Upload */}
-          <section className="space-y-6">
-             <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
-              <Upload className="w-5 h-5" /> Required Documents
-            </div>
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors cursor-pointer relative">
-                 <input
-                  type="file"
-                  multiple
-                  onChange={handleDocumentsChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                <div className="flex flex-col items-center">
-                  <div className="bg-primary/10 p-4 rounded-full mb-4">
-                    <Upload className="w-8 h-8 text-primary" />
-                  </div>
-                  <h4 className="font-semibold text-lg mb-1">Click to upload documents</h4>
-                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                    Upload scanned copies of your degrees, certificates, and other relevant documents. (PDF, JPG, PNG)
+          {/* Terms and Conditions */}
+          <section className="space-y-4 pt-4">
+            <div className="flex items-start space-x-3 p-4 bg-slate-50 dark:bg-slate-900/30 rounded-lg border border-slate-200 dark:border-slate-800">
+              <Checkbox
+                id="terms"
+                checked={registrationForm.watch("termsAccepted")}
+                onCheckedChange={(checked) => {
+                  registrationForm.setValue("termsAccepted", checked === true, { shouldValidate: true });
+                }}
+                className="mt-0.5"
+              />
+              <div className="flex-1 space-y-1">
+                <label
+                  htmlFor="terms"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  I accept the Terms and Conditions and Privacy Policy
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  By proceeding, you agree to our{" "}
+                  <a href="/terms" target="_blank" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                    Terms and Conditions
+                  </a>
+                  {" "}and{" "}
+                  <a href="/privacy" target="_blank" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                    Privacy Policy
+                  </a>
+                </p>
+                {registrationForm.formState.errors.termsAccepted && (
+                  <p className="text-destructive text-xs mt-1">
+                    {registrationForm.formState.errors.termsAccepted.message}
                   </p>
-                </div>
+                )}
               </div>
-
-              {documentFiles.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                  {documentFiles.map((file, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                      <div className="flex items-center gap-2 truncate">
-                        <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                        <span className="text-sm truncate max-w-[200px]">{file.name}</span>
-                        <span className="text-xs text-muted-foreground">({(file.size / 1024).toFixed(0)}kb)</span>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        onClick={() => removeDocument(idx)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </section>
 
@@ -1091,7 +1190,7 @@ export function MembershipForm() {
             <Button
               type="submit"
               className="w-full py-6 text-lg font-bold shadow-lg"
-              disabled={isSendingOTP}
+              disabled={isSendingOTP || !registrationForm.watch("termsAccepted")}
             >
               {isSendingOTP ? (
                 <>
@@ -1100,14 +1199,11 @@ export function MembershipForm() {
                 </>
               ) : (
                 <>
-                Verify Email
+                  Verify Email
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
             </Button>
-            <p className="text-center text-sm text-muted-foreground mt-4">
-              By clicking Next, you agree to our Terms and Conditions and Privacy Policy.
-            </p>
           </div>
         </form>
         )}
