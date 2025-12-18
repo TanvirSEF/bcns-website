@@ -304,7 +304,7 @@ export interface PasswordChangeInput {
 }
 
 export interface LoginInput {
-  readonly email: EmailAddress;
+  readonly usernameOrEmail: string; // Can be either username or email
   readonly password: string;
 }
 
@@ -316,12 +316,14 @@ export interface RegisterInput {
 
 export interface SendOTPInput {
   readonly name: string;
+  readonly username: string;
   readonly email: EmailAddress;
   readonly password: string;
 }
 
 export interface VerifyOTPInput {
   readonly name: string;
+  readonly username: string;
   readonly email: EmailAddress;
   readonly password: string;
   readonly otp: string;

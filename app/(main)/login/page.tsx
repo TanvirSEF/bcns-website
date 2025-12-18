@@ -20,7 +20,7 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const { login } = useAuth();
 
-  const [emailAddress, setEmailAddress] = useState("");
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -47,13 +47,8 @@ function LoginPageContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!emailAddress.trim() || !passwordValue.trim()) {
+    if (!usernameOrEmail.trim() || !passwordValue.trim()) {
       setError("Please fill in all fields");
-      return;
-    }
-
-    if (!emailAddress.includes("@")) {
-      setError("Please enter a valid email address");
       return;
     }
 
@@ -63,7 +58,7 @@ function LoginPageContent() {
 
     try {
       const credentials: LoginInput = {
-        email: emailAddress.trim(),
+        usernameOrEmail: usernameOrEmail.trim(),
         password: passwordValue
       };
 
@@ -215,17 +210,17 @@ function LoginPageContent() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
-                  htmlFor="email"
+                  htmlFor="usernameOrEmail"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Email Address
+                  Username or Email
                 </label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={emailAddress}
-                  onChange={handleInputChange(setEmailAddress)}
+                  id="usernameOrEmail"
+                  type="text"
+                  placeholder="Enter your username or email"
+                  value={usernameOrEmail}
+                  onChange={handleInputChange(setUsernameOrEmail)}
                   className="mt-1"
                   required
                 />
