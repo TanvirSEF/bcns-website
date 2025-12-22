@@ -131,8 +131,7 @@ const registrationSchema = z.object({
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   password: passwordSchema,
   affiliation: z.string().min(2, "Affiliation is required"),
-  formNo: z.string().optional(),
-  refNo: z.string().optional(),
+  designation: z.string().min(2, "Designation is required"),
   mailingAddress: z.string().min(5, "Mailing address is required"),
   permanentAddress: z.string().min(5, "Permanent address is required"),
   educationQualifications: z.array(educationSchema),
@@ -584,8 +583,7 @@ export function MembershipForm() {
       formData.append("phone", registrationData.phone);
       formData.append("password", registrationData.password);
       formData.append("affiliation", registrationData.affiliation);
-      if (registrationData.formNo) formData.append("formNo", registrationData.formNo);
-      if (registrationData.refNo) formData.append("refNo", registrationData.refNo);
+      formData.append("designation", registrationData.designation);
       formData.append("mailingAddress", registrationData.mailingAddress);
       formData.append("permanentAddress", registrationData.permanentAddress);
       if (registrationData.researchInterest1)
@@ -1013,8 +1011,8 @@ export function MembershipForm() {
             <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
               <Building className="w-5 h-5" /> Professional Information
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2 md:col-span-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
                 <Label htmlFor="affiliation">Affiliation / Hospital</Label>
                 <div className="relative">
                   <Building className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -1030,20 +1028,19 @@ export function MembershipForm() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="formNo">Form No. (Optional)</Label>
-                <Input
-                  id="formNo"
-                  placeholder="12345"
-                  {...registrationForm.register("formNo")}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="refNo">Ref No. (Optional)</Label>
-                <Input
-                  id="refNo"
-                  placeholder="REF-001"
-                  {...registrationForm.register("refNo")}
-                />
+                <Label htmlFor="designation">Designation</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="designation"
+                    placeholder="e.g., Assistant Professor, Consultant"
+                    {...registrationForm.register("designation")}
+                    className={`pl-9 ${registrationForm.formState.errors.designation ? "border-destructive" : ""}`}
+                  />
+                </div>
+                {registrationForm.formState.errors.designation && (
+                  <p className="text-destructive text-xs">{registrationForm.formState.errors.designation.message}</p>
+                )}
               </div>
             </div>
           </section>
