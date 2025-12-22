@@ -175,6 +175,9 @@ export function MembershipForm() {
     hasLetter: false,
     hasSpecialChar: false,
   });
+  const [paymentMethod, setPaymentMethod] = useState<"bkash" | "handCash" | "bankTransfer" | null>(null);
+  const [paymentDocuments, setPaymentDocuments] = useState<File[]>([]);
+  const [verifiedOtp, setVerifiedOtp] = useState<string>("");
 
   // Main form for registration data
   const registrationForm = useForm<RegistrationFormValues>({
@@ -202,47 +205,70 @@ export function MembershipForm() {
   const watchedUsername = registrationForm.watch("username");
   const watchedPassword = registrationForm.watch("password");
 
-  // Debounced username availability check
+  // Debounced username availability check with real-time validation
   useEffect(() => {
     const username = watchedUsername?.trim().toLowerCase();
     
-    // Reset availability state if username is empty or invalid
-    if (!username || username.length < 3 || !usernameRegex.test(username)) {
+    // Reset availability state if username is empty or too short
+    if (!username || username.length < 3) {
       setUsernameAvailability({ checking: false, available: null });
+      registrationForm.clearErrors("username");
+      return;
+    }
+
+    // Validate format first (lowercase, numbers, underscores only)
+    if (!usernameRegex.test(username)) {
+      setUsernameAvailability({ checking: false, available: null });
+      // Format validation error is handled by zod schema
       return;
     }
 
     // Set checking state
     setUsernameAvailability({ checking: true, available: null });
+    registrationForm.clearErrors("username"); // Clear previous errors while checking
 
-    // Debounce the API call
+    // Debounce the API call (500ms after user stops typing)
     const timeoutId = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/users/check-username?username=${encodeURIComponent(username)}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
+        const response = await fetch(
+          `/api/users/check-username?username=${encodeURIComponent(username)}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        if (!response.ok) {
+          // If API fails, don't block user - backend will validate during registration
+          console.warn("Username check API failed:", response.status);
+          setUsernameAvailability({ checking: false, available: null });
+          registrationForm.clearErrors("username");
+          return;
+        }
 
         const data = await response.json();
         
-        // Check if username is available (assuming backend returns { available: boolean })
-        const available = data.available !== false; // Default to true if not specified
-        setUsernameAvailability({ checking: false, available });
+        // Backend returns: { success: true, available: boolean, message?: string }
+        const isAvailable = data.success === true && data.available === true;
+        
+        setUsernameAvailability({ checking: false, available: isAvailable });
         
         // Set validation error if username is not available
-        if (!available) {
+        if (!isAvailable) {
           registrationForm.setError("username", {
             type: "manual",
-            message: "Username is already taken",
+            message: data.message || "Username is already taken",
           });
         } else {
           registrationForm.clearErrors("username");
         }
       } catch (error) {
         console.error("Error checking username availability:", error);
+        // On error, don't block user - backend will validate during registration
         setUsernameAvailability({ checking: false, available: null });
+        registrationForm.clearErrors("username");
       }
-    }, 500); // 500ms debounce
+    }, 500); // 500ms debounce - wait for user to stop typing
 
     return () => clearTimeout(timeoutId);
   }, [watchedUsername, registrationForm]);
@@ -333,6 +359,65 @@ export function MembershipForm() {
 
   // Step 1: Handle registration form submission
   const onRegistrationSubmit = async (data: RegistrationFormValues) => {
+    // Final username availability check before submission
+    const username = data.username?.trim().toLowerCase();
+    
+    // Validate username format
+    if (!username || username.length < 3 || !usernameRegex.test(username)) {
+      toast.error("Please enter a valid username");
+      registrationForm.setError("username", { message: "Please enter a valid username" });
+      return;
+    }
+
+    // If username is currently being checked, wait a moment
+    if (usernameAvailability.checking) {
+      toast.error("Please wait while we verify username availability");
+      return;
+    }
+
+    // If username is not available, block submission
+    if (usernameAvailability.available === false) {
+      toast.error("Username is already taken. Please choose a different username.");
+      registrationForm.setError("username", { message: "Username is already taken" });
+      return;
+    }
+
+    // If availability hasn't been checked yet, do a final check
+    if (usernameAvailability.available === null) {
+      try {
+        const response = await fetch(
+          `/api/users/check-username?username=${encodeURIComponent(username)}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        if (!response.ok) {
+          // If check fails, allow submission - backend will validate
+          console.warn("Final username check failed, proceeding with submission");
+        } else {
+          const checkData = await response.json();
+          
+          // Backend returns: { success: true, available: boolean }
+          if (checkData.success === true && checkData.available === true) {
+            // Username is available, proceed
+            setUsernameAvailability({ checking: false, available: true });
+            registrationForm.clearErrors("username");
+          } else {
+            // Username is not available
+            toast.error("Username is already taken. Please choose a different username.");
+            registrationForm.setError("username", { message: "Username is already taken" });
+            setUsernameAvailability({ checking: false, available: false });
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error checking username availability:", error);
+        // On error, allow submission - backend will validate
+      }
+    }
+
     // Validate required fields that are optional in schema
     if (!data.profilePicture) {
       toast.error("Profile picture is required");
@@ -447,13 +532,49 @@ export function MembershipForm() {
 
       if (!verifyResult.success || !verifyResult.data?.otpValid) {
         toast.error("Invalid OTP. Please try again.");
-        // Don't return early - let finally block handle state cleanup
         return;
       }
 
-      // OTP verified, now submit registration
-      setIsVerifyingOTP(false); // OTP verification complete
-      setIsSubmitting(true);
+      // OTP verified, store it and move to payment step
+      setVerifiedOtp(data.otp);
+      toast.success("OTP verified successfully!");
+      setCurrentStep(3); // Move to payment step
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+      console.error(error);
+    } finally {
+      setIsVerifyingOTP(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle payment document upload
+  const handlePaymentDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setPaymentDocuments(files);
+  };
+
+  // Step 3: Handle payment confirmation and registration submission
+  const handlePaymentConfirm = async () => {
+    if (!registrationData) {
+      toast.error("Registration data is missing. Please start over.");
+      setCurrentStep(1);
+      return;
+    }
+
+    if (!paymentMethod) {
+      toast.error("Please select a payment method");
+      return;
+    }
+
+    // All payment methods require receipt/screenshot upload
+    if (paymentDocuments.length === 0) {
+      toast.error("Please upload your payment receipt/screenshot");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
       const formData = new FormData();
 
       // Text Fields
@@ -471,7 +592,13 @@ export function MembershipForm() {
         formData.append("researchInterest1", registrationData.researchInterest1);
       if (registrationData.researchInterest2)
         formData.append("researchInterest2", registrationData.researchInterest2);
-      formData.append("otp", data.otp);
+      
+      // Use stored verified OTP
+      if (!verifiedOtp) {
+        toast.error("OTP verification required. Please go back and verify OTP.");
+        return;
+      }
+      formData.append("otp", verifiedOtp);
 
       // JSON Stringify Arrays (without document files - they'll be sent separately)
       const educationWithoutFiles = registrationData.educationQualifications.map(({ document, ...rest }) => rest);
@@ -488,18 +615,23 @@ export function MembershipForm() {
         formData.append("profilePicture", registrationData.profilePicture);
       }
 
-      // Add documents from education qualifications
-      registrationData.educationQualifications.forEach((edu, index) => {
+      // Add all documents (education + training + payment) to single 'documents' array
+      // Backend expects: documents[] (all documents together, not separated)
+      registrationData.educationQualifications.forEach((edu) => {
         if (edu.document instanceof File) {
-          formData.append(`educationDocument_${index}`, edu.document);
+          formData.append("documents", edu.document);
         }
       });
 
-      // Add documents from training
-      registrationData.training.forEach((train, index) => {
+      registrationData.training.forEach((train) => {
         if (train.document instanceof File) {
-          formData.append(`trainingDocument_${index}`, train.document);
+          formData.append("documents", train.document);
         }
+      });
+
+      // Add payment documents (receipts) if uploaded
+      paymentDocuments.forEach((doc) => {
+        formData.append("documents", doc);
       });
 
       const response = await fetch("/api/auth/verify-registration", {
@@ -511,7 +643,11 @@ export function MembershipForm() {
 
       if (result.success && response.ok) {
         toast.success("Registration submitted successfully!");
-        setCurrentStep(3); // Move to payment step
+        setCurrentStep(4);
+        // Redirect to login after a brief delay
+        setTimeout(() => {
+          router.push("/login?registered=true");
+        }, 2000);
       } else {
         toast.error(result.message || "Registration failed");
       }
@@ -519,18 +655,8 @@ export function MembershipForm() {
       toast.error("An unexpected error occurred");
       console.error(error);
     } finally {
-      setIsVerifyingOTP(false);
       setIsSubmitting(false);
     }
-  };
-
-  // Step 3: Handle payment confirmation
-  const handlePaymentConfirm = () => {
-    setCurrentStep(4);
-    // Redirect to login after a brief delay
-    setTimeout(() => {
-      router.push("/login?registered=true");
-    }, 2000);
   };
 
   // Resend OTP handler
@@ -715,26 +841,58 @@ export function MembershipForm() {
                         }
                       },
                     })}
-                    className={`pl-9 pr-9 ${
-                      registrationForm.formState.errors.username ? "border-destructive" : ""
-                    } ${
-                      usernameAvailability.available === true ? "border-green-500" : ""
+                    className={`pl-9 pr-9 transition-colors ${
+                      registrationForm.formState.errors.username || usernameAvailability.available === false
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : usernameAvailability.available === true
+                        ? "border-green-500 focus-visible:ring-green-500"
+                        : ""
                     }`}
                   />
+                  {/* Real-time checking indicator */}
                   {usernameAvailability.checking && (
-                    <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                    <div className="absolute right-3 top-2.5 flex items-center gap-1.5">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      <span className="text-xs text-muted-foreground hidden sm:inline">Checking...</span>
+                    </div>
                   )}
+                  {/* Available indicator */}
                   {!usernameAvailability.checking && usernameAvailability.available === true && (
-                    <Check className="absolute right-3 top-2.5 h-4 w-4 text-green-500" />
+                    <div className="absolute right-3 top-2.5 flex items-center gap-1.5">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span className="text-xs text-green-600 dark:text-green-400 hidden sm:inline">Available</span>
+                    </div>
                   )}
+                  {/* Not available indicator */}
                   {!usernameAvailability.checking && usernameAvailability.available === false && (
-                    <X className="absolute right-3 top-2.5 h-4 w-4 text-destructive" />
+                    <div className="absolute right-3 top-2.5 flex items-center gap-1.5">
+                      <X className="h-4 w-4 text-destructive" />
+                      <span className="text-xs text-destructive hidden sm:inline">Taken</span>
+                    </div>
                   )}
                 </div>
+                {/* Error message */}
                 {registrationForm.formState.errors.username && (
-                  <p className="text-destructive text-xs">{registrationForm.formState.errors.username.message}</p>
+                  <p className="text-destructive text-xs flex items-center gap-1">
+                    <X className="h-3 w-3" />
+                    {registrationForm.formState.errors.username.message}
+                  </p>
                 )}
-                {watchedUsername && watchedUsername.length >= 3 && !registrationForm.formState.errors.username && (
+                {/* Success message */}
+                {!registrationForm.formState.errors.username && 
+                 usernameAvailability.available === true && 
+                 watchedUsername && 
+                 watchedUsername.length >= 3 && (
+                  <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                    <Check className="h-3 w-3" />
+                    Username is available
+                  </p>
+                )}
+                {/* Helper text */}
+                {watchedUsername && 
+                 watchedUsername.length >= 3 && 
+                 !registrationForm.formState.errors.username &&
+                 usernameAvailability.available !== true && (
                   <p className="text-xs text-muted-foreground">
                     Only lowercase letters, numbers, and underscores allowed
                   </p>
@@ -1164,7 +1322,7 @@ export function MembershipForm() {
                   htmlFor="terms"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 >
-                  I accept the Terms and Conditions and Privacy Policy
+                  Do you agree to comply with all the terms and conditions applicable to BCNS membership?
                 </label>
                 <p className="text-xs text-muted-foreground">
                   By proceeding, you agree to our{" "}
@@ -1289,14 +1447,14 @@ export function MembershipForm() {
                 className="flex-1 w-full sm:w-auto order-1 sm:order-2"
                 disabled={isVerifyingOTP || isSubmitting}
               >
-                {isVerifyingOTP || isSubmitting ? (
+                {isVerifyingOTP ? (
                   <>
                     <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin mr-2" />
-                    {isVerifyingOTP ? "Verifying..." : "Submitting..."}
+                    Verifying...
                   </>
                 ) : (
                   <>
-                    Verify & Submit
+                    Verify OTP
                     <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                   </>
                 )}
@@ -1314,46 +1472,180 @@ export function MembershipForm() {
               </div>
               <div className="space-y-3 sm:space-y-4">
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Your registration has been submitted successfully! Please complete the payment to finalize your membership.
+                  Please select a payment method and complete the payment to finalize your membership.
                 </p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
-                  <div className="p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-                      <Image src="/images/bkash.png" alt="bKash" width={24} height={24} className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
-                      bKash
-                    </h3>
-                    <div className="space-y-2">
-                      <p className="text-xs sm:text-sm text-muted-foreground">Account Number</p>
-                      <p className="text-lg sm:text-xl font-mono font-bold break-all">01879235494</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">Send money to this number</p>
-                    </div>
+                {/* Payment Method Tabs */}
+                <div className="border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex gap-2 sm:gap-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentMethod("bkash");
+                        setPaymentDocuments([]);
+                      }}
+                      className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
+                        paymentMethod === "bkash"
+                          ? "border-primary text-primary"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <Image src="/images/bkash.png" alt="bKash" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
+                        <span>bKash</span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentMethod("handCash");
+                        setPaymentDocuments([]);
+                      }}
+                      className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
+                        paymentMethod === "handCash"
+                          ? "border-primary text-primary"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span>Hand Cash</span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentMethod("bankTransfer");
+                        setPaymentDocuments([]);
+                      }}
+                      className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
+                        paymentMethod === "bankTransfer"
+                          ? "border-primary text-primary"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <Building className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span>Bank Transfer</span>
+                      </div>
+                    </button>
                   </div>
+                </div>
 
-                  <div className="p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-                      <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                      Bank Transfer
-                    </h3>
-                    <div className="space-y-2">
-                      <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground">Bank</p>
-                        <p className="text-sm sm:text-base font-semibold">Bank Asia PLC</p>
-                      </div>
-                      <div>
+                {/* Payment Method Content */}
+                <div className="mt-4 sm:mt-6">
+                  {paymentMethod === "bkash" && (
+                    <div className="p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 space-y-4">
+                      <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
+                        <Image src="/images/bkash.png" alt="bKash" width={24} height={24} className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
+                        bKash Payment
+                      </h3>
+                      <div className="space-y-2 mb-4">
                         <p className="text-xs sm:text-sm text-muted-foreground">Account Number</p>
-                        <p className="text-base sm:text-lg font-mono font-bold break-all">08536000112</p>
+                        <p className="text-lg sm:text-xl font-mono font-bold break-all">01879235494</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">Send money to this number</p>
                       </div>
-                      <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground">Account Name</p>
-                        <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100">Bangladesh Child Neurology Society (BCNS)</p>
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground">Branch</p>
-                        <p className="text-xs sm:text-sm">BSMMU</p>
+                      <div className="space-y-3">
+                        <Label htmlFor="bkashScreenshot" className="text-sm font-medium">
+                          Upload Payment Screenshot
+                        </Label>
+                        <Input
+                          id="bkashScreenshot"
+                          type="file"
+                          accept="image/*,.pdf"
+                          multiple
+                          onChange={handlePaymentDocumentChange}
+                          className="cursor-pointer"
+                        />
+                        {paymentDocuments.length > 0 && (
+                          <p className="text-xs text-green-600 dark:text-green-400">
+                            {paymentDocuments.length} file(s) selected
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Please upload a screenshot of your bKash payment transaction
+                        </p>
                       </div>
                     </div>
-                  </div>
+                  )}
+
+                  {paymentMethod === "handCash" && (
+                    <div className="p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 space-y-4">
+                      <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
+                        <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
+                        Hand Cash Payment
+                      </h3>
+                      <div className="space-y-3">
+                        <Label htmlFor="handCashReceipt" className="text-sm font-medium">
+                          Upload Your Receipt
+                        </Label>
+                        <Input
+                          id="handCashReceipt"
+                          type="file"
+                          accept="image/*,.pdf"
+                          multiple
+                          onChange={handlePaymentDocumentChange}
+                          className="cursor-pointer"
+                        />
+                        {paymentDocuments.length > 0 && (
+                          <p className="text-xs text-green-600 dark:text-green-400">
+                            {paymentDocuments.length} file(s) selected
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Please upload a clear photo or scan of your payment receipt
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentMethod === "bankTransfer" && (
+                    <div className="p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 space-y-4">
+                      <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
+                        <Building className="w-5 h-5 sm:w-6 sm:h-6" />
+                        Bank Transfer Payment
+                      </h3>
+                      <div className="space-y-2 mb-4">
+                        <div>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Bank</p>
+                          <p className="text-sm sm:text-base font-semibold">Bank Asia PLC</p>
+                        </div>
+                        <div>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Account Number</p>
+                          <p className="text-base sm:text-lg font-mono font-bold break-all">08536000112</p>
+                        </div>
+                        <div>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Account Name</p>
+                          <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100">Bangladesh Child Neurology Society (BCNS)</p>
+                        </div>
+                        <div>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Branch</p>
+                          <p className="text-xs sm:text-sm">BSMMU</p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="bankReceipt" className="text-sm font-medium">
+                          Upload Payment Screenshot
+                        </Label>
+                        <Input
+                          id="bankReceipt"
+                          type="file"
+                          accept="image/*,.pdf"
+                          multiple
+                          onChange={handlePaymentDocumentChange}
+                          className="cursor-pointer"
+                        />
+                        {paymentDocuments.length > 0 && (
+                          <p className="text-xs text-green-600 dark:text-green-400">
+                            {paymentDocuments.length} file(s) selected
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Please upload a screenshot or scan of your bank transfer receipt
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -1369,10 +1661,20 @@ export function MembershipForm() {
               <Button
                 type="button"
                 onClick={handlePaymentConfirm}
+                disabled={isSubmitting}
                 className="w-full py-4 sm:py-5 md:py-6 text-base sm:text-lg font-bold shadow-lg"
               >
-                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Confirm Payment
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    Confirm Payment
+                  </>
+                )}
               </Button>
             </div>
           </div>

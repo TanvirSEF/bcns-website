@@ -94,6 +94,7 @@ export async function GET(request: NextRequest) {
         );
       }
 
+      // For other errors (like 404, 500), return error response
       return NextResponse.json(
         {
           success: false,
@@ -107,14 +108,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Username is available
+    // Backend returned success - check the available field
+    // Backend format: { success: true, available: boolean, message?: string }
+    const isAvailable = data?.available === true;
+    
     return NextResponse.json(
       {
         success: true,
-        available: data?.available !== false, // Default to true if not specified
-        message: data?.message || 'Username is available',
+        available: isAvailable,
+        message: isAvailable 
+          ? (data?.message || 'Username is available') 
+          : (data?.message || 'Username is already taken'),
       },
       {
+        status: 200,
         headers: corsHeaders,
       }
     );
