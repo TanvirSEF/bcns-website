@@ -32,26 +32,26 @@ function handleApiResponse<T>(response: unknown): T {
   if (typeof response !== 'object' || response === null) {
     throw new Error('Invalid API response');
   }
-  
+
   const apiResponse = response as Record<string, unknown>;
-  
+
   if ('success' in apiResponse) {
     if (apiResponse.success === false) {
       const errorMessage = (apiResponse.message as string) || 'API request failed';
       throw new Error(errorMessage);
     }
-    
+
     if (apiResponse.success === true && 'data' in apiResponse) {
       return apiResponse.data as T;
     }
-    
+
     if (apiResponse.success === true && !('data' in apiResponse)) {
       // Return apiResponse without the success wrapper field to maintain type contract
       const { success, ...dataWithoutWrapper } = apiResponse;
       return dataWithoutWrapper as T;
     }
   }
-  
+
   // If response doesn't have success field, assume it's the data directly
   return response as T;
 }
@@ -63,7 +63,7 @@ export const authApi = {
       credentials,
       { skipAuth: true }
     );
-    
+
     return handleApiResponse<LoginResponse>(response);
   },
 
@@ -89,7 +89,7 @@ export const authApi = {
       { email: userData.email },
       { skipAuth: true }
     );
-    
+
     return handleApiResponse<SendOTPResponse>(response);
   },
 
@@ -99,7 +99,7 @@ export const authApi = {
       { email, otp },
       { skipAuth: true }
     );
-    
+
     // For verifyOTP, we need the full response, not just the data
     return response as { success: boolean; message: string; data: { email: string; otpValid: boolean } };
   },
@@ -110,7 +110,7 @@ export const authApi = {
       verificationData,
       { skipAuth: true }
     );
-    
+
     return handleApiResponse<VerifyOTPResponse>(response);
   },
 
@@ -120,7 +120,7 @@ export const authApi = {
       resendData,
       { skipAuth: true }
     );
-    
+
     return handleApiResponse<SendOTPResponse>(response);
   },
 };
@@ -136,7 +136,7 @@ export const userApi = {
       '/users/me/change-password',
       passwordData
     );
-    
+
     return handleApiResponse<OperationResponse>(response);
   },
 
@@ -151,7 +151,7 @@ export const userApi = {
       onProgress,
       'profilePicture' // Backend expects this field name
     );
-    
+
     return handleApiResponse<FileUploadResponse>(response);
   },
 
@@ -159,13 +159,13 @@ export const userApi = {
     const response = await apiClient.patch<OperationResponse>(
       '/users/me/profile-picture/delete'
     );
-    
+
     return handleApiResponse<OperationResponse>(response);
   },
 
   getMembers: async (): Promise<readonly User[]> => {
     const response = await apiClient.get<readonly User[]>('/members');
-    
+
     return handleApiResponse<readonly User[]>(response);
   },
 };
@@ -197,8 +197,11 @@ export const adminApi = {
     return handleApiResponse<readonly User[]>(response);
   },
 
-  approveUser: async (userId: string): Promise<OperationResponse> => {
-    const response = await apiClient.patch<OperationResponse>(`/users/admin/${userId}/approve`);
+  approveUser: async (userId: string, memberId: string, adminNotes?: string): Promise<OperationResponse> => {
+    const response = await apiClient.patch<OperationResponse>(
+      `/users/admin/${userId}/approve`,
+      { memberId, adminNotes }
+    );
     return handleApiResponse<OperationResponse>(response);
   },
 
@@ -259,9 +262,9 @@ export const galleryApi = {
   },
 
   uploadPhoto: async (
-    albumId: string, 
-    photoData: { 
-      caption?: string; 
+    albumId: string,
+    photoData: {
+      caption?: string;
       imageUrl?: string;
       photo?: File;
     }
@@ -271,19 +274,19 @@ export const galleryApi = {
       const formData = new FormData();
       formData.append("photo", photoData.photo);
       if (photoData.caption) formData.append("caption", photoData.caption);
-      
+
       const response = await apiClient.post<Photo>(
         `/gallery/albums/${albumId}/photos`,
         formData
       );
       return handleApiResponse<Photo>(response);
     }
-    
+
     // Otherwise, use FormData with imageUrl (backend expects FormData)
     const formData = new FormData();
     if (photoData.imageUrl) formData.append("imageUrl", photoData.imageUrl);
     if (photoData.caption) formData.append("caption", photoData.caption);
-    
+
     const response = await apiClient.post<Photo>(
       `/gallery/albums/${albumId}/photos`,
       formData
@@ -412,7 +415,7 @@ export const api = {
 };
 
 // Backward compatibility exports
-export const loginUser = (usernameOrEmail: string, password: string): Promise<LoginResponse> => 
+export const loginUser = (usernameOrEmail: string, password: string): Promise<LoginResponse> =>
   authApi.login({ usernameOrEmail, password });
 
 // DEPRECATED: Use OTP flow instead
@@ -436,10 +439,10 @@ export const resendRegistrationOTP = (email: string): Promise<SendOTPResponse> =
 export const logoutUser = authApi.logout;
 export const getProfile = authApi.getProfile;
 
-export const updateProfile = (data: UserUpdateInput): Promise<User> => 
+export const updateProfile = (data: UserUpdateInput): Promise<User> =>
   userApi.updateProfile(data);
 
-export const changePassword = (currentPassword: string, newPassword: string): Promise<OperationResponse> => 
+export const changePassword = (currentPassword: string, newPassword: string): Promise<OperationResponse> =>
   userApi.changePassword({ currentPassword, newPassword });
 
 export const getAllMembers = userApi.getMembers;
@@ -447,60 +450,60 @@ export const uploadProfileImage = userApi.uploadProfilePicture;
 export const deleteProfileImage = userApi.deleteProfilePicture;
 
 // Event backward compatibility exports
-export const getEvents = (category?: string): Promise<readonly Event[]> => 
+export const getEvents = (category?: string): Promise<readonly Event[]> =>
   eventApi.getEvents(category);
-export const getEvent = (eventId: string): Promise<Event> => 
+export const getEvent = (eventId: string): Promise<Event> =>
   eventApi.getEvent(eventId);
-export const createEvent = (eventData: EventCreateInput & { eventImage?: File }): Promise<Event> => 
+export const createEvent = (eventData: EventCreateInput & { eventImage?: File }): Promise<Event> =>
   eventApi.createEvent(eventData);
-export const registerForEvent = (): Promise<OperationResponse> => 
+export const registerForEvent = (): Promise<OperationResponse> =>
   Promise.resolve({ success: true, message: 'Success' });
 
 export const getMyDocuments = (): Promise<readonly Document[]> => Promise.resolve([]);
 export const getAllDocuments = (): Promise<readonly Document[]> => Promise.resolve([]);
-export const updateDocumentStatus = (): Promise<OperationResponse> => 
+export const updateDocumentStatus = (): Promise<OperationResponse> =>
   Promise.resolve({ success: true, message: 'Success' });
 
 // Gallery backward compatibility exports
 export const getAlbums = (): Promise<readonly Album[]> => galleryApi.getAlbums();
-export const createAlbum = (albumData: { title: string; description?: string; coverPhoto?: string }): Promise<Album> => 
+export const createAlbum = (albumData: { title: string; description?: string; coverPhoto?: string }): Promise<Album> =>
   galleryApi.createAlbum(albumData);
-export const getAlbumPhotos = (albumId: string): Promise<readonly Photo[]> => 
+export const getAlbumPhotos = (albumId: string): Promise<readonly Photo[]> =>
   galleryApi.getAlbumPhotos(albumId);
 
 export const getPolls = (): Promise<readonly Poll[]> => pollApi.getPolls();
 export const createPoll = (pollData: PollCreateInput): Promise<Poll> => pollApi.createPoll(pollData);
 export const getPoll = (pollId: string): Promise<Poll> => pollApi.getPoll(pollId);
-export const voteInPoll = (pollId: string, optionId: string): Promise<OperationResponse> => 
+export const voteInPoll = (pollId: string, optionId: string): Promise<OperationResponse> =>
   pollApi.voteInPoll(pollId, optionId);
 export const getPollResults = (pollId: string): Promise<PollResults> => pollApi.getPollResults(pollId);
 
-export const getPublications = (): Promise<readonly Publication[]> => 
+export const getPublications = (): Promise<readonly Publication[]> =>
   publicationApi.getPublications();
 export const createPublication = (publicationData: {
   title: string;
   description: string;
   category: string;
   file: File;
-}): Promise<Publication> => 
+}): Promise<Publication> =>
   publicationApi.createPublication(publicationData);
-export const getPublication = (publicationId: string): Promise<Publication> => 
+export const getPublication = (publicationId: string): Promise<Publication> =>
   publicationApi.getPublication(publicationId);
 
 export const globalSearch = (): Promise<readonly unknown[]> => Promise.resolve([]);
 
-export const subscribeToNotifications = (): Promise<OperationResponse> => 
+export const subscribeToNotifications = (): Promise<OperationResponse> =>
   Promise.resolve({ success: true, message: 'Success' });
-export const unsubscribeFromNotifications = (): Promise<OperationResponse> => 
+export const unsubscribeFromNotifications = (): Promise<OperationResponse> =>
   Promise.resolve({ success: true, message: 'Success' });
 
-export const generate2FA = (): Promise<{ qrCode: string; secret: string }> => 
+export const generate2FA = (): Promise<{ qrCode: string; secret: string }> =>
   Promise.resolve({ qrCode: '', secret: '' });
-export const turnOn2FA = (): Promise<OperationResponse> => 
+export const turnOn2FA = (): Promise<OperationResponse> =>
   Promise.resolve({ success: true, message: 'Success' });
-export const turnOff2FA = (): Promise<OperationResponse> => 
+export const turnOff2FA = (): Promise<OperationResponse> =>
   Promise.resolve({ success: true, message: 'Success' });
-export const authenticate2FA = (): Promise<OperationResponse> => 
+export const authenticate2FA = (): Promise<OperationResponse> =>
   Promise.resolve({ success: true, message: 'Success' });
 
 export const getActivityLogs = (): Promise<readonly ActivityLog[]> => Promise.resolve([]);

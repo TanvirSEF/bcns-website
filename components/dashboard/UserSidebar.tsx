@@ -8,6 +8,7 @@ import {
   Users,
   Building2,
   FileText,
+  FileCheck,
 } from "lucide-react";
 import { UserNavMain } from "./UserNavMain";
 import { UserNavUser } from "./UserNavUser";
@@ -71,6 +72,11 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
         title: "Members",
         url: "/user-dashboard/members",
         icon: Users,
+      },
+      {
+        title: "My CV",
+        url: "/user-dashboard/cv",
+        icon: FileCheck,
       },
       {
         title: "My Documents",

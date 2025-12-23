@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
-import { 
-  UserCheck, 
-  Trash2, 
-  RefreshCw, 
-  Users, 
+import {
+  UserCheck,
+  Trash2,
+  RefreshCw,
+  Users,
   CheckCircle2,
   Clock,
   Loader2
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dialog"
 import { api, type PendingUser, type ApprovalStats } from "@/lib/api"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ApproveUserDialog } from "@/components/admin/ApproveUserDialog"
 
 export default function UsersPage() {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([])
@@ -39,6 +40,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<PendingUser | null>(null)
 
   const fetchData = async () => {
@@ -62,15 +64,25 @@ export default function UsersPage() {
     fetchData()
   }, [])
 
-  const handleApprove = async (user: PendingUser) => {
+  const handleApproveClick = (user: PendingUser) => {
+    setSelectedUser(user)
+    setApproveDialogOpen(true)
+  }
+
+  const handleApproveConfirm = async (memberId: string, adminNotes?: string) => {
+    if (!selectedUser) return
+
     try {
-      setActionLoading(user.id)
-      await api.admin.approveUser(user.id)
-      toast.success(`User ${user.name} approved successfully`)
+      setActionLoading(selectedUser.id)
+      await api.admin.approveUser(selectedUser.id, memberId, adminNotes)
+      toast.success(`User ${selectedUser.name} approved successfully with Member ID: ${memberId}`)
+      setApproveDialogOpen(false)
+      setSelectedUser(null)
       await fetchData()
     } catch (error) {
       console.error("Failed to approve user:", error)
-      toast.error("Failed to approve user")
+      const errorMessage = error instanceof Error ? error.message : "Failed to approve user"
+      toast.error(errorMessage)
     } finally {
       setActionLoading(null)
     }
@@ -230,7 +242,7 @@ export default function UsersPage() {
                           <Button
                             size="sm"
                             variant="default"
-                            onClick={() => handleApprove(user)}
+                            onClick={() => handleApproveClick(user)}
                             disabled={actionLoading === user.id}
                             className="bg-green-600 hover:bg-green-700"
                           >
@@ -303,6 +315,15 @@ export default function UsersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Approve User Dialog */}
+      <ApproveUserDialog
+        user={selectedUser}
+        open={approveDialogOpen}
+        onOpenChange={setApproveDialogOpen}
+        onConfirm={handleApproveConfirm}
+        loading={actionLoading === selectedUser?.id}
+      />
     </div>
   )
 }
