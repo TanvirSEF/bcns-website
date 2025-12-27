@@ -31,13 +31,26 @@ export default function UserCVPage() {
         },
       });
 
-      if (!response.ok) {
+      // Check if response is JSON (error) or PDF (success)
+      const contentType = response.headers.get("content-type");
+      
+      if (!response.ok || contentType?.includes("application/json")) {
         const errorData = await response.json().catch(() => ({ message: "Failed to generate CV" }));
         throw new Error(errorData.message || "Failed to generate CV");
       }
 
+      // Verify it's a PDF
+      if (!contentType?.includes("application/pdf")) {
+        throw new Error("Invalid response format. Expected PDF file.");
+      }
+
       // Get PDF blob
       const blob = await response.blob();
+      
+      // Verify blob is not empty
+      if (blob.size === 0) {
+        throw new Error("Generated CV file is empty. Please try again.");
+      }
       
       // Create download link
       const url = window.URL.createObjectURL(blob);

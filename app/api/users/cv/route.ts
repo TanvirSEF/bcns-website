@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import config from "@/lib/config";
-import PDFDocument from "pdfkit";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 function getToken(request: NextRequest): string | null {
   const authHeader = request.headers.get("authorization");
@@ -22,6 +22,10 @@ interface BackendUser {
   permanentAddress?: string;
   bio?: string;
   profilePictureUrl?: string;
+  memberId?: string;
+  membershipType?: string;
+  formNo?: string;
+  refNo?: string;
   educationQualifications?: Array<{
     qualification: string;
     year?: string;
@@ -55,8 +59,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Backend API error:", response.status, errorData);
       return NextResponse.json(
-        { success: false, message: "Failed to fetch user data" },
+        { 
+          success: false, 
+          message: errorData.message || "Failed to fetch user data. Please try again." 
+        },
         { status: response.status }
       );
     }
@@ -64,142 +73,205 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     let user: BackendUser = data.user || data.data?.user || data;
 
+    // Validate user data
+    if (!user || !user.name) {
+      console.error("Invalid user data received:", data);
+      return NextResponse.json(
+        { success: false, message: "Invalid user data. Please complete your profile." },
+        { status: 400 }
+      );
+    }
+
     // Transform MongoDB _id to id for frontend compatibility
     if (user._id && !user.id) {
       user = { ...user, id: user._id };
     }
 
-    // Generate PDF
-    const chunks: Buffer[] = [];
-    const doc = new PDFDocument({
-      size: "A4",
-      margins: { top: 50, bottom: 50, left: 50, right: 50 },
-    });
+    // Generate PDF using pdf-lib (no font path issues)
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595, 842]); // A4 size in points
+    const { width, height } = page.getSize();
+    
+    // Load fonts
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    
+    let yPosition = height - 50; // Start from top with margin
+    const margin = 50;
+    const sectionSpacing = 20;
+    
+    // Helper function to add text
+    const addText = (text: string, fontSize: number, isBold: boolean = false, align: "left" | "center" | "right" = "left", y?: number) => {
+      const font = isBold ? helveticaBoldFont : helveticaFont;
+      const textWidth = font.widthOfTextAtSize(text, fontSize);
+      let x = margin;
+      
+      if (align === "center") {
+        x = (width - textWidth) / 2;
+      } else if (align === "right") {
+        x = width - margin - textWidth;
+      }
+      
+      const currentY = y !== undefined ? y : yPosition;
+      page.drawText(text, {
+        x,
+        y: currentY,
+        size: fontSize,
+        font,
+        color: rgb(0, 0, 0),
+      });
+      
+      if (y === undefined) {
+        yPosition -= fontSize + 5;
+      }
+    };
 
-    // Collect PDF chunks
-    doc.on("data", (chunk) => chunks.push(chunk));
+    // Header - Name
+    addText(user.name || "Member CV", 24, true, "center");
+    yPosition -= 10;
 
-    // PDF Content
-    // Header
-    doc.fontSize(24).font("Helvetica-Bold").text(user.name || "Member CV", { align: "center" });
-    doc.moveDown(0.5);
+    // Member ID and Membership Type (if available)
+    if (user.memberId || user.membershipType) {
+      let memberInfo = "";
+      if (user.memberId) {
+        memberInfo = `Member ID: ${user.memberId}`;
+      }
+      if (user.membershipType) {
+        const membershipTypeFormatted = user.membershipType.charAt(0).toUpperCase() + user.membershipType.slice(1);
+        memberInfo += memberInfo ? ` | Membership: ${membershipTypeFormatted}` : `Membership: ${membershipTypeFormatted}`;
+      }
+      if (memberInfo) {
+        addText(memberInfo, 11, false, "center");
+        yPosition -= 5;
+      }
+    }
+    yPosition -= 5;
 
     // Contact Information
-    doc.fontSize(12).font("Helvetica");
+    addText("Contact Information", 16, true);
+    yPosition -= 5;
     if (user.email) {
-      doc.text(`Email: ${user.email}`, { align: "center" });
+      addText(`Email: ${user.email}`, 12);
     }
     if (user.phone) {
-      doc.text(`Phone: ${user.phone}`, { align: "center" });
+      addText(`Phone: ${user.phone}`, 12);
     }
     if (user.mailingAddress) {
-      doc.text(`Address: ${user.mailingAddress}`, { align: "center" });
+      addText(`Mailing Address: ${user.mailingAddress}`, 12);
     }
-    doc.moveDown(1);
+    if (user.permanentAddress && user.permanentAddress !== user.mailingAddress) {
+      addText(`Permanent Address: ${user.permanentAddress}`, 12);
+    }
+    yPosition -= sectionSpacing;
 
     // Professional Information
     if (user.affiliation || user.designation) {
-      doc.fontSize(16).font("Helvetica-Bold").text("Professional Information", { underline: true });
-      doc.moveDown(0.5);
-      doc.fontSize(12).font("Helvetica");
+      addText("Professional Information", 16, true);
+      yPosition -= 5;
       if (user.designation) {
-        doc.text(`Designation: ${user.designation}`);
+        addText(`Designation: ${user.designation}`, 12);
       }
       if (user.affiliation) {
-        doc.text(`Affiliation: ${user.affiliation}`);
+        addText(`Affiliation: ${user.affiliation}`, 12);
       }
-      doc.moveDown(1);
+      yPosition -= sectionSpacing;
     }
 
     // Education Qualifications
     if (user.educationQualifications && user.educationQualifications.length > 0) {
-      doc.fontSize(16).font("Helvetica-Bold").text("Education Qualifications", { underline: true });
-      doc.moveDown(0.5);
-      doc.fontSize(12).font("Helvetica");
+      addText("Education Qualifications", 16, true);
+      yPosition -= 5;
       user.educationQualifications.forEach((edu, index) => {
-        doc.text(`${index + 1}. ${edu.qualification}`, { continued: false });
+        addText(`${index + 1}. ${edu.qualification}`, 12);
         if (edu.year) {
-          doc.text(`   Year: ${edu.year}`, { indent: 20 });
+          addText(`   Year: ${edu.year}`, 11);
         }
-        doc.text(`   Institution: ${edu.institution}`, { indent: 20 });
-        doc.moveDown(0.3);
+        if (edu.institution) {
+          addText(`   Institution: ${edu.institution}`, 11);
+        }
+        yPosition -= 3;
       });
-      doc.moveDown(1);
+      yPosition -= sectionSpacing;
     }
 
     // Professional Training
     if (user.training && user.training.length > 0) {
-      doc.fontSize(16).font("Helvetica-Bold").text("Professional Training", { underline: true });
-      doc.moveDown(0.5);
-      doc.fontSize(12).font("Helvetica");
+      addText("Professional Training", 16, true);
+      yPosition -= 5;
       user.training.forEach((train, index) => {
-        doc.text(`${index + 1}. ${train.institute}`, { continued: false });
+        addText(`${index + 1}. ${train.institute}`, 12);
         if (train.period) {
-          doc.text(`   Period: ${train.period}`, { indent: 20 });
+          addText(`   Period: ${train.period}`, 11);
         }
-        doc.moveDown(0.3);
+        yPosition -= 3;
       });
-      doc.moveDown(1);
+      yPosition -= sectionSpacing;
     }
 
     // Research Interests
     if (user.primaryResearchInterest || user.secondaryResearchInterest) {
-      doc.fontSize(16).font("Helvetica-Bold").text("Research Interests", { underline: true });
-      doc.moveDown(0.5);
-      doc.fontSize(12).font("Helvetica");
+      addText("Research Interests", 16, true);
+      yPosition -= 5;
       if (user.primaryResearchInterest) {
-        doc.text(`Primary: ${user.primaryResearchInterest}`);
-        doc.moveDown(0.3);
+        addText(`Primary: ${user.primaryResearchInterest}`, 12);
       }
       if (user.secondaryResearchInterest) {
-        doc.text(`Secondary: ${user.secondaryResearchInterest}`);
+        addText(`Secondary: ${user.secondaryResearchInterest}`, 12);
       }
-      doc.moveDown(1);
+      yPosition -= sectionSpacing;
     }
 
     // Bio
     if (user.bio) {
-      doc.fontSize(16).font("Helvetica-Bold").text("Biography", { underline: true });
-      doc.moveDown(0.5);
-      doc.fontSize(12).font("Helvetica");
-      doc.text(user.bio, { align: "justify" });
+      addText("Biography", 16, true);
+      yPosition -= 5;
+      // Split bio into multiple lines if too long
+      const words = user.bio.split(" ");
+      let currentLine = "";
+      const maxWidth = width - 2 * margin;
+      
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const testWidth = helveticaFont.widthOfTextAtSize(testLine, 12);
+        
+        if (testWidth > maxWidth && currentLine) {
+          addText(currentLine, 12);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) {
+        addText(currentLine, 12);
+      }
+      yPosition -= sectionSpacing;
     }
 
     // Footer
-    doc.fontSize(10).font("Helvetica").text(
-      `Generated on ${new Date().toLocaleDateString()} - Bangladesh Child Neurology Society (BCNS)`,
-      { align: "center" }
-    );
+    const footerText = `Generated on ${new Date().toLocaleDateString()} - Bangladesh Child Neurology Society (BCNS)`;
+    addText(footerText, 10, false, "center", 30);
 
-    // Wait for PDF to be generated (set up promise before ending)
-    const pdfPromise = new Promise<Buffer>((resolve) => {
-      doc.on("end", () => {
-        const pdfBuffer = Buffer.concat(chunks);
-        resolve(pdfBuffer);
-      });
-    });
-
-    // Finalize PDF
-    doc.end();
-
-    // Wait for PDF to be generated
-    const pdfBuffer = await pdfPromise;
+    // Generate PDF bytes
+    const pdfBytes = await pdfDoc.save();
 
     // Return PDF as response
-    return new NextResponse(pdfBuffer as unknown as BodyInit, {
+    return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="BCNS_CV_${user.name.replace(/\s+/g, "_")}.pdf"`,
-        "Content-Length": pdfBuffer.length.toString(),
+        "Content-Length": pdfBytes.length.toString(),
       },
     });
   } catch (error) {
     console.error("CV generation error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to generate CV";
     return NextResponse.json(
-      { success: false, message: "Failed to generate CV" },
+      { 
+        success: false, 
+        message: errorMessage || "Failed to generate CV. Please try again later." 
+      },
       { status: 500 }
     );
   }
 }
-
