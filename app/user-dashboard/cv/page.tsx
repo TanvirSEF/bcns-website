@@ -8,18 +8,15 @@ import { useAuth } from "@/lib/auth-context";
 import { toast } from "react-toastify";
 
 export default function UserCVPage() {
-  const { user } = useAuth();
+  const { user, getToken } = useAuth();
   const [generating, setGenerating] = React.useState(false);
 
   const handleGenerateCV = async () => {
     try {
       setGenerating(true);
       
-      // Get auth token from cookies
-      const token = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("auth_token="))
-        ?.split("=")[1];
+      // Get auth token from auth context
+      const token = getToken();
 
       if (!token) {
         toast.error("Please log in to generate your CV");
