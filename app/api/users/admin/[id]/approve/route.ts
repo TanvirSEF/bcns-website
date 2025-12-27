@@ -26,6 +26,9 @@ export async function PATCH(
 
     const { id: userId } = await params;
 
+    // Read request body
+    const body = await request.json().catch(() => ({}));
+
     const response = await fetchWithTimeout(
       `${config.backendUrl}/api/users/admin/${userId}/approve`,
       {
@@ -34,6 +37,7 @@ export async function PATCH(
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
+        body: JSON.stringify(body),
       }
     );
 
