@@ -1,12 +1,11 @@
 "use client";
 
-import { Bell, Calendar, ArrowRight, AlertCircle } from "lucide-react";
+import { Bell, Calendar, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { NavbarClient } from "@/components/navbarclient";
 import { Footer } from "@/components/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -19,12 +18,21 @@ export default function NoticeBoardPage() {
   // Notice board data
   const noticeData = [
     {
+      id: "0",
+      title: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
+      type: "event",
+      priority: "high",
+      date: "2025-01-17",
+      isNew: true,
+      description: "We are pleased to announce a comprehensive program on Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management. This educational program will focus on the latest evaluation techniques and updated management strategies for brain malformations, congenital myopathies, and neuroinfections in pediatric patients. The program aims to enhance the knowledge and clinical skills of child neurologists, pediatricians, and allied healthcare professionals in diagnosing and managing these complex neurological conditions. Date: 17 January 2025 | Time: 9:00 AM to 2:00 PM | Venue: Conference Hall, National Institute of Neuro Sciences & Hospital (NINS&H), Dhaka-1207. Registration link: https://shorturl.at/8sk4s"
+    },
+    {
       id: "1",
       title: "BCNS Annual Conference 2025 Registration Open",
       type: "announcement",
       priority: "high",
       date: "2024-12-15",
-      isNew: true,
+      isNew: false,
       description: "We are pleased to announce that registration for the BCNS Annual Conference 2025 is now open. This year's conference will feature keynote speakers, research presentations, and networking opportunities. Early bird registration discounts are available until January 15, 2025. All members are encouraged to register early to secure their spot."
     },
     {
@@ -125,7 +133,8 @@ export default function NoticeBoardPage() {
                 return (
                   <Card
                     key={notice.id}
-                    className="border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 group"
+                    className="border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 group cursor-pointer"
+                    onClick={() => setSelectedNotice(notice)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
@@ -154,29 +163,19 @@ export default function NoticeBoardPage() {
                             {notice.title}
                           </h3>
                           
-                          <div className="flex items-center justify-between flex-wrap gap-2">
-                            <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                              <Calendar className="h-3.5 w-3.5" />
-                              <span>
-                                {new Date(notice.date).toLocaleDateString('en-US', { 
-                                  year: 'numeric',
-                                  month: 'short', 
-                                  day: 'numeric' 
-                                })}
-                              </span>
-                            </div>
-                            
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedNotice(notice)}
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-7 text-xs px-2"
-                            >
-                              <span className="flex items-center gap-1">
-                                View Details
-                                <ArrowRight className="h-3 w-3" />
-                              </span>
-                            </Button>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                            {notice.description}
+                          </p>
+                          
+                          <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>
+                              {new Date(notice.date).toLocaleDateString('en-US', { 
+                                year: 'numeric',
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}
+                            </span>
                           </div>
                         </div>
                       </div>

@@ -1,38 +1,14 @@
 "use client";
 
 import { Calendar, Heart, Users, Sparkles } from "lucide-react";
-// import { eventsData } from "@/data/events";
+import { eventsData } from "@/data/events";
 
 export function UpcomingEvents() {
-  // Temporarily disable events to show welcome message
-  // const currentDate = new Date();
-  // const upcomingEvents = eventsData.filter(event => {
-  //   // Parse event date more accurately
-  //   const eventDateStr = event.date;
-  //   
-  //   // Handle different date formats
-  //   if (eventDateStr.includes("–") || eventDateStr.includes("-")) {
-  //     // For date ranges like "21–22 September 2025", take the start date
-  //     const startDate = eventDateStr.split(/[–-]/)[0].trim();
-  //     const fullDateStr = startDate + " " + eventDateStr.split(" ").slice(-1)[0]; // Add year
-  //     const eventDate = new Date(fullDateStr);
-  //     return eventDate > currentDate;
-  //   } else if (eventDateStr.includes(".")) {
-  //     // For dates like "26.04.2025"
-  //     const parts = eventDateStr.split(".");
-  //     if (parts.length === 3) {
-  //       const eventDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-  //       return eventDate > currentDate;
-  //     }
-  //   }
-  //   
-  //   // For simple year dates like "2025", consider them future if year is greater than current
-  //   const eventYear = parseInt(eventDateStr.match(/\d{4}/)?.[0] || "0");
-  //   return eventYear > currentDate.getFullYear();
-  // }).slice(0, 1); // Show only the first upcoming event
+  // Get the new event
+  const newEvent = eventsData.find(event => event.slug === "brain-malformation-congenital-myopathy-neuroinfection-jan-2025");
   
-  // Force show welcome message by setting empty events array
-  const upcomingEvents: any[] = [];
+  // Show new event if available, otherwise show welcome message
+  const upcomingEvents = newEvent ? [newEvent] : [];
 
   const hasUpcomingEvents = upcomingEvents.length > 0;
   const currentEvent = upcomingEvents[0];
@@ -59,8 +35,8 @@ export function UpcomingEvents() {
               // Show upcoming event with animation
               <div className="marquee-track">
                 <div className="flex items-center gap-x-3 flex-shrink-0 whitespace-nowrap pr-8">
-                  <Calendar className="h-4 w-4 text-yellow-300" />
-                  <span className="font-semibold text-xs sm:text-sm">{currentEvent.title}</span>
+                  <Calendar className="h-4 w-4 text-yellow-300 flex-shrink-0" />
+                  <span className="font-semibold text-xs sm:text-sm">Brain Malformation, Congenital Myopathy & Neuroinfection Program</span>
                   <span className="hidden sm:inline text-white/70">|</span>
                   <span className="text-xs sm:text-sm">📅 {currentEvent.date}</span>
                   {currentEvent.time && (
@@ -69,21 +45,24 @@ export function UpcomingEvents() {
                       <span className="text-xs sm:text-sm">🕘 {currentEvent.time}</span>
                     </>
                   )}
-                  <span className="hidden sm:inline text-white/70">|</span>
-                  <span className="text-xs sm:text-sm">📍 {currentEvent.venue}</span>
                   {currentEvent.registrationUrl && (
                     <>
                       <span className="hidden sm:inline text-white/70">|</span>
-                      <span className="text-xs sm:text-sm bg-yellow-400 text-blue-900 px-2 py-0.5 rounded-full font-medium">
+                      <a 
+                        href={currentEvent.registrationUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs sm:text-sm bg-yellow-400 text-blue-900 px-2 py-0.5 rounded-full font-medium hover:bg-yellow-300 transition-colors cursor-pointer"
+                      >
                         🎯 Register Now
-                      </span>
+                      </a>
                     </>
                   )}
                 </div>
                 {/* Duplicate for seamless looping */}
                 <div className="flex items-center gap-x-3 flex-shrink-0 whitespace-nowrap pr-8" aria-hidden="true">
-                  <Calendar className="h-4 w-4 text-yellow-300" />
-                  <span className="font-semibold text-xs sm:text-sm">{currentEvent.title}</span>
+                  <Calendar className="h-4 w-4 text-yellow-300 flex-shrink-0" />
+                  <span className="font-semibold text-xs sm:text-sm">Brain Malformation, Congenital Myopathy & Neuroinfection Program</span>
                   <span className="hidden sm:inline text-white/70">|</span>
                   <span className="text-xs sm:text-sm">📅 {currentEvent.date}</span>
                   {currentEvent.time && (
@@ -92,8 +71,6 @@ export function UpcomingEvents() {
                       <span className="text-xs sm:text-sm">🕘 {currentEvent.time}</span>
                     </>
                   )}
-                  <span className="hidden sm:inline text-white/70">|</span>
-                  <span className="text-xs sm:text-sm">📍 {currentEvent.venue}</span>
                   {currentEvent.registrationUrl && (
                     <>
                       <span className="hidden sm:inline text-white/70">|</span>

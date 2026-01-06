@@ -15,6 +15,17 @@ export interface EventItem {
 
 export const eventsData: EventItem[] = [
   {
+    slug: "brain-malformation-congenital-myopathy-neuroinfection-jan-2025",
+    type: "program",
+    title: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
+    date: "17.01.2025",
+    time: "9:00 AM to 2:00 PM",
+    venue: "Conference Hall, National Institute of Neuro Sciences & Hospital (NINS&H), Dhaka-1207",
+    registrationUrl: "https://shorturl.at/8sk4s",
+    summary:
+      "A comprehensive program on Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management, organized by the Bangladesh Child Neurology Society (BCNS). This educational program will focus on the latest evaluation techniques and updated management strategies for brain malformations, congenital myopathies, and neuroinfections in pediatric patients. The program aims to enhance the knowledge and clinical skills of child neurologists, pediatricians, and allied healthcare professionals in diagnosing and managing these complex neurological conditions.",
+  },
+  {
     slug: "cme-malaysia-june-2025",
     type: "program",
     title: "CME \"Paediatric Movement Disorder\"",
