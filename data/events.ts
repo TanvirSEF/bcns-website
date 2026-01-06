@@ -15,10 +15,10 @@ export interface EventItem {
 
 export const eventsData: EventItem[] = [
   {
-    slug: "brain-malformation-congenital-myopathy-neuroinfection-jan-2025",
+    slug: "brain-malformation-congenital-myopathy-neuroinfection-jan-2026",
     type: "program",
     title: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
-    date: "17.01.2025",
+    date: "17.01.2026",
     time: "9:00 AM to 2:00 PM",
     venue: "Conference Hall, National Institute of Neuro Sciences & Hospital (NINS&H), Dhaka-1207",
     registrationUrl: "https://shorturl.at/8sk4s",

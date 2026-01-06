@@ -22,9 +22,9 @@ export default function NoticeBoardPage() {
       title: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
       type: "event",
       priority: "high",
-      date: "2025-01-17",
+      date: "2026-01-17",
       isNew: true,
-      description: "We are pleased to announce a comprehensive program on Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management. This educational program will focus on the latest evaluation techniques and updated management strategies for brain malformations, congenital myopathies, and neuroinfections in pediatric patients. The program aims to enhance the knowledge and clinical skills of child neurologists, pediatricians, and allied healthcare professionals in diagnosing and managing these complex neurological conditions. Date: 17 January 2025 | Time: 9:00 AM to 2:00 PM | Venue: Conference Hall, National Institute of Neuro Sciences & Hospital (NINS&H), Dhaka-1207. Registration link: https://shorturl.at/8sk4s"
+      description: "We are pleased to announce a comprehensive program on Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management. This educational program will focus on the latest evaluation techniques and updated management strategies for brain malformations, congenital myopathies, and neuroinfections in pediatric patients. The program aims to enhance the knowledge and clinical skills of child neurologists, pediatricians, and allied healthcare professionals in diagnosing and managing these complex neurological conditions. Date: 17 January 2026 | Time: 9:00 AM to 2:00 PM | Venue: Conference Hall, National Institute of Neuro Sciences & Hospital (NINS&H), Dhaka-1207. Registration link: https://shorturl.at/8sk4s"
     },
     {
       id: "1",

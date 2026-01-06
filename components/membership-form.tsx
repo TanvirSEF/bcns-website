@@ -178,6 +178,8 @@ export function MembershipForm() {
   const [paymentMethod, setPaymentMethod] = useState<"bkash" | "handCash" | "bankTransfer" | null>(null);
   const [paymentDocuments, setPaymentDocuments] = useState<File[]>([]);
   const [verifiedOtp, setVerifiedOtp] = useState<string>("");
+  const [nidDocument, setNidDocument] = useState<File | null>(null);
+  const [nidPreview, setNidPreview] = useState<string | null>(null);
 
   // Main form for registration data
   const registrationForm = useForm<RegistrationFormValues>({
@@ -635,6 +637,11 @@ export function MembershipForm() {
       paymentDocuments.forEach((doc) => {
         formData.append("documents", doc);
       });
+
+      // Add NID document if uploaded (will go to documents array like others)
+      if (nidDocument) {
+        formData.append("documents", nidDocument);
+      }
 
       const response = await fetch("/api/auth/verify-registration", {
         method: "POST",
@@ -1357,6 +1364,108 @@ export function MembershipForm() {
                     {...registrationForm.register("researchInterest2")}
                     placeholder="Describe your secondary research interests..."
                   />
+                </div>
+              </div>
+            </section>
+
+            {/* 8. NID Document Upload */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-2 border-b pb-2 text-lg font-semibold text-primary">
+                <FileText className="w-5 h-5" /> NID Document
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nidDocument">Upload NID Document</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Please upload a clear copy of your National ID Card (NID). Accepted formats: PDF, JPG, JPEG, PNG. Max file size: 5MB.
+                  </p>
+                  {!nidDocument ? (
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > MAX_FILE_SIZE) {
+                              toast.error("File size must be less than 5MB");
+                              return;
+                            }
+                            setNidDocument(file);
+                            
+                            // Create preview for images
+                            if (file.type.startsWith("image/")) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setNidPreview(reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            } else {
+                              setNidPreview(null);
+                            }
+                          }
+                        }}
+                        className="hidden"
+                        id="nid-document"
+                      />
+                      <label
+                        htmlFor="nid-document"
+                        className="flex flex-col items-center justify-center gap-3 px-6 py-8 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <Upload className="w-8 h-8 text-muted-foreground" />
+                        <div className="text-center">
+                          <span className="text-sm font-medium text-foreground">Click to upload NID Document</span>
+                          <p className="text-xs text-muted-foreground mt-1">PDF, JPG, JPEG, PNG (Max 5MB)</p>
+                        </div>
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          {nidPreview ? (
+                            <div className="relative w-16 h-16 rounded border border-slate-300 dark:border-slate-700 overflow-hidden">
+                              <Image
+                                src={nidPreview}
+                                alt="NID Preview"
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <FileText className="w-8 h-8 text-primary flex-shrink-0" />
+                          )}
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium truncate max-w-[300px]">{nidDocument.name}</span>
+                            <span className="text-xs text-muted-foreground">{(nidDocument.size / 1024).toFixed(2)} KB</span>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          onClick={() => {
+                            setNidDocument(null);
+                            setNidPreview(null);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      {nidPreview && (
+                        <div className="relative w-full max-w-md mx-auto rounded-lg border border-slate-300 dark:border-slate-700 overflow-hidden">
+                          <Image
+                            src={nidPreview}
+                            alt="NID Document Preview"
+                            width={400}
+                            height={300}
+                            className="w-full h-auto object-contain"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
