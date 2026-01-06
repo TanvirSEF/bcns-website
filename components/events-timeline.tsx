@@ -72,8 +72,9 @@ export function EventsTimeline() {
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        {'slug' in event && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {/* Hide View Summary only for the new event */}
+                        {'slug' in event && event.slug !== "brain-malformation-congenital-myopathy-neuroinfection-jan-2025" && (
                           <Link
                             href={`/events/${event.slug}`}
                             className="inline-flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors text-sm font-semibold cursor-pointer"
@@ -81,10 +82,9 @@ export function EventsTimeline() {
                             View Summary
                           </Link>
                         )}
-                        {/* Registration temporarily disabled */}
-                        {'registrationUrl' in event && false && (
+                        {event.registrationUrl && ('slug' in event && event.slug !== "cme-japan-sept-2025") && (
                           <a
-                            href={('registrationUrl' in event ? (event as any).registrationUrl : '') || '#'}
+                            href={event.registrationUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition-colors text-sm font-semibold cursor-pointer"

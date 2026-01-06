@@ -77,10 +77,15 @@ export default async function EventDetailsPage({ params }: PageProps) {
               )}
             </div>
 
-            {/* Registration temporarily disabled */}
-            {false && event?.registrationUrl && (
-              <div className="mt-8">
-                <a href={event?.registrationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex px-5 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700">
+            {/* Registration Link */}
+            {event?.registrationUrl && (
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <a 
+                  href={event.registrationUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+                >
                   Register Now
                 </a>
               </div>
