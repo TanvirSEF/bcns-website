@@ -5,7 +5,7 @@ import { eventsData } from "@/data/events";
 
 export function UpcomingEvents() {
   // Get the new event
-  const newEvent = eventsData.find(event => event.slug === "brain-malformation-congenital-myopathy-neuroinfection-jan-2025");
+  const newEvent = eventsData.find(event => event.slug === "brain-malformation-congenital-myopathy-neuroinfection-jan-2026");
   
   // Show new event if available, otherwise show welcome message
   const upcomingEvents = newEvent ? [newEvent] : [];
