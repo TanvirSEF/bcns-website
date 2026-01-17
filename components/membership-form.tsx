@@ -524,8 +524,8 @@ export function MembershipForm() {
       if (registrationData.researchInterest2)
         formData.append("researchInterest2", registrationData.researchInterest2);
 
-      // No OTP required - skip verification
-      // formData.append("otp", ""); // OTP disabled
+      // Send dummy OTP to satisfy backend validation (OTP verification disabled on frontend)
+      formData.append("otp", "000000");
 
       // JSON Stringify Arrays (without document files - they'll be sent separately)
       const educationWithoutFiles = registrationData.educationQualifications.map(({ document, ...rest }) => rest);
