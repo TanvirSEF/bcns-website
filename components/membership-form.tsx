@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { authApi } from "@/lib/api";
 
 // --- Zod Schemas (Split for multi-step workflow) ---
 
@@ -167,9 +168,21 @@ export function MembershipForm() {
   });
   const [paymentMethod, setPaymentMethod] = useState<"bkash" | "handCash" | "bankTransfer" | null>(null);
   const [paymentDocuments, setPaymentDocuments] = useState<File[]>([]);
-  // OTP verification disabled - removed verifiedOtp, isSendingOTP, otpSent, isVerifyingOTP states
   const [nidDocument, setNidDocument] = useState<File | null>(null);
   const [nidPreview, setNidPreview] = useState<string | null>(null);
+  // Upload progress tracking (used in handlePaymentConfirm for R2 uploads)
+  // @ts-expect-error - uploadProgress is used in callbacks, TypeScript doesn't detect it
+  const [uploadProgress, setUploadProgress] = useState<{
+    profilePicture: number;
+    documents: number[];
+  }>({ profilePicture: 0, documents: [] });
+
+  // OTP verification states
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [isSendingOTP, setIsSendingOTP] = useState(false);
+  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
 
   // Main form for registration data
   const registrationForm = useForm<RegistrationFormValues>({
@@ -285,6 +298,17 @@ export function MembershipForm() {
       });
     }
   }, [watchedPassword]);
+
+  // Resend OTP countdown timer
+  useEffect(() => {
+    if (resendCountdown > 0) {
+      const timer = setTimeout(() => {
+        setResendCountdown(resendCountdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [resendCountdown]);
 
   // OTP form - REMOVED (OTP disabled)
 
@@ -464,20 +488,137 @@ export function MembershipForm() {
       return;
     }
 
-    // Store registration data with filtered training entries and skip to payment step
+    // Store registration data with filtered training entries and proceed to OTP verification
     setRegistrationData({
       ...data,
       training: validTraining, // Store only validated training entries
     });
 
-    // Skip OTP verification - go directly to payment step
-    toast.success("Registration details saved! Please proceed with payment.");
-    setCurrentStep(3); // Skip step 2 (OTP) and go directly to step 3 (Payment)
+    // Proceed to OTP verification step
+    toast.success("Registration details saved! Please verify your email.");
+    setCurrentStep(2); // Go to step 2 (OTP verification)
+  };
+
+  // Step 2: Send OTP handler
+  const handleSendOTP = async () => {
+    if (!registrationData) {
+      toast.error("Registration data is missing. Please start over.");
+      setCurrentStep(1);
+      return;
+    }
+
+    setIsSendingOTP(true);
+    try {
+      await authApi.sendRegistrationOTP({
+        name: registrationData.name,
+        username: registrationData.username,
+        email: registrationData.email,
+        password: registrationData.password,
+      });
+
+      setOtpSent(true);
+      setResendCountdown(60); // 60 seconds cooldown
+      toast.success(`OTP sent to ${registrationData.email}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send OTP");
+    } finally {
+      setIsSendingOTP(false);
+    }
+  };
+
+  // Step 2: Verify OTP handler
+  const handleVerifyOTP = async () => {
+    if (!registrationData) {
+      toast.error("Registration data is missing. Please start over.");
+      setCurrentStep(1);
+      return;
+    }
+
+    if (!otp || otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    setIsVerifyingOTP(true);
+    try {
+      const response = await authApi.verifyOTP(registrationData.email, otp);
+
+      if (response.success && response.data.otpValid) {
+        toast.success("OTP verified successfully!");
+        // Proceed to payment step
+        setTimeout(() => {
+          setCurrentStep(3);
+        }, 500);
+      } else {
+        toast.error("Invalid OTP. Please try again.");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to verify OTP");
+    } finally {
+      setIsVerifyingOTP(false);
+    }
+  };
+
+  // Step 2: Resend OTP handler
+  const handleResendOTP = async () => {
+    if (!registrationData) {
+      toast.error("Registration data is missing.");
+      return;
+    }
+
+    if (resendCountdown > 0) {
+      toast.error(`Please wait ${resendCountdown} seconds before resending`);
+      return;
+    }
+
+    setIsSendingOTP(true);
+    try {
+      await authApi.resendRegistrationOTP({ email: registrationData.email });
+
+      setResendCountdown(60); // Reset cooldown
+      toast.success("OTP resent successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to resend OTP");
+    } finally {
+      setIsSendingOTP(false);
+    }
   };
 
   // Step 2: OTP verification handler - REMOVED (OTP disabled)
   // Registration now goes directly from step 1 to step 3 (payment)
 
+
+  // Helper function to upload file to R2 using presigned URL
+  const uploadToR2 = async (
+    file: File,
+    presignedUrl: string,
+    onProgress?: (progress: number) => void
+  ): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable && onProgress) {
+          const progress = Math.round((e.loaded / e.total) * 100);
+          onProgress(progress);
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status === 200) {
+          resolve();
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+
+      xhr.open('PUT', presignedUrl);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.send(file);
+    });
+  };
 
   // Handle payment document upload
   const handlePaymentDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -506,74 +647,107 @@ export function MembershipForm() {
 
     setIsSubmitting(true);
     try {
-      const formData = new FormData();
+      // Step 1: Prepare upload request for all files
+      const allDocuments: File[] = [
+        // Education documents
+        ...registrationData.educationQualifications
+          .filter((edu) => edu.document)
+          .map((edu) => edu.document!),
+        // Training documents
+        ...registrationData.training
+          .filter((train) => train.document)
+          .map((train) => train.document!),
+        // Payment documents
+        ...paymentDocuments,
+        // NID document
+        ...(nidDocument ? [nidDocument] : []),
+      ];
 
-      // Text Fields
-      formData.append("name", registrationData.name);
-      formData.append("username", registrationData.username);
-      formData.append("email", registrationData.email);
-      formData.append("phone", registrationData.phone);
-      formData.append("password", registrationData.password);
-      formData.append("affiliation", registrationData.affiliation);
-      formData.append("designation", registrationData.designation);
-      formData.append("membershipType", registrationData.membershipType);
-      formData.append("mailingAddress", registrationData.mailingAddress);
-      formData.append("permanentAddress", registrationData.permanentAddress);
-      if (registrationData.researchInterest1)
-        formData.append("researchInterest1", registrationData.researchInterest1);
-      if (registrationData.researchInterest2)
-        formData.append("researchInterest2", registrationData.researchInterest2);
+      const uploadRequest = {
+        profilePicture: {
+          filename: registrationData.profilePicture!.name,
+          contentType: registrationData.profilePicture!.type,
+        },
+        documents: allDocuments.map((doc) => ({
+          filename: doc.name,
+          contentType: doc.type,
+        })),
+      };
 
-      // Send dummy OTP to satisfy backend validation (OTP verification disabled on frontend)
-      formData.append("otp", "000000");
+      // Step 2: Get presigned URLs from backend
+      toast.info("Preparing file uploads...");
+      const uploadUrls = await authApi.getUploadUrls(uploadRequest);
 
-      // JSON Stringify Arrays (without document files - they'll be sent separately)
-      const educationWithoutFiles = registrationData.educationQualifications.map(({ document, ...rest }) => rest);
-      const trainingWithoutFiles = registrationData.training.map(({ document, ...rest }) => rest);
-
-      formData.append(
-        "educationQualifications",
-        JSON.stringify(educationWithoutFiles)
+      // Step 3: Upload profile picture to R2
+      toast.info("Uploading profile picture...");
+      await uploadToR2(
+        registrationData.profilePicture!,
+        uploadUrls.profilePicture.url,
+        (progress) =>
+          setUploadProgress((prev) => ({ ...prev, profilePicture: progress }))
       );
-      formData.append("training", JSON.stringify(trainingWithoutFiles));
 
-      // Files
-      if (registrationData.profilePicture instanceof File) {
-        formData.append("profilePicture", registrationData.profilePicture);
+      // Step 4: Upload all documents to R2
+      if (allDocuments.length > 0) {
+        toast.info(`Uploading ${allDocuments.length} document(s)...`);
+
+        // Initialize document progress array
+        setUploadProgress((prev) => ({
+          ...prev,
+          documents: new Array(allDocuments.length).fill(0),
+        }));
+
+        await Promise.all(
+          uploadUrls.documents.map((urlData, index) => {
+            const file = allDocuments[index];
+            if (!file) return Promise.resolve();
+            return uploadToR2(file, urlData.url, (progress) => {
+              setUploadProgress((prev) => {
+                const newDocs = [...prev.documents];
+                newDocs[index] = progress;
+                return { ...prev, documents: newDocs };
+              });
+            });
+          })
+        );
       }
 
-      // Add all documents (education + training + payment) to single 'documents' array
-      // Backend expects: documents[] (all documents together, not separated)
-      registrationData.educationQualifications.forEach((edu) => {
-        if (edu.document instanceof File) {
-          formData.append("documents", edu.document);
-        }
-      });
+      // Step 5: Submit registration with URLs
+      toast.info("Completing registration...");
+      const registrationPayload = {
+        name: registrationData.name,
+        username: registrationData.username,
+        email: registrationData.email,
+        password: registrationData.password,
+        otp: otp, // Real OTP from user input
+        designation: registrationData.designation,
+        membershipType: registrationData.membershipType,
+        phone: registrationData.phone,
+        affiliation: registrationData.affiliation,
+        mailingAddress: registrationData.mailingAddress,
+        permanentAddress: registrationData.permanentAddress,
+        profilePictureUrl: uploadUrls.profilePicture.publicUrl,
+        documentUrls: uploadUrls.documents.map((d) => d.publicUrl),
+        educationQualifications: registrationData.educationQualifications.map(
+          ({ document, year, ...rest }) => ({
+            ...rest,
+            year: year || "", // Ensure year is always a string
+          })
+        ),
+        training: registrationData.training.map(
+          ({ document, period, institute, ...rest }) => ({
+            ...rest,
+            period: period || "",
+            institute: institute || "",
+          })
+        ),
+        primaryResearchInterest: registrationData.researchInterest1,
+        secondaryResearchInterest: registrationData.researchInterest2,
+      };
 
-      registrationData.training.forEach((train) => {
-        if (train.document instanceof File) {
-          formData.append("documents", train.document);
-        }
-      });
+      const response = await authApi.verifyRegistrationOTP(registrationPayload);
 
-      // Add payment documents (receipts) if uploaded
-      paymentDocuments.forEach((doc) => {
-        formData.append("documents", doc);
-      });
-
-      // Add NID document if uploaded (will go to documents array like others)
-      if (nidDocument) {
-        formData.append("documents", nidDocument);
-      }
-
-      const response = await fetch("/api/auth/verify-registration", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (result.success && response.ok) {
+      if (response.user) {
         toast.success("Registration submitted successfully!");
         setCurrentStep(4);
         // Redirect to login after a brief delay
@@ -581,13 +755,15 @@ export function MembershipForm() {
           router.push("/login?registered=true");
         }, 2000);
       } else {
-        toast.error(result.message || "Registration failed");
+        toast.error("Registration failed. Please try again.");
       }
-    } catch (error) {
-      toast.error("An unexpected error occurred");
-      console.error(error);
+    } catch (error: any) {
+      toast.error(error.message || "An unexpected error occurred");
+      console.error("Registration error:", error);
     } finally {
       setIsSubmitting(false);
+      // Reset upload progress
+      setUploadProgress({ profilePicture: 0, documents: [] });
     }
   };
 
@@ -1404,7 +1580,7 @@ export function MembershipForm() {
                 className="w-full py-6 text-lg font-bold shadow-lg"
                 disabled={!registrationForm.watch("termsAccepted")}
               >
-                Continue to Payment
+                Continue to Verification
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
@@ -1412,7 +1588,112 @@ export function MembershipForm() {
         )
         }
 
-        {/* Step 2: OTP Verification - REMOVED (OTP disabled) */}
+        {/* Step 2: OTP Verification */}
+        {currentStep === 2 && (
+          <div className="space-y-6">
+            <div className="text-center space-y-4">
+              <Mail className="w-16 h-16 mx-auto text-primary" />
+              <div>
+                <h3 className="text-xl font-semibold">Verify Your Email</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  We've sent a 6-digit OTP to <strong>{registrationData?.email}</strong>
+                </p>
+              </div>
+            </div>
+
+            {!otpSent ? (
+              <div className="text-center space-y-4">
+                <p className="text-sm">Click the button below to receive your OTP</p>
+                <Button
+                  onClick={handleSendOTP}
+                  disabled={isSendingOTP}
+                  className="w-full max-w-md mx-auto"
+                >
+                  {isSendingOTP ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending OTP...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="mr-2 h-4 w-4" />
+                      Send OTP
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6 max-w-md mx-auto">
+                <div className="space-y-2">
+                  <Label htmlFor="otp">Enter OTP</Label>
+                  <Input
+                    id="otp"
+                    type="text"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    placeholder="000000"
+                    className="text-center text-2xl tracking-widest font-mono"
+                  />
+                  <p className="text-xs text-muted-foreground text-center">
+                    Enter the 6-digit code sent to your email
+                  </p>
+                </div>
+
+                <Button
+                  onClick={handleVerifyOTP}
+                  disabled={isVerifyingOTP || otp.length !== 6}
+                  className="w-full"
+                >
+                  {isVerifyingOTP ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Verify OTP
+                    </>
+                  )}
+                </Button>
+
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Didn't receive the code?
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={handleResendOTP}
+                    disabled={resendCountdown > 0 || isSendingOTP}
+                    className="w-full"
+                  >
+                    {isSendingOTP ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : resendCountdown > 0 ? (
+                      `Resend in ${resendCountdown}s`
+                    ) : (
+                      "Resend OTP"
+                    )}
+                  </Button>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setCurrentStep(1)}
+                    className="w-full"
+                  >
+                    Back to Registration
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
 
         {/* Step 3: Payment */}

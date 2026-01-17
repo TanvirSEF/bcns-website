@@ -26,6 +26,8 @@ import {
   SendOTPResponse,
   VerifyOTPResponse,
   EventCreateInput,
+  GetUploadUrlsRequest,
+  GetUploadUrlsResponse,
 } from '@/types/api';
 
 function handleApiResponse<T>(response: unknown): T {
@@ -102,6 +104,16 @@ export const authApi = {
 
     // For verifyOTP, we need the full response, not just the data
     return response as { success: boolean; message: string; data: { email: string; otpValid: boolean } };
+  },
+
+  getUploadUrls: async (uploadRequest: GetUploadUrlsRequest): Promise<GetUploadUrlsResponse> => {
+    const response = await apiClient.post<GetUploadUrlsResponse>(
+      '/auth/get-upload-urls',
+      uploadRequest,
+      { skipAuth: true }
+    );
+
+    return handleApiResponse<GetUploadUrlsResponse>(response);
   },
 
   verifyRegistrationOTP: async (verificationData: VerifyOTPInput): Promise<VerifyOTPResponse> => {
@@ -430,8 +442,19 @@ export const sendRegistrationOTP = (name: string, username: string, email: strin
 export const verifyOTP = (email: string, otp: string): Promise<{ success: boolean; message: string; data: { email: string; otpValid: boolean } }> =>
   authApi.verifyOTP(email, otp);
 
-export const verifyRegistrationOTP = (name: string, username: string, email: string, password: string, otp: string): Promise<VerifyOTPResponse> =>
-  authApi.verifyRegistrationOTP({ name, username, email, password, otp });
+// Note: This backward compatibility function is deprecated
+// Use authApi.verifyRegistrationOTP() directly with full registration data
+export const verifyRegistrationOTP = (
+  _name: string,
+  _username: string,
+  _email: string,
+  _password: string,
+  _otp: string
+): Promise<VerifyOTPResponse> => {
+  throw new Error(
+    'This function signature is deprecated. Use authApi.verifyRegistrationOTP() with full registration data including designation, membershipType, phone, affiliation, addresses, and file URLs.'
+  );
+};
 
 export const resendRegistrationOTP = (email: string): Promise<SendOTPResponse> =>
   authApi.resendRegistrationOTP({ email });

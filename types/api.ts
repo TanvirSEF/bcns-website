@@ -51,28 +51,28 @@ export interface User {
   readonly role: UserRole;
   readonly createdAt: ISODateString;
   readonly updatedAt: ISODateString;
-  
+
   readonly avatar?: URL;
   readonly phone?: string;
   readonly address?: string;
   readonly bio?: string;
   readonly profilePictureUrl?: URL;
-  
+
   readonly affiliation?: string;
   readonly mailingAddress?: string;
   readonly permanentAddress?: string;
   readonly membershipStatus: MembershipStatus;
   readonly membershipExpiry?: ISODateString;
-  
+
   readonly specialization?: string;
   readonly institution?: string;
-  
+
   readonly educationQualifications: readonly EducationQualification[];
   readonly training: readonly Training[];
-  
+
   readonly primaryResearchInterest?: string;
   readonly secondaryResearchInterest?: string;
-  
+
   readonly eventsAttended: number;
   readonly eventsThisMonth: number;
   readonly publicationsRead: number;
@@ -327,6 +327,18 @@ export interface VerifyOTPInput {
   readonly email: EmailAddress;
   readonly password: string;
   readonly otp: string;
+  readonly designation: string;
+  readonly membershipType: 'general' | 'lifetime';
+  readonly phone: string;
+  readonly affiliation: string;
+  readonly mailingAddress: string;
+  readonly permanentAddress: string;
+  readonly profilePictureUrl: string;
+  readonly documentUrls?: readonly string[];
+  readonly educationQualifications?: readonly EducationQualification[];
+  readonly training?: readonly Training[];
+  readonly primaryResearchInterest?: string | undefined;
+  readonly secondaryResearchInterest?: string | undefined;
 }
 
 export interface ResendOTPInput {
@@ -345,6 +357,28 @@ export interface VerifyOTPResponse {
   readonly refreshToken?: string | null;
   readonly expiresIn: number;
   readonly requiresLogin?: boolean;
+}
+
+// Upload URL types for presigned R2 uploads
+export interface UploadUrlRequest {
+  readonly filename: string;
+  readonly contentType: string;
+}
+
+export interface UploadUrlResponse {
+  readonly url: string;
+  readonly key: string;
+  readonly publicUrl: string;
+}
+
+export interface GetUploadUrlsRequest {
+  readonly profilePicture: UploadUrlRequest;
+  readonly documents?: readonly UploadUrlRequest[];
+}
+
+export interface GetUploadUrlsResponse {
+  readonly profilePicture: UploadUrlResponse;
+  readonly documents: readonly UploadUrlResponse[];
 }
 
 export interface EventCreateInput {
