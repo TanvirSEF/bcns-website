@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { OTPInput } from "@/components/ui/otp-input";
 import {
   User,
   Mail,
@@ -33,10 +32,8 @@ import {
   Camera,
   CheckCircle2,
   Loader2,
-  Send,
   Lock,
   ArrowRight,
-  ArrowLeft,
   CreditCard,
   CheckCircle,
   Eye,
@@ -144,13 +141,9 @@ const registrationSchema = z.object({
   }),
 });
 
-// Step 2: OTP verification schema
-const otpSchema = z.object({
-  otp: z.string().length(6, "OTP must be 6 digits"),
-});
+// OTP verification schema - REMOVED (OTP disabled)
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
-type OTPFormValues = z.infer<typeof otpSchema>;
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -159,9 +152,6 @@ export function MembershipForm() {
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   // Files are now stored in each education/training entry, not separately
-  const [isSendingOTP, setIsSendingOTP] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegistrationFormValues | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -177,7 +167,7 @@ export function MembershipForm() {
   });
   const [paymentMethod, setPaymentMethod] = useState<"bkash" | "handCash" | "bankTransfer" | null>(null);
   const [paymentDocuments, setPaymentDocuments] = useState<File[]>([]);
-  const [verifiedOtp, setVerifiedOtp] = useState<string>("");
+  // OTP verification disabled - removed verifiedOtp, isSendingOTP, otpSent, isVerifyingOTP states
   const [nidDocument, setNidDocument] = useState<File | null>(null);
   const [nidPreview, setNidPreview] = useState<string | null>(null);
 
@@ -296,13 +286,8 @@ export function MembershipForm() {
     }
   }, [watchedPassword]);
 
-  // Separate form for OTP
-  const otpForm = useForm<OTPFormValues>({
-    resolver: zodResolver(otpSchema),
-    defaultValues: {
-      otp: "",
-    },
-  });
+  // OTP form - REMOVED (OTP disabled)
+
 
   const {
     fields: eduFields,
@@ -479,78 +464,20 @@ export function MembershipForm() {
       return;
     }
 
-    // Store registration data with filtered training entries and move to OTP step
+    // Store registration data with filtered training entries and skip to payment step
     setRegistrationData({
       ...data,
       training: validTraining, // Store only validated training entries
     });
 
-    // Send OTP automatically when moving to step 2
-    const email = data.email;
-    setIsSendingOTP(true);
-    try {
-      const response = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      const otpData = await response.json();
-
-      if (otpData.success) {
-        setOtpSent(true);
-        setCurrentStep(2);
-        toast.success("OTP sent successfully to your email!");
-      } else {
-        toast.error(otpData.message || "Failed to send OTP");
-      }
-    } catch (error) {
-      toast.error("Network error. Please try again.");
-    } finally {
-      setIsSendingOTP(false);
-    }
+    // Skip OTP verification - go directly to payment step
+    toast.success("Registration details saved! Please proceed with payment.");
+    setCurrentStep(3); // Skip step 2 (OTP) and go directly to step 3 (Payment)
   };
 
-  // Step 2: Handle OTP verification and registration submission
-  const onOTPSubmit = async (data: OTPFormValues) => {
-    if (!registrationData) {
-      toast.error("Registration data is missing. Please start over.");
-      setCurrentStep(1);
-      return;
-    }
+  // Step 2: OTP verification handler - REMOVED (OTP disabled)
+  // Registration now goes directly from step 1 to step 3 (payment)
 
-    setIsVerifyingOTP(true);
-    setIsSubmitting(false); // Ensure isSubmitting starts as false
-    try {
-      // First verify OTP
-      const verifyResponse = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: registrationData.email,
-          otp: data.otp,
-        }),
-      });
-
-      const verifyResult = await verifyResponse.json();
-
-      if (!verifyResult.success || !verifyResult.data?.otpValid) {
-        toast.error("Invalid OTP. Please try again.");
-        return;
-      }
-
-      // OTP verified, store it and move to payment step
-      setVerifiedOtp(data.otp);
-      toast.success("OTP verified successfully!");
-      setCurrentStep(3); // Move to payment step
-    } catch (error) {
-      toast.error("An unexpected error occurred");
-      console.error(error);
-    } finally {
-      setIsVerifyingOTP(false);
-      setIsSubmitting(false);
-    }
-  };
 
   // Handle payment document upload
   const handlePaymentDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -597,12 +524,8 @@ export function MembershipForm() {
       if (registrationData.researchInterest2)
         formData.append("researchInterest2", registrationData.researchInterest2);
 
-      // Use stored verified OTP
-      if (!verifiedOtp) {
-        toast.error("OTP verification required. Please go back and verify OTP.");
-        return;
-      }
-      formData.append("otp", verifiedOtp);
+      // No OTP required - skip verification
+      // formData.append("otp", ""); // OTP disabled
 
       // JSON Stringify Arrays (without document files - they'll be sent separately)
       const educationWithoutFiles = registrationData.educationQualifications.map(({ document, ...rest }) => rest);
@@ -668,31 +591,8 @@ export function MembershipForm() {
     }
   };
 
-  // Resend OTP handler
-  const handleResendOTP = async () => {
-    if (!registrationData?.email) return;
+  // Resend OTP handler - REMOVED (OTP disabled)
 
-    setIsSendingOTP(true);
-    try {
-      const response = await fetch("/api/auth/resend-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: registrationData.email }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success("OTP resent successfully!");
-      } else {
-        toast.error(data.message || "Failed to resend OTP");
-      }
-    } catch (error) {
-      toast.error("Network error. Please try again.");
-    } finally {
-      setIsSendingOTP(false);
-    }
-  };
 
   // Step indicator component
   const StepIndicator = () => {
@@ -1392,7 +1292,7 @@ export function MembershipForm() {
                               return;
                             }
                             setNidDocument(file);
-                            
+
                             // Create preview for images
                             if (file.type.startsWith("image/")) {
                               const reader = new FileReader();
@@ -1502,123 +1402,18 @@ export function MembershipForm() {
               <Button
                 type="submit"
                 className="w-full py-6 text-lg font-bold shadow-lg"
-                disabled={isSendingOTP || !registrationForm.watch("termsAccepted")}
+                disabled={!registrationForm.watch("termsAccepted")}
               >
-                {isSendingOTP ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    Sending OTP...
-                  </>
-                ) : (
-                  <>
-                    Verify Email
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </>
-                )}
+                Continue to Payment
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
           </form >
         )
         }
 
-        {/* Step 2: OTP Verification */}
-        {
-          currentStep === 2 && (
-            <form onSubmit={otpForm.handleSubmit(onOTPSubmit)} className="space-y-4 sm:space-y-6">
-              <section className="space-y-4 sm:space-y-6 bg-slate-50 dark:bg-slate-900/30 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2 border-b pb-2 text-base sm:text-lg font-semibold text-primary">
-                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" /> Email Verification
-                </div>
-                <div className="space-y-3 sm:space-y-4">
-                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
-                    We&apos;ve sent a 6-digit OTP to <strong className="break-all">{registrationData?.email}</strong>. Please enter it below to verify your email address.
-                  </p>
+        {/* Step 2: OTP Verification - REMOVED (OTP disabled) */}
 
-                  <div className="flex flex-col gap-3 sm:gap-4">
-                    <div className="space-y-2 w-full">
-                      <Label className="text-sm sm:text-base">Enter OTP Code</Label>
-                      <div className="flex justify-center sm:justify-start overflow-x-auto pb-2 -mx-2 px-2">
-                        <Controller
-                          control={otpForm.control}
-                          name="otp"
-                          render={({ field }) => (
-                            <OTPInput
-                              value={field.value}
-                              onChange={field.onChange}
-                              length={6}
-                              className="justify-center sm:justify-start"
-                              disabled={!otpSent}
-                            />
-                          )}
-                        />
-                      </div>
-                      {otpForm.formState.errors.otp && (
-                        <p className="text-destructive text-xs text-center sm:text-left">{otpForm.formState.errors.otp.message}</p>
-                      )}
-                    </div>
-
-                    <Button
-                      type="button"
-                      onClick={handleResendOTP}
-                      disabled={isSendingOTP}
-                      variant="outline"
-                      className="w-full sm:w-auto sm:min-w-[140px] self-center sm:self-start"
-                    >
-                      {isSendingOTP ? (
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      ) : (
-                        <Send className="w-4 h-4 mr-2" />
-                      )}
-                      {isSendingOTP ? "Sending..." : "Resend OTP"}
-                    </Button>
-                  </div>
-                  {otpSent && (
-                    <p className="text-xs sm:text-sm text-green-600 flex items-center mt-2 flex-wrap gap-1">
-                      <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
-                      <span>OTP sent to <span className="break-all">{registrationData?.email}</span></span>
-                    </p>
-                  )}
-                </div>
-              </section>
-
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    // Clear registration data when going back to step 1
-                    // This ensures user must re-submit step 1 if they modify the form
-                    setRegistrationData(null);
-                    setOtpSent(false);
-                    otpForm.reset(); // Clear OTP input
-                    setCurrentStep(1);
-                  }}
-                  className="flex-1 w-full sm:w-auto order-2 sm:order-1"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex-1 w-full sm:w-auto order-1 sm:order-2"
-                  disabled={isVerifyingOTP || isSubmitting}
-                >
-                  {isVerifyingOTP ? (
-                    <>
-                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin mr-2" />
-                      Verifying...
-                    </>
-                  ) : (
-                    <>
-                      Verify OTP
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          )
-        }
 
         {/* Step 3: Payment */}
         {

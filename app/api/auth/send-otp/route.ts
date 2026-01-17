@@ -22,13 +22,13 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!body.email) {
       return NextResponse.json(
-        { 
-          success: false, 
-          message: "Email is required" 
+        {
+          success: false,
+          message: "Email is required"
         },
-        { 
+        {
           status: 400,
-          headers: corsHeaders 
+          headers: corsHeaders
         }
       );
     }
@@ -52,13 +52,13 @@ export async function POST(request: NextRequest) {
       data = await response.json();
     } catch (parseError) {
       return NextResponse.json(
-        { 
-          success: false, 
-          message: "Invalid response from server" 
+        {
+          success: false,
+          message: "Invalid response from server"
         },
-        { 
+        {
           status: 502,
-          headers: corsHeaders 
+          headers: corsHeaders
         }
       );
     }
