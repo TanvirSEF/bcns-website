@@ -14,6 +14,7 @@ import {
   BookOpen,
   Video,
   Activity,
+  Mail,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -74,6 +75,11 @@ const data = {
       title: "Polls",
       url: "/admin/polls",
       icon: BarChart3,
+    },
+    {
+      title: "Promotional Emails",
+      url: "/admin/promotional-emails",
+      icon: Mail,
     },
     {
       title: "Zoom Meetings",
