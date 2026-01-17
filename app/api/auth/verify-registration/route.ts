@@ -28,13 +28,13 @@ export async function POST(request: NextRequest) {
         jsonData = await request.json();
         // Convert JSON to FormData
         incomingFormData = new FormData();
-        
+
         // Helper to append values to FormData
         const appendToFormData = (key: string, value: any) => {
           if (value === null || value === undefined) {
             return; // Skip null/undefined values
           }
-          
+
           if (Array.isArray(value)) {
             // For arrays, stringify them (e.g., educationQualifications, training)
             incomingFormData.append(key, JSON.stringify(value));
@@ -87,9 +87,9 @@ export async function POST(request: NextRequest) {
     const name = getFormDataValue(incomingFormData, 'name');
     const email = getFormDataValue(incomingFormData, 'email');
     const password = getFormDataValue(incomingFormData, 'password');
-    const otp = getFormDataValue(incomingFormData, 'otp');
+    // OTP field removed - no longer extracted or validated
 
-    // Validate required fields
+    // Validate required fields (OTP removed from required list)
     const missingFields: string[] = [];
     if (!name || name.trim() === '') {
       missingFields.push('name');
@@ -100,9 +100,7 @@ export async function POST(request: NextRequest) {
     if (!password || password.trim() === '') {
       missingFields.push('password');
     }
-    if (!otp || otp.trim() === '') {
-      missingFields.push('otp');
-    }
+    // OTP validation removed - no longer required
 
     if (missingFields.length > 0) {
       return NextResponse.json(
@@ -155,7 +153,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       // Handle backend validation errors
-      const errorMessage = Array.isArray(data?.message) 
+      const errorMessage = Array.isArray(data?.message)
         ? data.message.join(', ') // If array of errors, join them
         : (data?.message || data?.error || "Verification failed");
 
@@ -190,7 +188,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error("Registration Proxy Error:", error);
-    
+
     let errorMessage = "Unable to verify registration";
     let statusCode = 500;
 
