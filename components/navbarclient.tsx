@@ -8,7 +8,6 @@ import { useAuth } from "@/lib/auth-context";
 import { UserRole } from "@/types/api";
 import {
   Menu,
-  Search,
   ChevronDown,
   User,
   Shield,
@@ -21,6 +20,7 @@ import {
   Phone,
   BellRing,
   Home,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -461,62 +461,37 @@ export function NavbarClient() {
                   </SheetContent>
                 </Sheet>
 
-                {/* Right side - Search, Login, Membership, Notice Icons */}
-                <div className="flex items-center gap-2 sm:gap-2">
-                  {/* Mobile Search Button */}
-                  <Button
-                    onClick={() => setIsSearchOpen(true)}
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 sm:h-10 sm:w-10 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
-                    aria-label="Open search"
-                  >
-                    <Search className="h-5 w-5 sm:h-5 sm:w-5" />
-                  </Button>
-
+                {/* Right side - Login and Membership Buttons */}
+                <div className="flex items-center gap-2">
                   {/* Mobile Login and Membership Buttons - Only show when not authenticated */}
                   {!isAuthenticated && (
                     <>
-                      {/* Login Icon Button */}
+                      {/* Login Button */}
                       <Button
                         asChild
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 sm:h-10 sm:w-10 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
-                        aria-label="Login"
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm h-9 px-4 text-sm font-medium"
                       >
                         <Link href="/login">
-                          <User className="h-5 w-5 sm:h-5 sm:w-5" />
+                          <User className="mr-1.5 h-4 w-4" />
+                          Login
                         </Link>
                       </Button>
 
-                      {/* Membership Icon Button */}
+                      {/* Membership Button */}
                       <Button
                         asChild
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 sm:h-10 sm:w-10 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
-                        aria-label="Membership"
+                        size="sm"
+                        variant="outline"
+                        className="border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 h-9 px-4 text-sm font-medium"
                       >
                         <Link href="/membership">
-                          <Shield className="h-5 w-5 sm:h-5 sm:w-5" />
+                          <Shield className="mr-1.5 h-4 w-4" />
+                          Membership
                         </Link>
                       </Button>
                     </>
                   )}
-
-                  {/* Mobile Notice Button - Last */}
-                  <Button
-                    asChild
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 sm:h-10 sm:w-10 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full relative"
-                    aria-label="Notice Board"
-                  >
-                    <Link href="/notice-board">
-                      <BellRing className="h-5 w-5 sm:h-5 sm:w-5 animate-pulse fill-red-500" />
-                    </Link>
-                  </Button>
 
                   {/* Mobile user profile */}
                   {isAuthenticated && user && (
