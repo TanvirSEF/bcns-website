@@ -588,53 +588,73 @@ export function MembershipForm() {
   // Registration now goes directly from step 1 to step 3 (payment)
 
 
-  // Helper function to upload file to R2 using presigned URL
+  // Helper function to upload file to R2 using presigned URL with retry logic
   const uploadToR2 = async (
     file: File,
     presignedUrl: string,
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
+    retries = 3
   ): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
 
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable && onProgress) {
-          const progress = Math.round((e.loaded / e.total) * 100);
-          onProgress(progress);
-        }
-      });
-
-      xhr.addEventListener('load', () => {
-        if (xhr.status === 200) {
-          resolve();
-        } else {
-          console.error('Upload failed:', {
-            status: xhr.status,
-            statusText: xhr.statusText,
-            response: xhr.responseText,
-            file: file.name,
+          xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable && onProgress) {
+              const progress = Math.round((e.loaded / e.total) * 100);
+              onProgress(progress);
+            }
           });
-          reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.statusText}`));
-        }
-      });
 
-      xhr.addEventListener('error', (e) => {
-        console.error('Upload network error:', {
-          error: e,
-          file: file.name,
-          url: presignedUrl.substring(0, 100) + '...',
+          xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+              resolve();
+            } else {
+              console.error('Upload failed:', {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                response: xhr.responseText,
+                file: file.name,
+                attempt: attempt + 1,
+              });
+              reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.statusText}`));
+            }
+          });
+
+          xhr.addEventListener('error', (e) => {
+            console.error('Upload network error:', {
+              error: e,
+              file: file.name,
+              url: presignedUrl.substring(0, 100) + '...',
+              attempt: attempt + 1,
+            });
+            reject(new Error(`Network error during upload of ${file.name}. Please check your internet connection.`));
+          });
+
+          xhr.addEventListener('abort', () => {
+            reject(new Error('Upload aborted'));
+          });
+
+          xhr.open('PUT', presignedUrl);
+          xhr.setRequestHeader('Content-Type', file.type);
+          xhr.send(file);
         });
-        reject(new Error(`Network error during upload of ${file.name}. This may be a CORS issue.`));
-      });
 
-      xhr.addEventListener('abort', () => {
-        reject(new Error('Upload aborted'));
-      });
+        // If successful, break out of retry loop
+        return;
+      } catch (error) {
+        if (attempt === retries - 1) {
+          // Last attempt failed, throw error
+          throw error;
+        }
 
-      xhr.open('PUT', presignedUrl);
-      xhr.setRequestHeader('Content-Type', file.type);
-      xhr.send(file);
-    });
+        // Wait before retrying (exponential backoff)
+        const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
+        console.log(`Retrying upload in ${delay}ms... (Attempt ${attempt + 2}/${retries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   };
 
   // Handle payment document upload
