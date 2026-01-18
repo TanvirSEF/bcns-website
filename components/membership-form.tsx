@@ -608,11 +608,28 @@ export function MembershipForm() {
         if (xhr.status === 200) {
           resolve();
         } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
+          console.error('Upload failed:', {
+            status: xhr.status,
+            statusText: xhr.statusText,
+            response: xhr.responseText,
+            file: file.name,
+          });
+          reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.statusText}`));
         }
       });
 
-      xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+      xhr.addEventListener('error', (e) => {
+        console.error('Upload network error:', {
+          error: e,
+          file: file.name,
+          url: presignedUrl.substring(0, 100) + '...',
+        });
+        reject(new Error(`Network error during upload of ${file.name}. This may be a CORS issue.`));
+      });
+
+      xhr.addEventListener('abort', () => {
+        reject(new Error('Upload aborted'));
+      });
 
       xhr.open('PUT', presignedUrl);
       xhr.setRequestHeader('Content-Type', file.type);
