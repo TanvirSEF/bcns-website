@@ -15,7 +15,7 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative py-16 sm:py-20 md:py-24">
         <div className="container mx-auto px-4">
@@ -59,11 +59,11 @@ export default function EventsPage() {
                           <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 leading-tight">{event.title}</h4>
                           <div className="flex flex-col gap-2 text-gray-700 text-sm">
                             <span className="inline-flex items-center gap-2">
-                              <Calendar className="w-4 h-4 text-blue-600 flex-shrink-0" /> 
+                              <Calendar className="w-4 h-4 text-blue-600 flex-shrink-0" />
                               <span>{event.time ? `${event.date}, ${event.time}` : event.date}</span>
                             </span>
                             <span className="inline-flex items-start gap-2">
-                              <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" /> 
+                              <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                               <span className="line-clamp-2">{event.venue}</span>
                             </span>
                           </div>
@@ -71,22 +71,12 @@ export default function EventsPage() {
                         <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-gray-100">
                           {/* Hide View Summary only for the new event */}
                           {event.slug !== "brain-malformation-congenital-myopathy-neuroinfection-jan-2026" && (
-                            <Link 
-                              href={`/events/${event.slug}`} 
+                            <Link
+                              href={`/events/${event.slug}`}
                               className="inline-flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 text-sm font-semibold transition-colors cursor-pointer"
                             >
                               View Summary
                             </Link>
-                          )}
-                          {event.registrationUrl && event.slug !== "cme-japan-sept-2025" && (
-                            <a 
-                              href={event.registrationUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold transition-colors cursor-pointer"
-                            >
-                              Register Now
-                            </a>
                           )}
                         </div>
                       </div>

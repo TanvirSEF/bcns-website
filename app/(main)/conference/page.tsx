@@ -15,7 +15,7 @@ export default function ConferencePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative py-16 sm:py-20 md:py-24">
         <div className="container mx-auto px-4">
@@ -64,10 +64,6 @@ export default function ConferencePage() {
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <Link href={`/events/${event.slug}`} className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 text-sm font-semibold">View Summary</Link>
-                          {/* Registration temporarily disabled */}
-                          {false && event.registrationUrl && (
-                            <a href={event.registrationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-semibold">Register</a>
-                          )}
                         </div>
                       </div>
                     </Card>

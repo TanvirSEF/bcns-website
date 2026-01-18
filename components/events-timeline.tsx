@@ -30,11 +30,10 @@ export function EventsTimeline() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors cursor-pointer ${
-                activeTab === tab.key
+              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors cursor-pointer ${activeTab === tab.key
                   ? "bg-blue-600 text-white border-blue-600"
                   : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-              }`}
+                }`}
               aria-pressed={activeTab === tab.key}
             >
               {tab.label}
@@ -49,55 +48,45 @@ export function EventsTimeline() {
           )}
           {filtered.map((event) => {
             // Use slug as primary key, fallback to title+date combination for stability
-            const stableKey = ('slug' in event && event.slug) 
-              ? event.slug 
+            const stableKey = ('slug' in event && event.slug)
+              ? event.slug
               : `${event.title}-${event.date}`.replace(/[^a-zA-Z0-9-]/g, '-');
-            
+
             return (
-                <div key={stableKey} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
-                  <div className="p-5 sm:p-6">
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">{event.title}</h3>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <Calendar className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium">
-                            {'time' in event ? (event.time ? `${event.date}, ${event.time}` : event.date) : event.date}
-                          </span>
+              <div key={stableKey} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div className="p-5 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">{event.title}</h3>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <Calendar className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium">
+                          {'time' in event ? (event.time ? `${event.date}, ${event.time}` : event.date) : event.date}
+                        </span>
+                      </div>
+                      {'venue' in event && (
+                        <div className="flex items-start gap-2 text-gray-700">
+                          <MapPin className="h-4 w-4 text-blue-600 mt-0.5" />
+                          <span className="text-sm">{event.venue}</span>
                         </div>
-                        {'venue' in event && (
-                          <div className="flex items-start gap-2 text-gray-700">
-                            <MapPin className="h-4 w-4 text-blue-600 mt-0.5" />
-                            <span className="text-sm">{event.venue}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {/* Hide View Summary only for the new event */}
-                        {'slug' in event && event.slug !== "brain-malformation-congenital-myopathy-neuroinfection-jan-2026" && (
-                          <Link
-                            href={`/events/${event.slug}`}
-                            className="inline-flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors text-sm font-semibold cursor-pointer"
-                          >
-                            View Summary
-                          </Link>
-                        )}
-                        {event.registrationUrl && ('slug' in event && event.slug !== "cme-japan-sept-2025") && (
-                          <a
-                            href={event.registrationUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition-colors text-sm font-semibold cursor-pointer"
-                          >
-                            Register Now
-                          </a>
-                        )}
-                      </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Hide View Summary only for the new event */}
+                      {'slug' in event && event.slug !== "brain-malformation-congenital-myopathy-neuroinfection-jan-2026" && (
+                        <Link
+                          href={`/events/${event.slug}`}
+                          className="inline-flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors text-sm font-semibold cursor-pointer"
+                        >
+                          View Summary
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
