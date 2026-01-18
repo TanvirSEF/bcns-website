@@ -85,10 +85,18 @@ function ResetPasswordContent() {
                 body: JSON.stringify({
                     token,
                     newPassword,
+                    password: newPassword,
                 }),
             });
 
-            const data = await response.json();
+            const responseText = await response.text();
+            let data;
+            try {
+                data = responseText ? JSON.parse(responseText) : {};
+            } catch (e) {
+                console.error("Failed to parse JSON response:", responseText);
+                data = { message: "Invalid server response" };
+            }
 
             if (response.ok) {
                 setIsSuccess(true);
@@ -99,6 +107,7 @@ function ResetPasswordContent() {
                     router.push("/login");
                 }, 2000);
             } else {
+                console.error("Reset password failed:", response.status, data);
                 if (response.status === 400) {
                     setError("This reset link is invalid or has expired. Please request a new one.");
                 } else if (response.status === 404) {
