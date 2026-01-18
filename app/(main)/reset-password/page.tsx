@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Navbar } from "@/components/navbar";
+import { NavbarClient } from "@/components/navbarclient";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -125,7 +125,7 @@ function ResetPasswordContent() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
-            <Navbar />
+            <NavbarClient />
 
             <main className="container mx-auto px-4 py-16 sm:py-24">
                 <div className="max-w-md mx-auto">
