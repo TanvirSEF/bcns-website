@@ -39,6 +39,15 @@ const nextConfig: NextConfig = {
   // bundleAnalyzer: {
   //   enabled: process.env.ANALYZE === 'true',
   // },
+
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.BACKEND_API_URL}/api/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
