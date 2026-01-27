@@ -166,6 +166,29 @@ const eventCategories = {
       "/images/cmeo/27.jpg",
       "/images/cmeo/28.jpg"
     ]
+  },
+  brain2026: {
+    title: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
+    date: "January 17, 2026",
+    attendees: "Participants",
+    description: "CME on Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
+    images: [
+      "/images/brain/1.JPG.jpeg",
+      "/images/brain/2.JPG.jpeg",
+      "/images/brain/3.JPG.jpeg",
+      "/images/brain/4.JPG.jpeg",
+      "/images/brain/5.JPG.jpeg",
+      "/images/brain/6.JPG.jpeg",
+      "/images/brain/7.JPG.jpeg",
+      "/images/brain/DSC00896.JPG.jpeg",
+      "/images/brain/DSC01069.JPG.jpeg",
+      "/images/brain/DSC01145.JPG.jpeg",
+      "/images/brain/DSC01203.JPG.jpeg",
+      "/images/brain/DSC01247.JPG.jpeg",
+      "/images/brain/DSC01382.JPG.jpeg",
+      "/images/brain/DSC01387.JPG.jpeg",
+      "/images/brain/DSC01391.JPG.jpeg"
+    ]
   }
 };
 

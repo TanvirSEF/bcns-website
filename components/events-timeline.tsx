@@ -72,8 +72,7 @@ export function EventsTimeline() {
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      {/* Hide View Summary only for the new event */}
-                      {'slug' in event && event.slug !== "brain-malformation-congenital-myopathy-neuroinfection-jan-2026" && (
+                      {'slug' in event && (
                         <Link
                           href={`/events/${event.slug}`}
                           className="inline-flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors text-sm font-semibold cursor-pointer"

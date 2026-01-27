@@ -142,11 +142,11 @@ const registrationSchema = z.object({
   }),
 });
 
-// OTP verification schema - REMOVED (OTP disabled)
+// OTP verification schema - REMOVED (OTP disabled from backend)
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
 export function MembershipForm() {
   const router = useRouter();
@@ -177,12 +177,7 @@ export function MembershipForm() {
     documents: number[];
   }>({ profilePicture: 0, documents: [] });
 
-  // OTP verification states
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [isSendingOTP, setIsSendingOTP] = useState(false);
-  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
-  const [resendCountdown, setResendCountdown] = useState(0);
+  // OTP verification states - REMOVED (OTP disabled)
 
   // Main form for registration data
   const registrationForm = useForm<RegistrationFormValues>({
@@ -299,18 +294,9 @@ export function MembershipForm() {
     }
   }, [watchedPassword]);
 
-  // Resend OTP countdown timer
-  useEffect(() => {
-    if (resendCountdown > 0) {
-      const timer = setTimeout(() => {
-        setResendCountdown(resendCountdown - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
-  }, [resendCountdown]);
+  // Resend OTP countdown timer - REMOVED (OTP disabled)
 
-  // OTP form - REMOVED (OTP disabled)
+  // OTP form - REMOVED (OTP disabled from backend)
 
 
   const {
@@ -488,104 +474,16 @@ export function MembershipForm() {
       return;
     }
 
-    // Store registration data with filtered training entries and proceed to OTP verification
+    // Store registration data with filtered training entries and proceed to payment
     setRegistrationData({
       ...data,
       training: validTraining, // Store only validated training entries
     });
 
-    // Proceed to OTP verification step
-    toast.success("Registration details saved! Please verify your email.");
-    setCurrentStep(2); // Go to step 2 (OTP verification)
+    // Proceed directly to payment step (OTP verification removed)
+    toast.success("Registration details saved! Please proceed to payment.");
+    setCurrentStep(2); // Go to step 2 (Payment)
   };
-
-  // Step 2: Send OTP handler
-  const handleSendOTP = async () => {
-    if (!registrationData) {
-      toast.error("Registration data is missing. Please start over.");
-      setCurrentStep(1);
-      return;
-    }
-
-    setIsSendingOTP(true);
-    try {
-      await authApi.sendRegistrationOTP({
-        name: registrationData.name,
-        username: registrationData.username,
-        email: registrationData.email,
-        password: registrationData.password,
-      });
-
-      setOtpSent(true);
-      setResendCountdown(60); // 60 seconds cooldown
-      toast.success(`OTP sent to ${registrationData.email}`);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send OTP");
-    } finally {
-      setIsSendingOTP(false);
-    }
-  };
-
-  // Step 2: Verify OTP handler
-  const handleVerifyOTP = async () => {
-    if (!registrationData) {
-      toast.error("Registration data is missing. Please start over.");
-      setCurrentStep(1);
-      return;
-    }
-
-    if (!otp || otp.length !== 6) {
-      toast.error("Please enter a valid 6-digit OTP");
-      return;
-    }
-
-    setIsVerifyingOTP(true);
-    try {
-      const response = await authApi.verifyOTP(registrationData.email, otp);
-
-      if (response.success && response.data.otpValid) {
-        toast.success("OTP verified successfully!");
-        // Proceed to payment step
-        setTimeout(() => {
-          setCurrentStep(3);
-        }, 500);
-      } else {
-        toast.error("Invalid OTP. Please try again.");
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to verify OTP");
-    } finally {
-      setIsVerifyingOTP(false);
-    }
-  };
-
-  // Step 2: Resend OTP handler
-  const handleResendOTP = async () => {
-    if (!registrationData) {
-      toast.error("Registration data is missing.");
-      return;
-    }
-
-    if (resendCountdown > 0) {
-      toast.error(`Please wait ${resendCountdown} seconds before resending`);
-      return;
-    }
-
-    setIsSendingOTP(true);
-    try {
-      await authApi.resendRegistrationOTP({ email: registrationData.email });
-
-      setResendCountdown(60); // Reset cooldown
-      toast.success("OTP resent successfully");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to resend OTP");
-    } finally {
-      setIsSendingOTP(false);
-    }
-  };
-
-  // Step 2: OTP verification handler - REMOVED (OTP disabled)
-  // Registration now goes directly from step 1 to step 3 (payment)
 
 
   // Helper function to upload file to R2 using presigned URL with retry logic
@@ -749,14 +647,13 @@ export function MembershipForm() {
         );
       }
 
-      // Step 5: Submit registration with URLs
+      // Step 5: Submit registration with URLs (OTP removed)
       toast.info("Completing registration...");
       const registrationPayload = {
         name: registrationData.name,
         username: registrationData.username,
         email: registrationData.email,
         password: registrationData.password,
-        otp: otp, // Real OTP from user input
         designation: registrationData.designation,
         membershipType: registrationData.membershipType,
         phone: registrationData.phone,
@@ -786,7 +683,7 @@ export function MembershipForm() {
 
       if (response.user) {
         toast.success("Registration submitted successfully!");
-        setCurrentStep(4);
+        setCurrentStep(3);
         // Redirect to login after a brief delay
         setTimeout(() => {
           router.push("/login?registered=true");
@@ -804,16 +701,15 @@ export function MembershipForm() {
     }
   };
 
-  // Resend OTP handler - REMOVED (OTP disabled)
+  // Resend OTP handler - REMOVED (OTP disabled from backend)
 
 
   // Step indicator component
   const StepIndicator = () => {
     const steps = [
       { number: 1, label: "Registration", icon: User },
-      { number: 2, label: "Verification", icon: CheckCircle2 },
-      { number: 3, label: "Payment", icon: CreditCard },
-      { number: 4, label: "Complete", icon: CheckCircle },
+      { number: 2, label: "Payment", icon: CreditCard },
+      { number: 3, label: "Complete", icon: CheckCircle },
     ];
 
     return (
@@ -1617,7 +1513,7 @@ export function MembershipForm() {
                 className="w-full py-6 text-lg font-bold shadow-lg"
                 disabled={!registrationForm.watch("termsAccepted")}
               >
-                Continue to Verification
+                Continue to Payment
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
@@ -1625,117 +1521,9 @@ export function MembershipForm() {
         )
         }
 
-        {/* Step 2: OTP Verification */}
-        {currentStep === 2 && (
-          <div className="space-y-6">
-            <div className="text-center space-y-4">
-              <Mail className="w-16 h-16 mx-auto text-primary" />
-              <div>
-                <h3 className="text-xl font-semibold">Verify Your Email</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  We've sent a 6-digit OTP to <strong>{registrationData?.email}</strong>
-                </p>
-              </div>
-            </div>
-
-            {!otpSent ? (
-              <div className="text-center space-y-4">
-                <p className="text-sm">Click the button below to receive your OTP</p>
-                <Button
-                  onClick={handleSendOTP}
-                  disabled={isSendingOTP}
-                  className="w-full max-w-md mx-auto"
-                >
-                  {isSendingOTP ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending OTP...
-                    </>
-                  ) : (
-                    <>
-                      <Mail className="mr-2 h-4 w-4" />
-                      Send OTP
-                    </>
-                  )}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-6 max-w-md mx-auto">
-                <div className="space-y-2">
-                  <Label htmlFor="otp">Enter OTP</Label>
-                  <Input
-                    id="otp"
-                    type="text"
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    placeholder="000000"
-                    className="text-center text-2xl tracking-widest font-mono"
-                  />
-                  <p className="text-xs text-muted-foreground text-center">
-                    Enter the 6-digit code sent to your email
-                  </p>
-                </div>
-
-                <Button
-                  onClick={handleVerifyOTP}
-                  disabled={isVerifyingOTP || otp.length !== 6}
-                  className="w-full"
-                >
-                  {isVerifyingOTP ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Verify OTP
-                    </>
-                  )}
-                </Button>
-
-                <div className="text-center space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Didn't receive the code?
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={handleResendOTP}
-                    disabled={resendCountdown > 0 || isSendingOTP}
-                    className="w-full"
-                  >
-                    {isSendingOTP ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : resendCountdown > 0 ? (
-                      `Resend in ${resendCountdown}s`
-                    ) : (
-                      "Resend OTP"
-                    )}
-                  </Button>
-                </div>
-
-                <div className="pt-4 border-t">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setCurrentStep(1)}
-                    className="w-full"
-                  >
-                    Back to Registration
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-
-        {/* Step 3: Payment */}
+        {/* Step 2: Payment */}
         {
-          currentStep === 3 && (
+          currentStep === 2 && (
             <div className="space-y-4 sm:space-y-6">
               <section className="space-y-4 sm:space-y-6 bg-slate-50 dark:bg-slate-900/30 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2 border-b pb-2 text-base sm:text-lg font-semibold text-primary">
@@ -1949,9 +1737,9 @@ export function MembershipForm() {
           )
         }
 
-        {/* Step 4: Completion */}
+        {/* Step 3: Completion */}
         {
-          currentStep === 4 && (
+          currentStep === 3 && (
             <div className="space-y-4 sm:space-y-6 text-center py-8 sm:py-10 md:py-12 px-2">
               <div className="flex justify-center mb-4 sm:mb-6">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">

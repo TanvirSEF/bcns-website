@@ -68,6 +68,15 @@ const eventCategories = [
     coverImage: "/images/cmeo/11.jpg",
     imageCount: 18,
     description: "CME on Insight into the Recent Innovation and Challenges of Epilepsy & Developmental Disorders"
+  },
+  {
+    id: "brain2026",
+    title: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
+    date: "January 17, 2026",
+    attendees: "Participants",
+    coverImage: "/images/brain/1.JPG.jpeg",
+    imageCount: 15,
+    description: "CME on Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management"
   }
 ];
 

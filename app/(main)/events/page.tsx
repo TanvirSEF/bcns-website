@@ -69,15 +69,12 @@ export default function EventsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-gray-100">
-                          {/* Hide View Summary only for the new event */}
-                          {event.slug !== "brain-malformation-congenital-myopathy-neuroinfection-jan-2026" && (
-                            <Link
-                              href={`/events/${event.slug}`}
-                              className="inline-flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 text-sm font-semibold transition-colors cursor-pointer"
-                            >
-                              View Summary
-                            </Link>
-                          )}
+                          <Link
+                            href={`/events/${event.slug}`}
+                            className="inline-flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 text-sm font-semibold transition-colors cursor-pointer"
+                          >
+                            View Summary
+                          </Link>
                         </div>
                       </div>
                     </Card>

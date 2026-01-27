@@ -86,6 +86,16 @@ export function PhotoGalleryPreview() {
       category: "CME",
       href: "/gallery/cmeo2025",
     },
+    {
+      id: "brain-malformation-2026",
+      src: "/images/brain/1.JPG.jpeg",
+      alt: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
+      eventName: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
+      date: "17 January 2026",
+      attendees: "Participants",
+      category: "Program",
+      href: "/gallery/brain2026",
+    },
   ];
 
   return (
@@ -158,9 +168,9 @@ export function PhotoGalleryPreview() {
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-                7+
+                8+
               </div>
-              <div className="text-gray-600 text-sm">Major Events 2025</div>
+              <div className="text-gray-600 text-sm">Major Events</div>
             </div>
           </div>
           <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-blue-100/60">

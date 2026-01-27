@@ -326,7 +326,7 @@ export interface VerifyOTPInput {
   readonly username: string;
   readonly email: EmailAddress;
   readonly password: string;
-  readonly otp: string;
+  readonly otp?: string; // Optional - OTP verification removed from backend
   readonly designation: string;
   readonly membershipType: 'general' | 'lifetime';
   readonly phone: string;
