@@ -841,6 +841,9 @@ export function MembershipForm() {
                       <CreditCard className="w-5 h-5 text-primary" />
                       <span className="font-semibold text-base">General Member</span>
                     </div>
+                    {registrationForm.watch("membershipType") === "general" && (
+                      <p className="text-sm font-bold text-primary">1000 BDT</p>
+                    )}
                     <p className="text-xs text-muted-foreground">Regular membership</p>
                   </div>
                   {registrationForm.watch("membershipType") === "general" && (
@@ -864,6 +867,9 @@ export function MembershipForm() {
                       <CheckCircle2 className="w-5 h-5 text-primary" />
                       <span className="font-semibold text-base">Lifetime Member</span>
                     </div>
+                    {registrationForm.watch("membershipType") === "lifetime" && (
+                      <p className="text-sm font-bold text-primary">10000 BDT</p>
+                    )}
                     <p className="text-xs text-muted-foreground">Lifetime membership</p>
                   </div>
                   {registrationForm.watch("membershipType") === "lifetime" && (

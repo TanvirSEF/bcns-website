@@ -48,6 +48,7 @@ export interface User {
   readonly id: UUID;
   readonly name: string;
   readonly email: EmailAddress;
+  readonly username?: string;
   readonly role: UserRole;
   readonly createdAt: ISODateString;
   readonly updatedAt: ISODateString;
@@ -57,12 +58,15 @@ export interface User {
   readonly address?: string;
   readonly bio?: string;
   readonly profilePictureUrl?: URL;
+  readonly designation?: string;
 
   readonly affiliation?: string;
   readonly mailingAddress?: string;
   readonly permanentAddress?: string;
   readonly membershipStatus: MembershipStatus;
   readonly membershipExpiry?: ISODateString;
+  readonly membershipType?: 'general' | 'lifetime';
+  readonly memberId?: string;
 
   readonly specialization?: string;
   readonly institution?: string;
@@ -285,13 +289,14 @@ export interface UserUpdateInput {
   readonly formNo?: string;
   readonly refNo?: string;
   readonly name?: string;
-  // email is read-only, cannot be updated via profile
+  readonly email?: EmailAddress;
+  readonly username?: string;
   readonly phone?: string;
+  readonly designation?: string;
   readonly bio?: string;
   readonly affiliation?: string;
   readonly mailingAddress?: string;
   readonly permanentAddress?: string;
-  // specialization and institution are read-only (set during registration)
   readonly primaryResearchInterest?: string;
   readonly secondaryResearchInterest?: string;
   readonly educationQualifications?: readonly EducationQualification[];

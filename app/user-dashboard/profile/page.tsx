@@ -26,14 +26,28 @@ import {
   Loader2,
   Plus,
   Trash2,
-  GraduationCap
+  GraduationCap,
+  AtSign,
+  Briefcase,
+  FileText,
+  Check,
+  Info
 } from "lucide-react";
 import { useRequireAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import type { UserUpdateInput } from "@/types/api";
 import { useAsyncSubmit } from "@/hooks/use-async";
 import { ApiError } from "@/lib/api-client";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { toast } from "react-toastify";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+const USERNAME_REGEX = /^[a-z0-9_]+$/;
 
 function ProfilePageContent() {
   const { user, isLoading, isAuthorized, updateUser, refreshUser } = useRequireAuth();
@@ -53,10 +67,13 @@ function ProfilePageContent() {
     refNo: "",
     name: "",
     email: "",
+    username: "",
     phone: "",
+    designation: "",
     affiliation: "",
     mailingAddress: "",
     permanentAddress: "",
+    bio: "",
     primaryResearchInterest: "",
     secondaryResearchInterest: "",
     educationQualifications: [] as Array<{ qualification: string; year: string; institution: string }>,
@@ -65,6 +82,11 @@ function ProfilePageContent() {
     newPassword: "",
     confirmPassword: ""
   });
+
+  const [usernameAvailability, setUsernameAvailability] = useState<{
+    checking: boolean;
+    available: boolean | null;
+  }>({ checking: false, available: null });
 
   // Fetch fresh user data when component mounts
   useEffect(() => {
@@ -85,7 +107,40 @@ function ProfilePageContent() {
     
     loadUserData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount - refreshUser is stable from useCallback
+  }, []);
+
+  // Username availability check (debounced, skip if unchanged from current user)
+  const currentUsername = (user as { username?: string })?.username?.toLowerCase();
+  useEffect(() => {
+    const username = formData.username?.trim().toLowerCase();
+    if (!username || username.length < 3) {
+      setUsernameAvailability({ checking: false, available: null });
+      return;
+    }
+    if (!USERNAME_REGEX.test(username)) {
+      setUsernameAvailability({ checking: false, available: null });
+      return;
+    }
+    if (username === currentUsername) {
+      setUsernameAvailability({ checking: false, available: true });
+      return;
+    }
+    setUsernameAvailability({ checking: true, available: null });
+    const timeoutId = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/users/check-username?username=${encodeURIComponent(username)}`,
+          { headers: { "Content-Type": "application/json" } }
+        );
+        const data = await res.json();
+        const available = data.success === true && data.available === true;
+        setUsernameAvailability({ checking: false, available });
+      } catch {
+        setUsernameAvailability({ checking: false, available: null });
+      }
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [formData.username, currentUsername]);
 
   // Loading state for profile update
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -148,17 +203,20 @@ function ProfilePageContent() {
   // Update form data when user data is loaded or updated
   useEffect(() => {
     if (user) {
+      const u = user as { username?: string; designation?: string; formNo?: string; refNo?: string };
       setFormData(prev => {
-        // Only update if user data has actually changed to avoid unnecessary re-renders
         const newFormData = {
-          formNo: (user as any).formNo || "",
-          refNo: (user as any).refNo || "",
+          formNo: u.formNo || "",
+          refNo: u.refNo || "",
           name: user.name || "",
           email: user.email || "",
+          username: u.username || "",
           phone: user.phone || "",
+          designation: u.designation || "",
           affiliation: user.affiliation || "",
           mailingAddress: user.mailingAddress || "",
           permanentAddress: user.permanentAddress || "",
+          bio: user.bio || "",
           primaryResearchInterest: user.primaryResearchInterest || "",
           secondaryResearchInterest: user.secondaryResearchInterest || "",
           educationQualifications: user.educationQualifications && user.educationQualifications.length > 0 
@@ -179,16 +237,18 @@ function ProfilePageContent() {
           confirmPassword: prev.confirmPassword
         };
         
-        // Check if data actually changed
         const hasChanged = 
           prev.formNo !== newFormData.formNo ||
           prev.refNo !== newFormData.refNo ||
           prev.name !== newFormData.name ||
           prev.email !== newFormData.email ||
+          prev.username !== newFormData.username ||
           prev.phone !== newFormData.phone ||
+          prev.designation !== newFormData.designation ||
           prev.affiliation !== newFormData.affiliation ||
           prev.mailingAddress !== newFormData.mailingAddress ||
           prev.permanentAddress !== newFormData.permanentAddress ||
+          prev.bio !== newFormData.bio ||
           prev.primaryResearchInterest !== newFormData.primaryResearchInterest ||
           prev.secondaryResearchInterest !== newFormData.secondaryResearchInterest ||
           JSON.stringify(prev.educationQualifications) !== JSON.stringify(newFormData.educationQualifications) ||
@@ -238,59 +298,83 @@ function ProfilePageContent() {
     isSavingRef.current = true;
 
     setIsSaving(true);
+
+    // Validate username if changed
+    const username = formData.username?.trim().toLowerCase();
+    const currentUser = user as { username?: string };
+    if (username && username !== currentUser?.username?.toLowerCase()) {
+      if (username.length < 3) {
+        toast.error("Username must be at least 3 characters");
+        setIsSaving(false);
+        isSavingRef.current = false;
+        return;
+      }
+      if (!USERNAME_REGEX.test(username)) {
+        toast.error("Username can only contain lowercase letters, numbers, and underscores");
+        setIsSaving(false);
+        isSavingRef.current = false;
+        return;
+      }
+      if (usernameAvailability.checking) {
+        toast.error("Please wait while we verify username availability");
+        setIsSaving(false);
+        isSavingRef.current = false;
+        return;
+      }
+      if (usernameAvailability.available === false) {
+        toast.error("Username is already taken. Please choose a different username.");
+        setIsSaving(false);
+        isSavingRef.current = false;
+        return;
+      }
+    }
     
-    // Prepare data for API call (excluding read-only fields)
-    const updateData: any = {
-      formNo: formData.formNo || undefined,
-      refNo: formData.refNo || undefined,
+    const eduFiltered = formData.educationQualifications
+      .filter(edu => edu.qualification.trim() !== "" && edu.institution.trim() !== "")
+      .map(edu => ({ qualification: edu.qualification, year: edu.year, institution: edu.institution }));
+    const trainFiltered = formData.training
+      .filter(t => t.period.trim() !== "" && t.institute.trim() !== "")
+      .map(t => ({ period: t.period, institute: t.institute }));
+
+    const cleaned = {
       name: formData.name,
-      phone: formData.phone,
-      affiliation: formData.affiliation,
-      mailingAddress: formData.mailingAddress,
-      permanentAddress: formData.permanentAddress,
-      primaryResearchInterest: formData.primaryResearchInterest || undefined,
-      secondaryResearchInterest: formData.secondaryResearchInterest || undefined,
-      educationQualifications: formData.educationQualifications
-        .filter(edu => edu.qualification.trim() !== "" && edu.institution.trim() !== "")
-        .map(edu => ({
-          qualification: edu.qualification,
-          year: edu.year,
-          institution: edu.institution
-        })),
-      training: formData.training
-        .filter(t => t.period.trim() !== "" && t.institute.trim() !== "")
-        .map(t => ({
-          period: t.period,
-          institute: t.institute
-        })),
+      ...(formData.formNo && { formNo: formData.formNo }),
+      ...(formData.refNo && { refNo: formData.refNo }),
+      ...(formData.email && { email: formData.email }),
+      ...(formData.username?.trim() && { username: formData.username.trim() }),
+      ...(formData.phone && { phone: formData.phone }),
+      ...(formData.designation && { designation: formData.designation }),
+      ...(formData.affiliation && { affiliation: formData.affiliation }),
+      ...(formData.mailingAddress && { mailingAddress: formData.mailingAddress }),
+      ...(formData.permanentAddress && { permanentAddress: formData.permanentAddress }),
+      ...(formData.bio && { bio: formData.bio }),
+      ...(formData.primaryResearchInterest && { primaryResearchInterest: formData.primaryResearchInterest }),
+      ...(formData.secondaryResearchInterest && { secondaryResearchInterest: formData.secondaryResearchInterest }),
+      ...(eduFiltered.length > 0 && { educationQualifications: eduFiltered }),
+      ...(trainFiltered.length > 0 && { training: trainFiltered }),
     };
 
-    // Remove undefined values
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] === undefined) {
-        delete updateData[key];
-      }
-    });
-
-    // Direct API call to ensure it actually happens
     setUpdateLoading(true);
     try {
-      const updatedUser = await api.users.updateProfile(updateData);
+      const updatedUser = await api.users.updateProfile(cleaned as UserUpdateInput);
       
       // Update local state with the updated user data from API response
       updateUser(updatedUser);
       
-      // Update form data directly with the updated user data
-      // No need to refresh from server since we already have the latest data
+      const u = updatedUser as { formNo?: string; refNo?: string; username?: string; designation?: string };
       setFormData(prev => ({
         ...prev,
-        formNo: (updatedUser as any).formNo || "",
-        refNo: (updatedUser as any).refNo || "",
+        formNo: u.formNo || "",
+        refNo: u.refNo || "",
         name: updatedUser.name || "",
+        email: updatedUser.email || "",
+        username: u.username || "",
         phone: updatedUser.phone || "",
+        designation: u.designation || "",
         affiliation: updatedUser.affiliation || "",
         mailingAddress: updatedUser.mailingAddress || "",
         permanentAddress: updatedUser.permanentAddress || "",
+        bio: updatedUser.bio || "",
         primaryResearchInterest: updatedUser.primaryResearchInterest || "",
         secondaryResearchInterest: updatedUser.secondaryResearchInterest || "",
         educationQualifications: updatedUser.educationQualifications && updatedUser.educationQualifications.length > 0 
@@ -470,8 +554,14 @@ function ProfilePageContent() {
               </Badge>
             </CardHeader>
             <CardContent className="space-y-4">
+              {(user as { username?: string })?.username && (
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <AtSign className="h-4 w-4 flex-shrink-0" />
+                  <span>@{((user as { username?: string }).username)}</span>
+                </div>
+              )}
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Mail className="h-4 w-4" />
+                <Mail className="h-4 w-4 flex-shrink-0" />
                 <span>{user?.email || "user@example.com"}</span>
               </div>
               {user?.phone && (
@@ -600,35 +690,128 @@ function ProfilePageContent() {
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     disabled={!isEditing}
+                    placeholder="Your full name"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    disabled
-                    className="bg-gray-50 cursor-not-allowed"
-                    title="Email cannot be changed"
-                  />
+                  <Label htmlFor="username" className="flex items-center gap-1.5">
+                    Username
+                    <span className="text-xs text-muted-foreground">(min 3 chars, a-z, 0-9, _)</span>
+                  </Label>
+                  <div className="relative">
+                    <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="username"
+                      value={formData.username}
+                      onChange={(e) => {
+                        const v = e.target.value.toLowerCase();
+                        handleInputChange("username", v);
+                      }}
+                      disabled={!isEditing}
+                      placeholder="johndoe123"
+                      className={`pl-9 pr-10 ${
+                        usernameAvailability.available === false ? "border-destructive" : ""
+                      }`}
+                    />
+                    {usernameAvailability.checking && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </span>
+                    )}
+                    {!usernameAvailability.checking && usernameAvailability.available === true && (
+                      <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                    )}
+                    {!usernameAvailability.checking && usernameAvailability.available === false && formData.username && (
+                      <X className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
+                    )}
+                  </div>
+                  {usernameAvailability.available === false && formData.username && (
+                    <p className="text-xs text-destructive">Username is already taken</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="flex items-center gap-1.5">
+                    Email Address
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">Changing email will require re-verification. Your account will show as unverified until you verify the new email.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="you@example.com"
+                      className="pl-9"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    disabled={!isEditing}
-                  />
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange("phone", e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="+880..."
+                      className="pl-9"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="affiliation">Institution/Affiliation</Label>
-                  <Input
-                    id="affiliation"
-                    value={formData.affiliation}
-                    onChange={(e) => handleInputChange("affiliation", e.target.value)}
+                  <Label htmlFor="designation">Designation</Label>
+                  <div className="relative">
+                    <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="designation"
+                      value={formData.designation}
+                      onChange={(e) => handleInputChange("designation", e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="e.g. Assistant Professor, Consultant"
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="affiliation">Institution / Affiliation</Label>
+                  <div className="relative">
+                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="affiliation"
+                      value={formData.affiliation}
+                      onChange={(e) => handleInputChange("affiliation", e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="e.g. Dhaka Medical College Hospital"
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Textarea
+                    id="bio"
+                    value={formData.bio}
+                    onChange={(e) => handleInputChange("bio", e.target.value)}
                     disabled={!isEditing}
+                    rows={3}
+                    placeholder="A brief professional bio about yourself"
+                    className="pl-9"
                   />
                 </div>
               </div>

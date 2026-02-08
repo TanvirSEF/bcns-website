@@ -26,6 +26,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { api } from "@/lib/api"
 import type { User } from "@/types/api"
@@ -35,6 +42,7 @@ export default function MembersPage() {
   const [filteredMembers, setFilteredMembers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null)
 
   const fetchMembers = async () => {
     try {
@@ -90,16 +98,151 @@ export default function MembersPage() {
     })
   }
 
-  const getRoleBadgeVariant = (role?: string) => {
-    switch (role?.toLowerCase()) {
-      case "admin":
-        return "destructive"
-      case "moderator":
-        return "secondary"
-      default:
-        return "outline"
+  // Split members into Lifetime and General tables
+  const lifetimeMembers = filteredMembers.filter(
+    (m) => m.membershipType === "lifetime"
+  )
+  const generalMembers = filteredMembers.filter(
+    (m) => m.membershipType !== "lifetime"
+  )
+
+  const handleMembershipStatusChange = async (
+    userId: string,
+    membershipStatus: "active" | "inactive"
+  ) => {
+    setUpdatingMemberId(userId)
+    const previousMembers = [...members]
+    try {
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === userId ? ({ ...m, membershipStatus } as User) : m
+        )
+      )
+      setFilteredMembers((prev) =>
+        prev.map((m) =>
+          m.id === userId ? ({ ...m, membershipStatus } as User) : m
+        )
+      )
+      await api.admin.updateMembershipStatus(userId, membershipStatus)
+      toast.success(
+        membershipStatus === "active"
+          ? "Membership activated successfully"
+          : "Membership deactivated successfully"
+      )
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to update membership status"
+      toast.error(message)
+      setMembers(previousMembers)
+      setFilteredMembers(previousMembers)
+    } finally {
+      setUpdatingMemberId(null)
     }
   }
+
+  const MemberRow = ({ member }: { member: User }) => (
+    <TableRow key={member.id}>
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <Avatar>
+            <AvatarImage src={member.profilePictureUrl} />
+            <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium">{member.name}</div>
+            {member.bio && (
+              <div className="text-sm text-muted-foreground truncate max-w-[200px]">
+                {member.bio}
+              </div>
+            )}
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm">
+            <Mail className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground">{member.email}</span>
+          </div>
+          {member.phone && (
+            <div className="flex items-center gap-2 text-sm">
+              <Phone className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">{member.phone}</span>
+            </div>
+          )}
+          {member.mailingAddress && (
+            <div className="flex items-center gap-2 text-sm">
+              <MapPin className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground truncate max-w-[150px]">
+                {member.mailingAddress}
+              </span>
+            </div>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        {member.affiliation ? (
+          <div className="flex items-center gap-2">
+            <Building className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{member.affiliation}</span>
+          </div>
+        ) : (
+          <span className="text-sm text-muted-foreground">N/A</span>
+        )}
+      </TableCell>
+      <TableCell>
+        {member.membershipType ? (
+          <Badge variant={member.membershipType === "lifetime" ? "default" : "secondary"}>
+            {member.membershipType === "general" ? "General" : "Lifetime"}
+          </Badge>
+        ) : (
+          <span className="text-sm text-muted-foreground">N/A</span>
+        )}
+      </TableCell>
+      <TableCell>
+        {member.memberId ? (
+          <span className="text-sm font-mono">{member.memberId}</span>
+        ) : (
+          <span className="text-sm text-muted-foreground">N/A</span>
+        )}
+      </TableCell>
+      <TableCell>
+        <Select
+          value={member.membershipStatus || "inactive"}
+          onValueChange={(value) =>
+            handleMembershipStatusChange(member.id, value as "active" | "inactive")
+          }
+          disabled={updatingMemberId === member.id}
+        >
+          <SelectTrigger
+            size="sm"
+            className={`w-[115px] ${
+              member.membershipStatus === "active"
+                ? "border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-400"
+                : "border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              {updatingMemberId === member.id && (
+                <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
+              )}
+              <SelectValue placeholder="Status" />
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Calendar className="h-3 w-3" />
+          {formatDate(member.createdAt)}
+        </div>
+      </TableCell>
+    </TableRow>
+  )
 
   return (
     <div className="space-y-8">
@@ -122,16 +265,25 @@ export default function MembersPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Total Members
+            Members Summary
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{members.length}</div>
-          <p className="text-sm text-muted-foreground mt-1">
-            {filteredMembers.length === members.length
-              ? "All members displayed"
-              : `${filteredMembers.length} filtered from ${members.length} total`}
-          </p>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Lifetime Members</p>
+              <div className="text-2xl font-bold">{lifetimeMembers.length}</div>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">General Members</p>
+              <div className="text-2xl font-bold">{generalMembers.length}</div>
+            </div>
+          </div>
+          {filteredMembers.length !== members.length && (
+            <p className="text-sm text-muted-foreground mt-4">
+              {filteredMembers.length} filtered from {members.length} total
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -156,29 +308,29 @@ export default function MembersPage() {
         </CardContent>
       </Card>
 
-      {/* Members Table */}
+      {/* Lifetime Members Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Members List</CardTitle>
+          <CardTitle>Lifetime Members</CardTitle>
           <CardDescription>
-            Complete list of all registered members
+            Members with lifetime membership
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex items-center justify-center h-48">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : filteredMembers.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
+          ) : lifetimeMembers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-48 text-center">
               <UserCheck className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">
-                {searchQuery ? "No members found" : "No members yet"}
+                {searchQuery ? "No lifetime members found" : "No lifetime members yet"}
               </h3>
               <p className="text-sm text-muted-foreground">
                 {searchQuery
                   ? "Try adjusting your search criteria"
-                  : "Members will appear here once they register"}
+                  : "Lifetime members will appear here once they register"}
               </p>
             </div>
           ) : (
@@ -189,85 +341,65 @@ export default function MembersPage() {
                     <TableHead>Member</TableHead>
                     <TableHead>Contact</TableHead>
                     <TableHead>Affiliation</TableHead>
-                    <TableHead>Role</TableHead>
+                    <TableHead>Membership Type</TableHead>
+                    <TableHead>Member ID</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Joined</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredMembers.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={member.profilePictureUrl} />
-                            <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">{member.name}</div>
-                            {member.bio && (
-                              <div className="text-sm text-muted-foreground truncate max-w-[200px]">
-                                {member.bio}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-muted-foreground">{member.email}</span>
-                          </div>
-                          {member.phone && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Phone className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-muted-foreground">{member.phone}</span>
-                            </div>
-                          )}
-                          {member.mailingAddress && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <MapPin className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-muted-foreground truncate max-w-[150px]">
-                                {member.mailingAddress}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {member.affiliation ? (
-                          <div className="flex items-center gap-2">
-                            <Building className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">{member.affiliation}</span>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">N/A</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getRoleBadgeVariant(member.role)}>
-                          {member.role || "member"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            member.membershipStatus === "active"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {member.membershipStatus || "active"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(member.createdAt)}
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                  {lifetimeMembers.map((member) => (
+                    <MemberRow key={member.id} member={member} />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* General Members Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>General Members</CardTitle>
+          <CardDescription>
+            Members with general (regular) membership
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center h-48">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : generalMembers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-48 text-center">
+              <UserCheck className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">
+                {searchQuery ? "No general members found" : "No general members yet"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {searchQuery
+                  ? "Try adjusting your search criteria"
+                  : "General members will appear here once they register"}
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Member</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Affiliation</TableHead>
+                    <TableHead>Membership Type</TableHead>
+                    <TableHead>Member ID</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Joined</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {generalMembers.map((member) => (
+                    <MemberRow key={member.id} member={member} />
                   ))}
                 </TableBody>
               </Table>

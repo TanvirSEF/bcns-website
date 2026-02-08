@@ -221,6 +221,17 @@ export const adminApi = {
     const response = await apiClient.delete<OperationResponse>(`/users/admin/${userId}/delete`);
     return handleApiResponse<OperationResponse>(response);
   },
+
+  updateMembershipStatus: async (
+    userId: string,
+    membershipStatus: "active" | "inactive"
+  ): Promise<OperationResponse> => {
+    const response = await apiClient.patch<OperationResponse>(
+      `/users/admin/${userId}/membership-status`,
+      { membershipStatus }
+    );
+    return handleApiResponse<OperationResponse>(response);
+  },
 };
 
 // Event API

@@ -10,6 +10,7 @@ interface BackendUser {
   role?: string;
   phone?: string;
   affiliation?: string;
+  designation?: string;
   mailingAddress?: string;
   permanentAddress?: string;
   address?: string;
@@ -23,6 +24,8 @@ interface BackendUser {
   approvalStatus?: string;
   isEmailVerified?: boolean;
   membershipStatus?: string;
+  membershipType?: 'general' | 'lifetime';
+  memberId?: string;
   primaryResearchInterest?: string;
   secondaryResearchInterest?: string;
   educationQualifications?: Array<{
@@ -105,28 +108,32 @@ export async function GET(request: NextRequest) {
     }
 
     // Map to frontend format
-    const formattedUsers = users.map((user: BackendUser) => ({
-      id: user._id || user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role || "member",
-      phone: user.phone || "",
-      affiliation: user.affiliation || "",
-      mailingAddress: user.mailingAddress || user.address || "",
-      permanentAddress: user.permanentAddress || "",
-      bio: user.bio || "",
-      profilePictureUrl: user.profilePictureUrl || user.profile_picture_url,
-      createdAt: user.createdAt || user.created_at,
-      updatedAt: user.updatedAt || user.updated_at,
-      approvalStatus: user.approvalStatus || "approved",
-      isEmailVerified: user.isEmailVerified || false,
-      membershipStatus: user.membershipStatus || "active",
-      primaryResearchInterest: user.primaryResearchInterest || "",
-      secondaryResearchInterest: user.secondaryResearchInterest || "",
-      educationQualifications: user.educationQualifications || [],
-      training: user.training || [],
-      documents: user.documents || [],
-    }));
+    const formattedUsers = users.map((user: BackendUser) => {
+      return {
+        id: user._id || user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role || "member",
+        phone: user.phone || "",
+        affiliation: user.affiliation || "",
+        mailingAddress: user.mailingAddress || user.address || "",
+        permanentAddress: user.permanentAddress || "",
+        bio: user.bio || "",
+        profilePictureUrl: user.profilePictureUrl || user.profile_picture_url,
+        createdAt: user.createdAt || user.created_at,
+        updatedAt: user.updatedAt || user.updated_at,
+        approvalStatus: user.approvalStatus || "approved",
+        isEmailVerified: user.isEmailVerified || false,
+        membershipStatus: user.membershipStatus || "active",
+        membershipType: user.membershipType,
+        memberId: user.memberId,
+        primaryResearchInterest: user.primaryResearchInterest || "",
+        secondaryResearchInterest: user.secondaryResearchInterest || "",
+        educationQualifications: user.educationQualifications || [],
+        training: user.training || [],
+        documents: user.documents || [],
+      };
+    });
 
     return NextResponse.json({
       success: true,
