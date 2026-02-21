@@ -20,6 +20,20 @@ function getToken(request: NextRequest): string | null {
   return request.cookies.get("auth_token")?.value || null;
 }
 
+function normalizeId(idInfo: any): string {
+  if (!idInfo) return "";
+  if (typeof idInfo === "string") return idInfo;
+  if (typeof idInfo === "object" && idInfo.$oid) return idInfo.$oid;
+  return String(idInfo);
+}
+
+function normalizeDate(dateInfo: any): string {
+  if (!dateInfo) return new Date().toISOString();
+  if (typeof dateInfo === "string") return dateInfo;
+  if (typeof dateInfo === "object" && dateInfo.$date) return dateInfo.$date;
+  return new Date().toISOString();
+}
+
 // GET /api/gallery/albums - Get all albums
 export async function GET(request: NextRequest) {
   try {
@@ -63,14 +77,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Map to frontend format
-    const formattedAlbums = albums.map((album: BackendAlbum) => ({
-      id: album._id || album.id || "",
+    const formattedAlbums = albums.map((album: BackendAlbum, index: number) => ({
+      id: normalizeId(album._id || album.id) || `album-${index}`,
       title: album.title,
       description: album.description || "",
       coverPhoto: album.coverPhoto || undefined,
       photoCount: album.photoCount || 0,
-      createdAt: album.createdAt || new Date().toISOString(),
-      updatedAt: album.updatedAt || new Date().toISOString(),
+      createdAt: normalizeDate(album.createdAt),
+      updatedAt: normalizeDate(album.updatedAt),
     }));
 
     return NextResponse.json({
@@ -142,13 +156,13 @@ export async function POST(request: NextRequest) {
     const album = data.album || data.data || data;
 
     const formattedAlbum = {
-      id: album._id || album.id || "",
+      id: normalizeId(album._id || album.id),
       title: album.title,
       description: album.description || "",
       coverPhoto: album.coverPhoto || undefined,
       photoCount: album.photoCount || 0,
-      createdAt: album.createdAt || new Date().toISOString(),
-      updatedAt: album.updatedAt || new Date().toISOString(),
+      createdAt: normalizeDate(album.createdAt),
+      updatedAt: normalizeDate(album.updatedAt),
     };
 
     return NextResponse.json({

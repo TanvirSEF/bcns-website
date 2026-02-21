@@ -7,10 +7,12 @@ interface BackendUser {
   id?: string;
   name: string;
   email: string;
+  username?: string;
   role?: string;
   phone?: string;
   affiliation?: string;
   designation?: string;
+  specialization?: string;
   mailingAddress?: string;
   permanentAddress?: string;
   address?: string;
@@ -113,9 +115,12 @@ export async function GET(request: NextRequest) {
         id: user._id || user.id,
         name: user.name,
         email: user.email,
+        username: user.username,
         role: user.role || "member",
         phone: user.phone || "",
         affiliation: user.affiliation || "",
+        designation: user.designation || "",
+        specialization: user.specialization || "",
         mailingAddress: user.mailingAddress || user.address || "",
         permanentAddress: user.permanentAddress || "",
         bio: user.bio || "",
@@ -143,11 +148,11 @@ export async function GET(request: NextRequest) {
     console.error("Users API error:", error);
     const errorMessage = getErrorMessage(error);
     const statusCode = getErrorStatusCode(error);
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
-        message: errorMessage || "Failed to fetch users" 
+      {
+        success: false,
+        message: errorMessage || "Failed to fetch users"
       },
       { status: statusCode }
     );

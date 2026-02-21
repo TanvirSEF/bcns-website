@@ -51,10 +51,10 @@ export default function GalleryManagement() {
             const photos = await api.gallery.getAlbumPhotos(album.id);
             const photoCount = photos.length;
             const firstPhoto = photos[0];
-            
+
             // Update album with accurate photo count
             let updatedAlbum: Album = { ...album, photoCount } as Album;
-            
+
             // If album has photos but no cover photo, set first photo as cover
             if (firstPhoto && firstPhoto.imageUrl && !album.coverPhoto) {
               const coverPhotoUrl = String(firstPhoto.imageUrl);
@@ -63,7 +63,7 @@ export default function GalleryManagement() {
               // Keep existing cover photo
               updatedAlbum = { ...updatedAlbum, coverPhoto: album.coverPhoto } as Album;
             }
-            
+
             return updatedAlbum;
           } catch (error) {
             // If fetching photos fails, use the album as is with backend photoCount
@@ -85,11 +85,11 @@ export default function GalleryManagement() {
     try {
       const response = await api.gallery.getAlbumPhotos(albumId);
       setPhotos([...response]);
-      
+
       // Update album photo count and cover photo in state
       const photoCount = response.length;
       const firstPhoto = response[0];
-      
+
       setAlbums((prevAlbums) =>
         prevAlbums.map((album) => {
           if (album.id === albumId) {
@@ -97,7 +97,7 @@ export default function GalleryManagement() {
             if (firstPhoto && firstPhoto.imageUrl && !album.coverPhoto) {
               return { ...album, photoCount, coverPhoto: String(firstPhoto.imageUrl) } as Album;
             }
-            
+
             return { ...album, photoCount };
           }
           return album;
@@ -121,7 +121,7 @@ export default function GalleryManagement() {
         ...(albumFormData.description && { description: albumFormData.description }),
         ...(albumFormData.coverPhoto && { coverPhoto: albumFormData.coverPhoto }),
       });
-      
+
       toast.success("Album created successfully");
       setIsCreateAlbumDialogOpen(false);
       setAlbumFormData({ title: "", description: "", coverPhoto: "" });
@@ -158,24 +158,24 @@ export default function GalleryManagement() {
       for (let i = 0; i < photoFormData.photoFiles.length; i++) {
         const file = photoFormData.photoFiles[i];
         if (!file) continue;
-        
+
         try {
           const uploadedPhoto = await api.gallery.uploadPhoto(selectedAlbum.id, {
             ...(photoFormData.caption && { caption: photoFormData.caption }),
             photo: file,
           });
-          
+
           // If this is the first photo in the album, save its URL for cover photo
           if (isFirstPhoto && i === 0 && uploadedPhoto.imageUrl) {
             firstUploadedPhotoUrl = uploadedPhoto.imageUrl;
           }
-          
+
           successCount++;
         } catch (error) {
           console.error(`Error uploading file ${file.name}:`, error);
           failCount++;
         }
-        
+
         // Update progress
         setUploadProgress(((i + 1) / totalFiles) * 100);
       }
@@ -184,7 +184,7 @@ export default function GalleryManagement() {
       if (isFirstPhoto && firstUploadedPhotoUrl && selectedAlbum && successCount > 0) {
         // Convert imageUrl to string (URL type is string alias)
         const coverPhotoUrl = String(firstUploadedPhotoUrl);
-        
+
         // Update the album in the albums state to show cover photo
         setAlbums((prevAlbums) =>
           prevAlbums.map((album) =>
@@ -193,7 +193,7 @@ export default function GalleryManagement() {
               : album
           )
         );
-        
+
         // Also update selectedAlbum state if it's still selected
         setSelectedAlbum((prev) =>
           prev && prev.id === selectedAlbum.id
@@ -215,17 +215,17 @@ export default function GalleryManagement() {
 
       setIsUploadPhotoDialogOpen(false);
       setPhotoFormData({ caption: "", albumId: "", photoFiles: [] });
-      
+
       if (selectedAlbum && successCount > 0) {
         // Fetch photos to update the list and cover photo
         await fetchPhotos(selectedAlbum.id);
-        
+
         // Update selected album state with latest data
         const updatedAlbums = await api.gallery.getAlbums();
         const foundAlbum = updatedAlbums.find(a => a.id === selectedAlbum.id);
         if (foundAlbum) {
           let updatedAlbum = { ...foundAlbum };
-          
+
           // If album has no cover photo but has photos, get the first photo as cover
           if (!updatedAlbum.coverPhoto && updatedAlbum.photoCount > 0) {
             try {
@@ -239,7 +239,7 @@ export default function GalleryManagement() {
             }
           }
           setSelectedAlbum(updatedAlbum);
-          
+
           // Update albums list state
           setAlbums((prevAlbums) =>
             prevAlbums.map((album) => {
@@ -265,7 +265,7 @@ export default function GalleryManagement() {
     try {
       // TODO: Replace with actual API call
       // await deletePhoto(_photoId);
-      
+
       toast.success("Photo deleted successfully");
       if (selectedAlbum) {
         fetchPhotos(selectedAlbum.id);
@@ -480,9 +480,9 @@ export default function GalleryManagement() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {albums.map((album) => (
-                  <Card 
-                    key={album.id} 
+                {albums.map((album, index) => (
+                  <Card
+                    key={`${album.id}-${index}`}
                     className="cursor-pointer border border-gray-200 overflow-hidden bg-white p-0 max-w-sm mx-auto"
                     onClick={() => openAlbum(album)}
                   >
@@ -500,7 +500,7 @@ export default function GalleryManagement() {
                           <ImageIcon className="h-16 w-16 text-muted-foreground" />
                         </div>
                       )}
-                      
+
                       {/* Photo count badge */}
                       <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm font-semibold text-gray-800 shadow-sm">
                         {album.photoCount || 0} photos
@@ -567,7 +567,7 @@ export default function GalleryManagement() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {photos.map((photo, index) => (
                     <div
-                      key={photo.id}
+                      key={`${photo.id}-${index}`}
                       className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
                       onClick={() => {
                         setCurrentImageIndex(index);
@@ -584,14 +584,14 @@ export default function GalleryManagement() {
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                        
+
                         {/* Zoom Icon */}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <div className="bg-white/90 backdrop-blur-sm rounded-full p-3">
                             <Camera className="h-6 w-6 text-gray-800" />
                           </div>
                         </div>
-                        
+
                         {/* Delete button overlay */}
                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <Button
@@ -624,12 +624,12 @@ export default function GalleryManagement() {
           isOpen={lightboxOpen}
           onClose={() => setLightboxOpen(false)}
           onNext={() => {
-            setCurrentImageIndex((prev) => 
+            setCurrentImageIndex((prev) =>
               prev === photos.length - 1 ? 0 : prev + 1
             );
           }}
           onPrevious={() => {
-            setCurrentImageIndex((prev) => 
+            setCurrentImageIndex((prev) =>
               prev === 0 ? photos.length - 1 : prev - 1
             );
           }}

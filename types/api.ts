@@ -44,6 +44,14 @@ export interface PollOption {
   readonly votes: number;
 }
 
+export interface UserDocument {
+  readonly _id?: any;
+  readonly title: string;
+  readonly fileUrl: string;
+  readonly status: string;
+  readonly uploadedAt?: any;
+}
+
 export interface User {
   readonly id: UUID;
   readonly name: string;
@@ -83,6 +91,8 @@ export interface User {
   readonly publicationsThisWeek: number;
   readonly networkConnections: number;
   readonly newConnections: number;
+  readonly documentUrls?: readonly string[];
+  readonly documents?: readonly UserDocument[];
 }
 
 export interface Event {

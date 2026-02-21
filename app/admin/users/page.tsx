@@ -9,7 +9,8 @@ import {
   Users,
   CheckCircle2,
   Clock,
-  Loader2
+  Loader2,
+  Eye
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -33,6 +34,7 @@ import {
 import { api, type PendingUser, type ApprovalStats } from "@/lib/api"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ApproveUserDialog } from "@/components/admin/ApproveUserDialog"
+import { UserDetailsDialog } from "@/components/admin/UserDetailsDialog"
 
 export default function UsersPage() {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([])
@@ -41,6 +43,7 @@ export default function UsersPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [approveDialogOpen, setApproveDialogOpen] = useState(false)
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<PendingUser | null>(null)
 
   const fetchData = async () => {
@@ -67,6 +70,11 @@ export default function UsersPage() {
   const handleApproveClick = (user: PendingUser) => {
     setSelectedUser(user)
     setApproveDialogOpen(true)
+  }
+
+  const handleDetailsClick = (user: PendingUser) => {
+    setSelectedUser(user)
+    setDetailsDialogOpen(true)
   }
 
   const handleApproveConfirm = async (memberId: string, adminNotes?: string) => {
@@ -241,6 +249,15 @@ export default function UsersPage() {
                         <div className="flex items-center justify-end gap-2">
                           <Button
                             size="sm"
+                            variant="outline"
+                            onClick={() => handleDetailsClick(user)}
+                            className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10"
+                            title="View full details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
                             variant="default"
                             onClick={() => handleApproveClick(user)}
                             disabled={actionLoading === user.id}
@@ -323,6 +340,13 @@ export default function UsersPage() {
         onOpenChange={setApproveDialogOpen}
         onConfirm={handleApproveConfirm}
         loading={actionLoading === selectedUser?.id}
+      />
+
+      {/* User Details Dialog */}
+      <UserDetailsDialog
+        user={selectedUser}
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
       />
     </div>
   )

@@ -23,6 +23,20 @@ function getToken(request: NextRequest): string | null {
   return request.cookies.get("auth_token")?.value || null;
 }
 
+function normalizeId(idInfo: any): string {
+  if (!idInfo) return "";
+  if (typeof idInfo === "string") return idInfo;
+  if (typeof idInfo === "object" && idInfo.$oid) return idInfo.$oid;
+  return String(idInfo);
+}
+
+function normalizeDate(dateInfo: any): string {
+  if (!dateInfo) return new Date().toISOString();
+  if (typeof dateInfo === "string") return dateInfo;
+  if (typeof dateInfo === "object" && dateInfo.$date) return dateInfo.$date;
+  return new Date().toISOString();
+}
+
 // GET /api/gallery/albums/[albumId]/photos - Get all photos in an album
 export async function GET(
   request: NextRequest,
@@ -81,14 +95,14 @@ export async function GET(
     }
 
     // Map to frontend format
-    const formattedPhotos = photos.map((photo: BackendPhoto) => ({
-      id: photo._id || photo.id || "",
+    const formattedPhotos = photos.map((photo: BackendPhoto, index: number) => ({
+      id: normalizeId(photo._id || photo.id) || `photo-${index}`,
       title: photo.caption || photo.title || "",
       description: photo.description || "",
       imageUrl: photo.imageUrl || "",
-      albumId: photo.albumId || photo.album || albumId,
-      uploadedBy: photo.uploadedBy || "",
-      createdAt: photo.createdAt || new Date().toISOString(),
+      albumId: normalizeId(photo.albumId || photo.album) || albumId,
+      uploadedBy: normalizeId(photo.uploadedBy) || "",
+      createdAt: normalizeDate(photo.createdAt),
     }));
 
     return NextResponse.json({
@@ -129,7 +143,7 @@ export async function POST(
     }
 
     const formData = await request.formData();
-    
+
     // Get file or image URL
     const photoFile = formData.get("photo") as File | null;
     const imageUrl = formData.get("imageUrl") as string | null;
@@ -170,7 +184,7 @@ export async function POST(
           { status: 400 }
         );
       }
-      
+
       // Validate file extension (png, jpeg, jpg, gif)
       const allowedExtensions = ['.png', '.jpeg', '.jpg', '.gif'];
       const fileName = photoFile.name.toLowerCase();
@@ -229,13 +243,13 @@ export async function POST(
     const extractedImageUrl = photo.imageUrl || photo.image_url || photo.url || imageUrl || "";
 
     const formattedPhoto = {
-      id: photo._id || photo.id || "",
+      id: normalizeId(photo._id || photo.id),
       title: photo.caption || photo.title || "",
       description: photo.description || "",
       imageUrl: extractedImageUrl,
-      albumId: photo.albumId || photo.album || albumId,
-      uploadedBy: photo.uploadedBy || "",
-      createdAt: photo.createdAt || new Date().toISOString(),
+      albumId: normalizeId(photo.albumId || photo.album) || albumId,
+      uploadedBy: normalizeId(photo.uploadedBy) || "",
+      createdAt: normalizeDate(photo.createdAt),
     };
 
     return NextResponse.json({
