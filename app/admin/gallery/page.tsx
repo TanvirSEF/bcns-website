@@ -259,19 +259,31 @@ export default function GalleryManagement() {
     }
   };
 
-  const handleDeletePhoto = async (_photoId: string) => {
+  const handleDeletePhoto = async (photoId: string) => {
     if (!confirm("Are you sure you want to delete this photo?")) return;
 
     try {
-      // TODO: Replace with actual API call
-      // await deletePhoto(_photoId);
+      if (!selectedAlbum) return;
+      await api.gallery.deletePhoto(selectedAlbum.id, photoId);
 
       toast.success("Photo deleted successfully");
-      if (selectedAlbum) {
-        fetchPhotos(selectedAlbum.id);
-      }
+      fetchPhotos(selectedAlbum.id);
     } catch (error) {
+      console.error("Error deleting photo:", error);
       toast.error("Failed to delete photo");
+    }
+  };
+
+  const handleDeleteAlbum = async (albumId: string) => {
+    if (!confirm("Are you sure you want to delete this entire album and all its photos? This action cannot be undone.")) return;
+
+    try {
+      await api.gallery.deleteAlbum(albumId);
+      toast.success("Album deleted successfully");
+      fetchAlbums();
+    } catch (error) {
+      console.error("Error deleting album:", error);
+      toast.error("Failed to delete album");
     }
   };
 
@@ -506,8 +518,22 @@ export default function GalleryManagement() {
                         {album.photoCount || 0} photos
                       </div>
                     </div>
-                    <div className="p-5 bg-white">
-                      <h3 className="font-semibold text-lg mb-2 text-gray-900">
+                    <div className="p-5 bg-white relative">
+                      {/* Delete album button */}
+                      <div className="absolute top-2 right-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteAlbum(album.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <h3 className="font-semibold text-lg mb-2 text-gray-900 pr-8">
                         {album.title}
                       </h3>
                       {album.description && (

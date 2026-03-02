@@ -31,8 +31,15 @@ import {
 } from '@/types/api';
 
 function handleApiResponse<T>(response: unknown): T {
-  if (typeof response !== 'object' || response === null) {
-    throw new Error('Invalid API response');
+  // If response is null, undefined or empty string but it reached here (meaning it was a success status),
+  // return it as successfully cast data, or an empty object if T is expected to be an object.
+  if (response === null || response === undefined || response === '') {
+    return {} as T;
+  }
+
+  if (typeof response !== 'object') {
+    // If it's a string (but not empty) or number, just return it
+    return response as T;
   }
 
   const apiResponse = response as Record<string, unknown>;
@@ -48,9 +55,9 @@ function handleApiResponse<T>(response: unknown): T {
     }
 
     if (apiResponse.success === true && !('data' in apiResponse)) {
-      // Return apiResponse without the success wrapper field to maintain type contract
-      const { success, ...dataWithoutWrapper } = apiResponse;
-      return dataWithoutWrapper as T;
+      // Return the whole response if no explicit data field exists
+      // This is common for OperationResponse types
+      return apiResponse as T;
     }
   }
 
@@ -315,6 +322,18 @@ export const galleryApi = {
       formData
     );
     return handleApiResponse<Photo>(response);
+  },
+
+  deleteAlbum: async (albumId: string): Promise<OperationResponse> => {
+    const response = await apiClient.delete<OperationResponse>(`/gallery/albums/${albumId}`);
+    return handleApiResponse<OperationResponse>(response);
+  },
+
+  deletePhoto: async (albumId: string, photoId: string): Promise<OperationResponse> => {
+    const response = await apiClient.delete<OperationResponse>(
+      `/gallery/albums/${albumId}/photos?photoId=${photoId}`
+    );
+    return handleApiResponse<OperationResponse>(response);
   },
 };
 

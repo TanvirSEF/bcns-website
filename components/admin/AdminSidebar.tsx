@@ -15,7 +15,6 @@ import {
   Database,
   FileBarChart,
   Building2,
-  Mail,
 } from "lucide-react";
 import { NavMain } from "./NavMain";
 import { NavSecondary } from "./NavSecondary";
@@ -70,11 +69,6 @@ const data = {
       title: "Analytics",
       url: "/admin/analytics",
       icon: BarChart3,
-    },
-    {
-      title: "Promotional Emails",
-      url: "/admin/promotional-emails",
-      icon: Mail,
     },
   ],
   navSecondary: [

@@ -1,20 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import config from "@/lib/config";
 
-interface BackendPhoto {
-  _id?: string;
-  id?: string;
-  title?: string;
-  caption?: string;
-  description?: string;
-  imageUrl?: string;
-  albumId?: string;
-  album?: string;
-  uploadedBy?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
 function getToken(request: NextRequest): string | null {
   const authHeader = request.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
@@ -25,8 +11,16 @@ function getToken(request: NextRequest): string | null {
 
 function normalizeId(idInfo: any): string {
   if (!idInfo) return "";
-  if (typeof idInfo === "string") return idInfo;
-  if (typeof idInfo === "object" && idInfo.$oid) return idInfo.$oid;
+  if (typeof idInfo === "string") {
+    return idInfo === "undefined" || idInfo === "null" ? "" : idInfo;
+  }
+  if (typeof idInfo === "object") {
+    if (idInfo.$oid) return String(idInfo.$oid);
+    if (idInfo.toString && typeof idInfo.toString === "function") {
+      const str = idInfo.toString();
+      return str === "[object Object]" ? "" : str;
+    }
+  }
   return String(idInfo);
 }
 
@@ -83,27 +77,36 @@ export async function GET(
     }
 
     const data = await response.json();
+    console.log(`[DEBUG] Photos backend response for album ${albumId}:`, JSON.stringify(data).slice(0, 500));
 
-    // Handle different response structures from backend
-    let photos = [];
+    // Handle different response structures
+    let rawPhotos = [];
     if (Array.isArray(data)) {
-      photos = data;
-    } else if (data.photos) {
-      photos = data.photos;
-    } else if (data.data) {
-      photos = Array.isArray(data.data) ? data.data : [];
+      rawPhotos = data;
+    } else if (data.data && Array.isArray(data.data)) {
+      rawPhotos = data.data;
+    } else if (data.photos && Array.isArray(data.photos)) {
+      rawPhotos = data.photos;
+    } else if (data.data && data.data.photos && Array.isArray(data.data.photos)) {
+      rawPhotos = data.data.photos;
     }
 
-    // Map to frontend format
-    const formattedPhotos = photos.map((photo: BackendPhoto, index: number) => ({
-      id: normalizeId(photo._id || photo.id) || `photo-${index}`,
-      title: photo.caption || photo.title || "",
-      description: photo.description || "",
-      imageUrl: photo.imageUrl || "",
-      albumId: normalizeId(photo.albumId || photo.album) || albumId,
-      uploadedBy: normalizeId(photo.uploadedBy) || "",
-      createdAt: normalizeDate(photo.createdAt),
-    }));
+    // Map to frontend format with extremely robust ID extraction
+    const formattedPhotos = rawPhotos.map((photo: any, index: number) => {
+      // Try to find the ID in various common fields
+      const idSource = photo._id || photo.id || photo.pk || photo.key;
+      const id = normalizeId(idSource) || `p-${index}-${Date.now().toString().slice(-6)}`;
+
+      return {
+        id,
+        title: photo.caption || photo.title || "",
+        description: photo.description || "",
+        imageUrl: photo.imageUrl || photo.image_url || photo.url || "",
+        albumId: normalizeId(photo.albumId || photo.album) || albumId,
+        uploadedBy: normalizeId(photo.uploadedBy) || "",
+        createdAt: normalizeDate(photo.createdAt || photo.created_at),
+      };
+    });
 
     return NextResponse.json({
       success: true,
@@ -242,14 +245,18 @@ export async function POST(
     // Extract imageUrl from various possible fields
     const extractedImageUrl = photo.imageUrl || photo.image_url || photo.url || imageUrl || "";
 
+    // Robust ID extraction for POST response
+    const idSource = photo._id || photo.id || photo.pk || photo.key;
+    const id = normalizeId(idSource) || `p-new-${Date.now().toString().slice(-6)}`;
+
     const formattedPhoto = {
-      id: normalizeId(photo._id || photo.id),
+      id,
       title: photo.caption || photo.title || "",
       description: photo.description || "",
       imageUrl: extractedImageUrl,
       albumId: normalizeId(photo.albumId || photo.album) || albumId,
       uploadedBy: normalizeId(photo.uploadedBy) || "",
-      createdAt: normalizeDate(photo.createdAt),
+      createdAt: normalizeDate(photo.createdAt || photo.created_at),
     };
 
     return NextResponse.json({
@@ -260,6 +267,68 @@ export async function POST(
     console.error("Upload photo API error:", error);
     return NextResponse.json(
       { success: false, message: "Failed to upload photo" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/gallery/albums/[albumId]/photos - Delete a photo from album
+// Note: We expect the photoId as a query parameter or in the backend URL
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ albumId: string }> }
+) {
+  try {
+    const token = getToken(request);
+
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { albumId } = await params;
+    const { searchParams } = new URL(request.url);
+    const photoId = searchParams.get("photoId");
+
+    if (!albumId || !photoId) {
+      return NextResponse.json(
+        { success: false, message: "Album ID and Photo ID are required" },
+        { status: 400 }
+      );
+    }
+
+    const response = await fetch(
+      `${config.backendUrl}/api/gallery/albums/${albumId}/photos/${photoId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return NextResponse.json(
+        {
+          success: false,
+          message: errorData.message || "Failed to delete photo",
+        },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Photo deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete photo API error:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete photo" },
       { status: 500 }
     );
   }

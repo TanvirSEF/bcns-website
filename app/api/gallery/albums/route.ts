@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import config from "@/lib/config";
 
-interface BackendAlbum {
-  _id?: string;
-  id?: string;
-  title: string;
-  description?: string;
-  coverPhoto?: string;
-  photoCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
 
 function getToken(request: NextRequest): string | null {
   const authHeader = request.headers.get("authorization");
@@ -22,8 +12,16 @@ function getToken(request: NextRequest): string | null {
 
 function normalizeId(idInfo: any): string {
   if (!idInfo) return "";
-  if (typeof idInfo === "string") return idInfo;
-  if (typeof idInfo === "object" && idInfo.$oid) return idInfo.$oid;
+  if (typeof idInfo === "string") {
+    return idInfo === "undefined" || idInfo === "null" ? "" : idInfo;
+  }
+  if (typeof idInfo === "object") {
+    if (idInfo.$oid) return String(idInfo.$oid);
+    if (idInfo.toString && typeof idInfo.toString === "function") {
+      const str = idInfo.toString();
+      return str === "[object Object]" ? "" : str;
+    }
+  }
   return String(idInfo);
 }
 
@@ -66,26 +64,31 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
-    // Handle different response structures from backend
-    let albums = [];
+    // Handle different response structures
+    let rawAlbums = [];
     if (Array.isArray(data)) {
-      albums = data;
-    } else if (data.albums) {
-      albums = data.albums;
-    } else if (data.data) {
-      albums = Array.isArray(data.data) ? data.data : [];
+      rawAlbums = data;
+    } else if (data.data && Array.isArray(data.data)) {
+      rawAlbums = data.data;
+    } else if (data.albums && Array.isArray(data.albums)) {
+      rawAlbums = data.albums;
     }
 
     // Map to frontend format
-    const formattedAlbums = albums.map((album: BackendAlbum, index: number) => ({
-      id: normalizeId(album._id || album.id) || `album-${index}`,
-      title: album.title,
-      description: album.description || "",
-      coverPhoto: album.coverPhoto || undefined,
-      photoCount: album.photoCount || 0,
-      createdAt: normalizeDate(album.createdAt),
-      updatedAt: normalizeDate(album.updatedAt),
-    }));
+    const formattedAlbums = rawAlbums.map((album: any, index: number) => {
+      const idSource = album._id || album.id || album.pk || album.key;
+      const id = normalizeId(idSource) || `a-${index}-${Date.now().toString().slice(-6)}`;
+
+      return {
+        id,
+        title: album.title,
+        description: album.description || "",
+        coverPhoto: album.coverPhoto || album.cover_photo || undefined,
+        photoCount: album.photoCount || album.photo_count || 0,
+        createdAt: normalizeDate(album.createdAt || album.created_at),
+        updatedAt: normalizeDate(album.updatedAt || album.updated_at),
+      };
+    });
 
     return NextResponse.json({
       success: true,
@@ -154,15 +157,17 @@ export async function POST(request: NextRequest) {
 
     // Handle different response structures
     const album = data.album || data.data || data;
+    const idSource = album._id || album.id || album.pk || album.key;
+    const id = normalizeId(idSource) || `a-new-${Date.now().toString().slice(-6)}`;
 
     const formattedAlbum = {
-      id: normalizeId(album._id || album.id),
+      id,
       title: album.title,
       description: album.description || "",
-      coverPhoto: album.coverPhoto || undefined,
-      photoCount: album.photoCount || 0,
-      createdAt: normalizeDate(album.createdAt),
-      updatedAt: normalizeDate(album.updatedAt),
+      coverPhoto: album.coverPhoto || album.cover_photo || undefined,
+      photoCount: album.photoCount || album.photo_count || 0,
+      createdAt: normalizeDate(album.createdAt || album.created_at),
+      updatedAt: normalizeDate(album.updatedAt || album.updated_at),
     };
 
     return NextResponse.json({
