@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Users, Sparkles } from "lucide-react";
+import { Sparkles, Calendar, Clock, MapPin } from "lucide-react";
 
 export function UpcomingEvents() {
   return (
@@ -16,52 +16,60 @@ export function UpcomingEvents() {
           {/* Label */}
           <div className="hidden sm:flex items-center space-x-2 bg-white/95 backdrop-blur-sm text-blue-600 px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wide flex-shrink-0 shadow-sm">
             <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
-            <span>WELCOME</span>
+            <span>UPCOMING EVENT</span>
           </div>
 
           {/* Content */}
           <div className="w-full sm:flex-1 overflow-hidden">
             {/* Show welcome message */}
             <div className="marquee-track">
-              <div className="flex items-center gap-x-3 flex-shrink-0 whitespace-nowrap pr-8">
-                <Heart className="h-4 w-4 text-pink-300 animate-pulse flex-shrink-0" />
-                <span className="font-semibold text-xs sm:text-sm">
-                  Welcome to Bangladesh Child Neurology Society (BCNS)
+              <div className="flex items-center gap-x-4 flex-shrink-0 whitespace-nowrap pr-12">
+                <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse flex-shrink-0" />
+                <span className="font-bold text-xs sm:text-sm text-white">
+                  Scientific Seminar on "Management of Childhood Epilepsy: An Evidence Based Approach"
                 </span>
-                <span className="hidden sm:inline text-white/70">|</span>
-                <Users className="h-4 w-4 text-green-300 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">
-                  Advancing Child Neurology in Bangladesh
+                
+                <span className="hidden sm:inline text-white/50">•</span>
+                <Calendar className="h-4 w-4 text-green-300 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-blue-50">
+                  Date: 6th April 2026, Monday
                 </span>
-                <span className="hidden sm:inline text-white/70">|</span>
-                <Sparkles className="h-4 w-4 text-yellow-300 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">
-                  Professional Development • Research • Collaboration
+
+                <span className="hidden sm:inline text-white/50">•</span>
+                <Clock className="h-4 w-4 text-pink-300 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-blue-50">
+                  Time: 10:00 AM
                 </span>
-                <span className="hidden sm:inline text-white/70">|</span>
-                <span className="text-xs sm:text-sm bg-gradient-to-r from-pink-400 to-purple-400 text-white px-2 py-0.5 rounded-full font-medium">
-                  Join Our Community
+
+                <span className="hidden sm:inline text-white/50">•</span>
+                <MapPin className="h-4 w-4 text-red-300 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-blue-50">
+                  Venue: Seminar Room, Department of Paediatrics, Rangpur Medical College Hospital
                 </span>
               </div>
               {/* Duplicate for seamless looping */}
-              <div className="flex items-center gap-x-3 flex-shrink-0 whitespace-nowrap pr-8" aria-hidden="true">
-                <Heart className="h-4 w-4 text-pink-300 animate-pulse flex-shrink-0" />
-                <span className="font-semibold text-xs sm:text-sm">
-                  Welcome to Bangladesh Child Neurology Society (BCNS)
+              <div className="flex items-center gap-x-4 flex-shrink-0 whitespace-nowrap pr-12" aria-hidden="true">
+                <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse flex-shrink-0" />
+                <span className="font-bold text-xs sm:text-sm text-white">
+                  Scientific Seminar on "Management of Childhood Epilepsy: An Evidence Based Approach"
                 </span>
-                <span className="hidden sm:inline text-white/70">|</span>
-                <Users className="h-4 w-4 text-green-300 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">
-                  Advancing Child Neurology in Bangladesh
+                
+                <span className="hidden sm:inline text-white/50">•</span>
+                <Calendar className="h-4 w-4 text-green-300 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-blue-50">
+                  Date: 6th April 2026, Monday
                 </span>
-                <span className="hidden sm:inline text-white/70">|</span>
-                <Sparkles className="h-4 w-4 text-yellow-300 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">
-                  Professional Development • Research • Collaboration
+
+                <span className="hidden sm:inline text-white/50">•</span>
+                <Clock className="h-4 w-4 text-pink-300 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-blue-50">
+                  Time: 10:00 AM
                 </span>
-                <span className="hidden sm:inline text-white/70">|</span>
-                <span className="text-xs sm:text-sm bg-gradient-to-r from-pink-400 to-purple-400 text-white px-2 py-0.5 rounded-full font-medium">
-                  Join Our Community
+
+                <span className="hidden sm:inline text-white/50">•</span>
+                <MapPin className="h-4 w-4 text-red-300 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-blue-50">
+                  Venue: Seminar Room, Department of Paediatrics, Rangpur Medical College Hospital
                 </span>
               </div>
             </div>
@@ -75,7 +83,7 @@ export function UpcomingEvents() {
           display: inline-flex;
           width: max-content;
           gap: 2rem;
-          animation: marquee 25s linear infinite;
+          animation: marquee 35s linear infinite;
         }
         @keyframes marquee {
           0% { transform: translateX(0); }

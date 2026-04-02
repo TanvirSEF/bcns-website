@@ -32,6 +32,10 @@ export function Hero() {
 
   const heroSlides = [
     {
+      image: "/images/bannerlast.jpeg",
+      title: "Scientific Seminar on Management of Childhood Epilepsy: An Evidence Based Approach",
+    },
+    {
       image: "/images/banner.jpg",
       title: "BCNS – 1st Executive Committee Meeting, 2025",
     },
@@ -59,10 +63,6 @@ export function Hero() {
       image: "/images/banner9.jpg",
       title: '(CME) on "Paediatric Movement Disorder"',
     },
-    // {
-    //   image: "/images/banner6.jpg",
-    //   title: "",
-    // },
   ];
 
   return (
@@ -81,7 +81,7 @@ export function Hero() {
               <div className="relative min-h-[20rem] xs:min-h-[24rem] sm:min-h-[28rem] md:min-h-[32rem] lg:min-h-[38rem] xl:min-h-[42rem] 2xl:min-h-[45rem] w-full">
               <Image
                 src={slide.image}
-                alt={slide.title}
+                alt={typeof slide.title === "string" ? slide.title : "Banner Image"}
                 fill
                 className="object-cover"
                 priority={index === 0}
