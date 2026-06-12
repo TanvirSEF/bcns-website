@@ -18,12 +18,21 @@ export default function NoticeBoardPage() {
   // Notice board data
   const noticeData = [
     {
+      id: "epilepsy-seminar-2026",
+      title: "Scientific Seminar on \"Management of Childhood Epilepsy: An Evidence Based Approach\"",
+      type: "event",
+      priority: "high",
+      date: "2026-06-17",
+      isNew: true,
+      description: "We are pleased to announce a scientific seminar on \"Management of Childhood Epilepsy: An Evidence Based Approach\". This educational program will focus on the latest evaluation techniques, diagnostic guidelines, and updated management strategies for childhood epilepsy in pediatric patients. The program aims to enhance clinical knowledge and evidence-based practice. Date: 17th June 2026, Wednesday | Time: 10:00 AM | Venue: Seminar Room, Department of Paediatrics, Rangpur Medical College Hospital."
+    },
+    {
       id: "0",
       title: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
       type: "event",
       priority: "high",
       date: "2026-01-17",
-      isNew: true,
+      isNew: false,
       description: "We are pleased to announce a comprehensive program on Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management. This educational program will focus on the latest evaluation techniques and updated management strategies for brain malformations, congenital myopathies, and neuroinfections in pediatric patients. The program aims to enhance the knowledge and clinical skills of child neurologists, pediatricians, and allied healthcare professionals in diagnosing and managing these complex neurological conditions. Date: 17 January 2026 | Time: 9:00 AM to 2:00 PM | Venue: Conference Hall, National Institute of Neuro Sciences & Hospital (NINS&H), Dhaka-1207. Registration link: https://shorturl.at/8sk4s"
     },
     {
@@ -217,7 +226,7 @@ export default function NoticeBoardPage() {
                 <DialogTitle className="text-xl font-bold text-left">
                   {selectedNotice.title}
                 </DialogTitle>
-                <DialogDescription className="text-left">
+                <DialogDescription className="text-left" asChild>
                   <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
                     <Calendar className="h-4 w-4" />
                     <span>

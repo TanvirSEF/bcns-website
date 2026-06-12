@@ -15,6 +15,16 @@ export interface EventItem {
 
 export const eventsData: EventItem[] = [
   {
+    slug: "childhood-epilepsy-seminar-rangpur-june-2026",
+    type: "program",
+    title: "Scientific Seminar on \"Management of Childhood Epilepsy: An Evidence Based Approach\"",
+    date: "17th June 2026, Wednesday",
+    time: "10:00 AM",
+    venue: "Seminar Room, Department of Paediatrics, Rangpur Medical College Hospital",
+    summary:
+      "Scientific Seminar on \"Management of Childhood Epilepsy: An Evidence Based Approach\" will be held on 17th June 2026 at the Seminar Room, Department of Paediatrics, Rangpur Medical College Hospital, organized by the Bangladesh Child Neurology Society (BCNS).",
+  },
+  {
     slug: "brain-malformation-congenital-myopathy-neuroinfection-jan-2026",
     type: "program",
     title: "Brain Malformation, Congenital Myopathy and Neuroinfection: Evaluation & Updated Management",
