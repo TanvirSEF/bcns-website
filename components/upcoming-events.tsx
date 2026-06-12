@@ -32,7 +32,7 @@ export function UpcomingEvents() {
                 <span className="hidden sm:inline text-white/50">•</span>
                 <Calendar className="h-4 w-4 text-green-300 flex-shrink-0" />
                 <span className="text-xs sm:text-sm text-blue-50">
-                  Date: 6th April 2026, Monday
+                  Date: 17th June 2026, Wednesday
                 </span>
 
                 <span className="hidden sm:inline text-white/50">•</span>
@@ -57,7 +57,7 @@ export function UpcomingEvents() {
                 <span className="hidden sm:inline text-white/50">•</span>
                 <Calendar className="h-4 w-4 text-green-300 flex-shrink-0" />
                 <span className="text-xs sm:text-sm text-blue-50">
-                  Date: 6th April 2026, Monday
+                  Date: 17th June 2026, Wednesday
                 </span>
 
                 <span className="hidden sm:inline text-white/50">•</span>
