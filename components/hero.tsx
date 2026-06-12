@@ -32,8 +32,8 @@ export function Hero() {
 
   const heroSlides = [
     {
-      image: "/images/bannerlast.jpeg",
-      title: "Scientific Seminar on Management of Childhood Epilepsy: An Evidence Based Approach",
+      image: "/images/bannerr.jpg",
+      title: "",
     },
     {
       image: "/images/banner.jpg",
