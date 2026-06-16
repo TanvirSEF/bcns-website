@@ -261,16 +261,17 @@ export function NavbarClient() {
                     {item.hasDropdown ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <div
+                          <button
+                            type="button"
                             className={cn(
-                              "h-12 px-6 flex items-center cursor-pointer text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200",
+                              "h-12 px-6 flex items-center cursor-pointer text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200 border-0 bg-transparent",
                               isActive(item.href!) && "text-blue-600 bg-blue-50"
                             )}
                           >
                             {item.icon && <item.icon className="mr-2 h-4 w-4" />}
                             {item.name}
                             <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-200" />
-                          </div>
+                          </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           className="w-64 rounded-lg"

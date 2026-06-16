@@ -57,7 +57,7 @@ const ACCEPTED_IMAGE_TYPES = [
 ];
 
 const educationSchema = z.object({
-  qualification: z.string().min(1, "Qualification is required"),
+  qualification: z.string().optional().or(z.literal("")),
   year: z
     .string()
     .optional()
@@ -65,7 +65,7 @@ const educationSchema = z.object({
     .refine((val) => !val || val === "" || /^\d{4}$/.test(val), {
       message: "Year must be 4 digits",
     }),
-  institution: z.string().min(1, "Institution is required"),
+  institution: z.string().optional().or(z.literal("")),
   document: z.instanceof(File).optional(),
 });
 
@@ -78,68 +78,37 @@ const trainingSchema = z.object({
 // Username validation regex: lowercase, numbers, underscores only
 const usernameRegex = /^[a-z0-9_]+$/;
 
-// Password validation: minimum 6 characters with number, letter, and special character
-const passwordSchema = z
-  .string()
-  .min(6, "Password must be at least 6 characters")
-  .refine(
-    (password) => {
-      // Must contain at least one number (0-9)
-      return /\d/.test(password);
-    },
-    {
-      message: "Password must contain at least one number (0-9)",
-    }
-  )
-  .refine(
-    (password) => {
-      // Must contain at least one letter (a-z, A-Z)
-      return /[a-zA-Z]/.test(password);
-    },
-    {
-      message: "Password must contain at least one letter (a-z, A-Z)",
-    }
-  )
-  .refine(
-    (password) => {
-      // Must contain at least one special character
-      return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-    },
-    {
-      message: "Password must contain at least one special character (!@#$%^&* etc.)",
-    }
-  );
+// Password: accept anything (no requirements)
+const passwordSchema = z.string().min(1, "Password is required");
+
 
 // Step 1: Registration form schema (without OTP)
 // Note: profilePicture, documents, and some fields are optional initially
 // but will be validated in the submit handler to provide better UX
 const registrationSchema = z.object({
   profilePicture: z
-    .custom<File | undefined>((v) => !v || v instanceof File, {
-      message: "Profile picture is required",
-    })
+    .custom<File | undefined>((v) => !v || v instanceof File)
     .optional(),
   name: z.string().min(2, "Name must be at least 2 characters"),
+  bmdcNo: z.string().optional().or(z.literal("")),
   username: z
     .string()
     .min(3, "Username must be at least 3 characters")
     .max(30, "Username must be at most 30 characters")
     .regex(usernameRegex, "Username can only contain lowercase letters, numbers, and underscores"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
+  phone: z.string().optional().or(z.literal("")),
   password: passwordSchema,
-  affiliation: z.string().min(2, "Affiliation is required"),
-  designation: z.string().min(2, "Designation is required"),
-  membershipType: z.enum(["general", "lifetime"]),
-  mailingAddress: z.string().min(5, "Mailing address is required"),
-  permanentAddress: z.string().min(5, "Permanent address is required"),
-  educationQualifications: z.array(educationSchema),
-  training: z.array(trainingSchema),
+  affiliation: z.string().optional().or(z.literal("")),
+  designation: z.string().optional().or(z.literal("")),
+  membershipType: z.enum(["general", "lifetime"]).default("general"),
+  mailingAddress: z.string().optional().or(z.literal("")),
+  permanentAddress: z.string().optional().or(z.literal("")),
+  educationQualifications: z.array(educationSchema).optional(),
+  training: z.array(trainingSchema).optional(),
   researchInterest1: z.string().optional(),
   researchInterest2: z.string().optional(),
-  termsAccepted: z.boolean().refine((val) => val === true, {
-    message: "You must accept the Terms and Conditions to continue",
-  }),
+  termsAccepted: z.boolean().optional(),
 });
 
 // OTP verification schema - REMOVED (OTP disabled from backend)
@@ -160,12 +129,7 @@ export function MembershipForm() {
     checking: boolean;
     available: boolean | null;
   }>({ checking: false, available: null });
-  const [passwordRequirements, setPasswordRequirements] = useState({
-    minLength: false,
-    hasNumber: false,
-    hasLetter: false,
-    hasSpecialChar: false,
-  });
+
   const [paymentMethod, setPaymentMethod] = useState<"bkash" | "handCash" | "bankTransfer" | null>(null);
   const [paymentDocuments, setPaymentDocuments] = useState<File[]>([]);
   const [nidDocument, setNidDocument] = useState<File | null>(null);
@@ -181,9 +145,11 @@ export function MembershipForm() {
 
   // Main form for registration data
   const registrationForm = useForm<RegistrationFormValues>({
-    resolver: zodResolver(registrationSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(registrationSchema) as any,
     defaultValues: {
       name: "",
+      bmdcNo: "",
       username: "",
       email: "",
       phone: "",
@@ -203,9 +169,8 @@ export function MembershipForm() {
     },
   });
 
-  // Watch username and password for real-time validation
+  // Watch username for real-time availability check
   const watchedUsername = registrationForm.watch("username");
-  const watchedPassword = registrationForm.watch("password");
 
   // Debounced username availability check with real-time validation
   useEffect(() => {
@@ -275,24 +240,6 @@ export function MembershipForm() {
     return () => clearTimeout(timeoutId);
   }, [watchedUsername, registrationForm]);
 
-  // Update password requirements validation in real-time
-  useEffect(() => {
-    if (watchedPassword) {
-      setPasswordRequirements({
-        minLength: watchedPassword.length >= 6,
-        hasNumber: /\d/.test(watchedPassword),
-        hasLetter: /[a-zA-Z]/.test(watchedPassword),
-        hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(watchedPassword),
-      });
-    } else {
-      setPasswordRequirements({
-        minLength: false,
-        hasNumber: false,
-        hasLetter: false,
-        hasSpecialChar: false,
-      });
-    }
-  }, [watchedPassword]);
 
   // Resend OTP countdown timer - REMOVED (OTP disabled)
 
@@ -417,38 +364,35 @@ export function MembershipForm() {
       }
     }
 
-    // Validate required fields that are optional in schema
-    if (!data.profilePicture) {
-      toast.error("Profile picture is required");
-      registrationForm.setError("profilePicture", { message: "Profile picture is required" });
-      return;
-    }
+    // Validate profile picture file size and type (if provided)
+    if (data.profilePicture) {
+      if (data.profilePicture.size > MAX_FILE_SIZE) {
+        toast.error("Profile picture size must be less than 5MB");
+        registrationForm.setError("profilePicture", { message: "Max file size is 5MB" });
+        return;
+      }
 
-    // Validate profile picture file size and type
-    if (data.profilePicture.size > MAX_FILE_SIZE) {
-      toast.error("Profile picture size must be less than 5MB");
-      registrationForm.setError("profilePicture", { message: "Max file size is 5MB" });
-      return;
-    }
-
-    if (!ACCEPTED_IMAGE_TYPES.includes(data.profilePicture.type)) {
-      toast.error("Only .jpg, .jpeg, .png and .webp formats are supported");
-      registrationForm.setError("profilePicture", {
-        message: "Only .jpg, .jpeg, .png and .webp formats are supported",
-      });
-      return;
+      if (!ACCEPTED_IMAGE_TYPES.includes(data.profilePicture.type)) {
+        toast.error("Only .jpg, .jpeg, .png and .webp formats are supported");
+        registrationForm.setError("profilePicture", {
+          message: "Only .jpg, .jpeg, .png and .webp formats are supported",
+        });
+        return;
+      }
     }
 
     // Documents are now validated separately in education/training sections
 
+    // Filter out completely empty education qualifications
+    const validEducation = data.educationQualifications ? data.educationQualifications.filter(
+      (edu) => edu.qualification?.trim() !== "" || edu.institution?.trim() !== "" || edu.year?.trim() !== "" || edu.document
+    ) : [];
+
     // Validate education qualifications
     // Year is optional/empty per schema, but if provided must be 4 digits
-    for (let i = 0; i < data.educationQualifications.length; i++) {
-      const edu = data.educationQualifications[i];
-      if (!edu) {
-        toast.error(`Education qualification ${i + 1}: Invalid entry`);
-        return;
-      }
+    for (let i = 0; i < validEducation.length; i++) {
+      const edu = validEducation[i];
+      if (!edu) continue;
       // If year is provided (not empty/undefined), it must be 4 digits
       if (edu.year && edu.year.trim() !== "" && !/^\d{4}$/.test(edu.year)) {
         toast.error(`Education qualification ${i + 1}: Year must be 4 digits`);
@@ -460,24 +404,15 @@ export function MembershipForm() {
     }
 
     // Validate training entries - filter out empty ones
-    const validTraining = data.training.filter(
-      (t) => t.period && t.period.trim() !== "" && t.institute && t.institute.trim() !== ""
-    );
-    // Only reject if user attempted to add training but left fields incomplete
-    // Allow empty training array (training is optional)
-    // Check if any training entry has partial data (one field filled but not both)
-    const hasPartialTraining = data.training.some(
-      (t) => (t.period && t.period.trim() !== "") !== (t.institute && t.institute.trim() !== "")
-    );
-    if (hasPartialTraining) {
-      toast.error("Please fill in all training fields or remove incomplete entries");
-      return;
-    }
+    const validTraining = data.training ? data.training.filter(
+      (t) => t.period?.trim() !== "" || t.institute?.trim() !== "" || t.document
+    ) : [];
 
     // Store registration data with filtered training entries and proceed to payment
     setRegistrationData({
       ...data,
-      training: validTraining, // Store only validated training entries
+      educationQualifications: validEducation,
+      training: validTraining,
     });
 
     // Proceed directly to payment step (OTP verification removed)
@@ -585,11 +520,11 @@ export function MembershipForm() {
       // Step 1: Prepare upload request for all files
       const allDocuments: File[] = [
         // Education documents
-        ...registrationData.educationQualifications
+        ...(registrationData.educationQualifications || [])
           .filter((edu) => edu.document)
           .map((edu) => edu.document!),
         // Training documents
-        ...registrationData.training
+        ...(registrationData.training || [])
           .filter((train) => train.document)
           .map((train) => train.document!),
         // Payment documents
@@ -598,88 +533,107 @@ export function MembershipForm() {
         ...(nidDocument ? [nidDocument] : []),
       ];
 
-      const uploadRequest = {
-        profilePicture: {
-          filename: registrationData.profilePicture!.name,
-          contentType: registrationData.profilePicture!.type,
-        },
-        documents: allDocuments.map((doc) => ({
+      // Build upload request - profilePicture is optional
+      const uploadRequest: {
+        profilePicture?: { filename: string; contentType: string };
+        documents?: { filename: string; contentType: string }[];
+      } = {};
+
+      if (registrationData.profilePicture) {
+        uploadRequest.profilePicture = {
+          filename: registrationData.profilePicture.name,
+          contentType: registrationData.profilePicture.type,
+        };
+      }
+
+      if (allDocuments.length > 0) {
+        uploadRequest.documents = allDocuments.map((doc) => ({
           filename: doc.name,
           contentType: doc.type,
-        })),
-      };
-
-      // Step 2: Get presigned URLs from backend
-      toast.info("Preparing file uploads...");
-      const uploadUrls = await authApi.getUploadUrls(uploadRequest);
-
-      // Step 3: Upload profile picture to R2
-      toast.info("Uploading profile picture...");
-      await uploadToR2(
-        registrationData.profilePicture!,
-        uploadUrls.profilePicture.url,
-        (progress) =>
-          setUploadProgress((prev) => ({ ...prev, profilePicture: progress }))
-      );
-
-      // Step 4: Upload all documents to R2
-      if (allDocuments.length > 0) {
-        toast.info(`Uploading ${allDocuments.length} document(s)...`);
-
-        // Initialize document progress array
-        setUploadProgress((prev) => ({
-          ...prev,
-          documents: new Array(allDocuments.length).fill(0),
         }));
+      }
 
-        await Promise.all(
-          uploadUrls.documents.map((urlData, index) => {
-            const file = allDocuments[index];
-            if (!file) return Promise.resolve();
-            return uploadToR2(file, urlData.url, (progress) => {
-              setUploadProgress((prev) => {
-                const newDocs = [...prev.documents];
-                newDocs[index] = progress;
-                return { ...prev, documents: newDocs };
+      let profilePicturePublicUrl: string | undefined;
+      let documentPublicUrls: string[] = [];
+
+      // Step 2: Get presigned URLs from backend (only if there are files to upload)
+      if (uploadRequest.profilePicture || (uploadRequest.documents && uploadRequest.documents.length > 0)) {
+        toast.info("Preparing file uploads...");
+        const uploadUrls = await authApi.getUploadUrls(uploadRequest);
+
+        // Step 3: Upload profile picture to R2 (if provided)
+        if (registrationData.profilePicture && uploadUrls.profilePicture) {
+          toast.info("Uploading profile picture...");
+          await uploadToR2(
+            registrationData.profilePicture,
+            uploadUrls.profilePicture.url,
+            (progress) =>
+              setUploadProgress((prev) => ({ ...prev, profilePicture: progress }))
+          );
+          profilePicturePublicUrl = uploadUrls.profilePicture.publicUrl;
+        }
+
+        // Step 4: Upload all documents to R2 (if any)
+        if (allDocuments.length > 0 && uploadUrls.documents && uploadUrls.documents.length > 0) {
+          toast.info(`Uploading ${allDocuments.length} document(s)...`);
+
+          setUploadProgress((prev) => ({
+            ...prev,
+            documents: new Array(allDocuments.length).fill(0),
+          }));
+
+          await Promise.all(
+            uploadUrls.documents.map((urlData, index) => {
+              const file = allDocuments[index];
+              if (!file) return Promise.resolve();
+              return uploadToR2(file, urlData.url, (progress) => {
+                setUploadProgress((prev) => {
+                  const newDocs = [...prev.documents];
+                  newDocs[index] = progress;
+                  return { ...prev, documents: newDocs };
+                });
               });
-            });
-          })
-        );
+            })
+          );
+
+          documentPublicUrls = uploadUrls.documents.map((d) => d.publicUrl);
+        }
       }
 
       // Step 5: Submit registration with URLs (OTP removed)
       toast.info("Completing registration...");
       const registrationPayload = {
         name: registrationData.name,
+        bmdcNo: registrationData.bmdcNo || undefined,
         username: registrationData.username,
         email: registrationData.email,
         password: registrationData.password,
-        designation: registrationData.designation,
-        membershipType: registrationData.membershipType,
-        phone: registrationData.phone,
-        affiliation: registrationData.affiliation,
-        mailingAddress: registrationData.mailingAddress,
-        permanentAddress: registrationData.permanentAddress,
-        profilePictureUrl: uploadUrls.profilePicture.publicUrl,
-        documentUrls: uploadUrls.documents.map((d) => d.publicUrl),
-        educationQualifications: registrationData.educationQualifications.map(
+        designation: registrationData.designation || undefined,
+        membershipType: registrationData.membershipType || "general",
+        phone: registrationData.phone || undefined,
+        affiliation: registrationData.affiliation || undefined,
+        mailingAddress: registrationData.mailingAddress || undefined,
+        permanentAddress: registrationData.permanentAddress || undefined,
+        profilePictureUrl: profilePicturePublicUrl,
+        documentUrls: documentPublicUrls,
+        educationQualifications: (registrationData.educationQualifications || []).map(
           ({ document, year, ...rest }) => ({
             ...rest,
-            year: year || "", // Ensure year is always a string
+            year: year || "",
           })
         ),
-        training: registrationData.training.map(
+        training: (registrationData.training || []).map(
           ({ document, period, institute, ...rest }) => ({
             ...rest,
             period: period || "",
             institute: institute || "",
           })
         ),
-        primaryResearchInterest: registrationData.researchInterest1,
-        secondaryResearchInterest: registrationData.researchInterest2,
+        primaryResearchInterest: registrationData.researchInterest1 || undefined,
+        secondaryResearchInterest: registrationData.researchInterest2 || undefined,
       };
 
-      const response = await authApi.verifyRegistrationOTP(registrationPayload);
+      const response = await authApi.verifyRegistrationOTP(registrationPayload as Parameters<typeof authApi.verifyRegistrationOTP>[0]);
 
       if (response.user) {
         toast.success("Registration submitted successfully!");
@@ -772,7 +726,7 @@ export function MembershipForm() {
       <CardContent className="p-4 sm:p-6 md:p-8">
         {/* Step 1: Registration Form */}
         {currentStep === 1 && (
-          <form onSubmit={registrationForm.handleSubmit(onRegistrationSubmit)} className="space-y-10">
+          <form onSubmit={registrationForm.handleSubmit(onRegistrationSubmit as any)} className="space-y-10">
 
             {/* 1. Profile Picture Section */}
             <div className="flex flex-col items-center justify-center space-y-4">
@@ -904,6 +858,18 @@ export function MembershipForm() {
                   )}
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="bmdcNo">BMDC No.</Label>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="bmdcNo"
+                      placeholder="e.g. A-12345"
+                      {...registrationForm.register("bmdcNo")}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="username">Username</Label>
                   <div className="relative">
                     <AtSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -1031,56 +997,10 @@ export function MembershipForm() {
                       )}
                     </button>
                   </div>
-                  {registrationForm.formState.errors.password ? (
+                  {registrationForm.formState.errors.password && (
                     <p className="text-destructive text-xs mt-1">
                       {registrationForm.formState.errors.password.message}
                     </p>
-                  ) : (
-                    <div className="space-y-1.5 mt-2">
-                      <p className="text-xs font-medium text-muted-foreground mb-2">Password Requirements:</p>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-xs">
-                          {passwordRequirements.minLength ? (
-                            <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-                          ) : (
-                            <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                          )}
-                          <span className={passwordRequirements.minLength ? "text-green-600" : "text-muted-foreground"}>
-                            Minimum 6 characters
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs">
-                          {passwordRequirements.hasNumber ? (
-                            <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-                          ) : (
-                            <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                          )}
-                          <span className={passwordRequirements.hasNumber ? "text-green-600" : "text-muted-foreground"}>
-                            At least one number (0-9)
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs">
-                          {passwordRequirements.hasLetter ? (
-                            <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-                          ) : (
-                            <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                          )}
-                          <span className={passwordRequirements.hasLetter ? "text-green-600" : "text-muted-foreground"}>
-                            At least one letter (a-z, A-Z)
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs">
-                          {passwordRequirements.hasSpecialChar ? (
-                            <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-                          ) : (
-                            <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                          )}
-                          <span className={passwordRequirements.hasSpecialChar ? "text-green-600" : "text-muted-foreground"}>
-                            At least one special character (!@#$%^&* etc.)
-                          </span>
-                        </div>
-                      </div>
-                    </div>
                   )}
                 </div>
               </div>
@@ -1490,7 +1410,7 @@ export function MembershipForm() {
               <div className="flex items-start space-x-3 p-4 bg-slate-50 dark:bg-slate-900/30 rounded-lg border border-slate-200 dark:border-slate-800">
                 <Checkbox
                   id="terms"
-                  checked={registrationForm.watch("termsAccepted")}
+                  checked={registrationForm.watch("termsAccepted") ?? false}
                   onCheckedChange={(checked) => {
                     registrationForm.setValue("termsAccepted", checked === true, { shouldValidate: true });
                   }}

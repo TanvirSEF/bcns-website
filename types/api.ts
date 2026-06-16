@@ -55,6 +55,7 @@ export interface UserDocument {
 export interface User {
   readonly id: UUID;
   readonly name: string;
+  readonly bmdcNo?: string;
   readonly email: EmailAddress;
   readonly username?: string;
   readonly role: UserRole;
@@ -341,14 +342,15 @@ export interface VerifyOTPInput {
   readonly username: string;
   readonly email: EmailAddress;
   readonly password: string;
-  readonly otp?: string; // Optional - OTP verification removed from backend
-  readonly designation: string;
-  readonly membershipType: 'general' | 'lifetime';
-  readonly phone: string;
-  readonly affiliation: string;
-  readonly mailingAddress: string;
-  readonly permanentAddress: string;
-  readonly profilePictureUrl: string;
+  readonly otp?: string;
+  readonly bmdcNo?: string; // Optional - OTP verification removed from backend
+  readonly designation?: string;
+  readonly membershipType?: 'general' | 'lifetime';
+  readonly phone?: string;
+  readonly affiliation?: string;
+  readonly mailingAddress?: string;
+  readonly permanentAddress?: string;
+  readonly profilePictureUrl?: string;
   readonly documentUrls?: readonly string[];
   readonly educationQualifications?: readonly EducationQualification[];
   readonly training?: readonly Training[];
@@ -387,12 +389,12 @@ export interface UploadUrlResponse {
 }
 
 export interface GetUploadUrlsRequest {
-  readonly profilePicture: UploadUrlRequest;
+  readonly profilePicture?: UploadUrlRequest;
   readonly documents?: readonly UploadUrlRequest[];
 }
 
 export interface GetUploadUrlsResponse {
-  readonly profilePicture: UploadUrlResponse;
+  readonly profilePicture?: UploadUrlResponse;
   readonly documents: readonly UploadUrlResponse[];
 }
 

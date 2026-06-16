@@ -19,12 +19,12 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
-        // Validate required fields - profilePicture is required
-        if (!body.profilePicture || !body.profilePicture.filename || !body.profilePicture.contentType) {
+        // Validate profilePicture if provided (optional)
+        if (body.profilePicture && (!body.profilePicture.filename || !body.profilePicture.contentType)) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Profile picture information is required"
+                    message: "Profile picture filename and contentType are required when profile picture is provided"
                 },
                 {
                     status: 400,
