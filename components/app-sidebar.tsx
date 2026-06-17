@@ -46,7 +46,7 @@ const data = {
       icon: UserCheck,
     },
     {
-      title: "Users",
+      title: "Pending Users",
       url: "/admin/users",
       icon: Users,
     },
