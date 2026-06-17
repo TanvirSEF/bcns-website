@@ -37,7 +37,7 @@ export function SectionCards() {
         
         // Fetch all stats in parallel
         const [users, events] = await Promise.all([
-          api.admin.getAllUsers().catch(() => []),
+          api.admin.getAllUsers({ limit: 0 }).catch(() => []),
           api.events.getEvents().catch(() => []),
         ])
 

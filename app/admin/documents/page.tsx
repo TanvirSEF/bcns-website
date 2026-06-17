@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Download, Clock, User, Search, X } from "lucide-react";
+import { Download, Clock, User, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { toast } from "react-toastify";
 import { Document, DocumentStatus } from "@/types/api";
 import { api } from "@/lib/api";
@@ -22,6 +22,10 @@ export default function DocumentsManagement() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
   useEffect(() => {
     fetchDocuments();
   }, []);
@@ -31,7 +35,7 @@ export default function DocumentsManagement() {
       setLoading(true);
       
       // Fetch all users
-      const users = await api.admin.getAllUsers();
+      const users = await api.admin.getAllUsers({ limit: 0 });
       
       // Extract all documents from all users
       const allDocuments: DocumentWithUser[] = [];
@@ -110,6 +114,77 @@ export default function DocumentsManagement() {
 
     setFilteredDocuments(filtered);
   }, [searchQuery, documents]);
+
+  // Reset page number when search query or documents change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, documents]);
+
+  // Calculate paginated slices
+  const totalPages = Math.ceil(filteredDocuments.length / pageSize);
+
+  const paginatedDocuments = filteredDocuments.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const PaginationControls = ({
+    currentPage,
+    totalPages,
+    onPageChange,
+  }: {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+  }) => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="flex items-center justify-end space-x-2 py-4 border-t px-4 bg-muted/10">
+        <div className="flex min-w-[100px] items-center justify-center text-sm font-medium text-muted-foreground mr-4">
+          Page {currentPage} of {totalPages}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => onPageChange(1)}
+            disabled={currentPage === 1}
+          >
+            <span className="sr-only">Go to first page</span>
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <span className="sr-only">Go to previous page</span>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <span className="sr-only">Go to next page</span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => onPageChange(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            <span className="sr-only">Go to last page</span>
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   const handleDownload = (fileUrl: string) => {
     if (fileUrl) {
@@ -206,90 +281,99 @@ export default function DocumentsManagement() {
               Showing {filteredDocuments.length} of {documents.length} documents
             </div>
           )}
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Document</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Uploaded By</TableHead>
-                <TableHead>Uploaded</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredDocuments.length > 0 ? (
-                filteredDocuments.map((document) => (
-                  <TableRow key={document.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{document.title}</div>
-                        {document.description && (
-                          <div className="text-sm text-muted-foreground line-clamp-2">
-                            {document.description}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(document.status)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{document.userEmail}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">
-                          {document.createdAt ? formatDate(document.createdAt) : "N/A"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownload(document.fileUrl)}
-                        className="hover:bg-primary hover:text-primary-foreground"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                    </TableCell>
+          <div className="flex flex-col gap-4">
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Document</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Uploaded By</TableHead>
+                    <TableHead>Uploaded</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    <div className="flex flex-col items-center gap-2">
-                      <Download className="h-12 w-12 text-muted-foreground" />
-                      <p className="text-muted-foreground">
-                        {searchQuery ? "No documents found matching your search" : "No documents found"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {searchQuery 
-                          ? "Try a different search term or clear the search to see all documents."
-                          : "Documents will appear here once users upload them."
-                        }
-                      </p>
-                      {searchQuery && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSearchQuery("")}
-                          className="mt-2"
-                        >
-                          Clear Search
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedDocuments.length > 0 ? (
+                    paginatedDocuments.map((document) => (
+                      <TableRow key={document.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{document.title}</div>
+                            {document.description && (
+                              <div className="text-sm text-muted-foreground line-clamp-2">
+                                {document.description}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(document.status)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{document.userEmail}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">
+                              {document.createdAt ? formatDate(document.createdAt) : "N/A"}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownload(document.fileUrl)}
+                            className="hover:bg-primary hover:text-primary-foreground"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <Download className="h-12 w-12 text-muted-foreground" />
+                          <p className="text-muted-foreground">
+                            {searchQuery ? "No documents found matching your search" : "No documents found"}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {searchQuery 
+                              ? "Try a different search term or clear the search to see all documents."
+                              : "Documents will appear here once users upload them."
+                            }
+                          </p>
+                          {searchQuery && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSearchQuery("")}
+                              className="mt-2"
+                            >
+                              Clear Search
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
         </CardContent>
       </Card>
 

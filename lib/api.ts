@@ -210,8 +210,19 @@ export const adminApi = {
     return handleApiResponse<ApprovalStats>(response);
   },
 
-  getAllUsers: async (role?: string): Promise<readonly User[]> => {
-    const url = role ? `/users?role=${encodeURIComponent(role)}` : '/users';
+  getAllUsers: async (roleOrParams?: string | { role?: string; limit?: number; page?: number; approvalStatus?: string }): Promise<readonly User[]> => {
+    const queryParams = new URLSearchParams();
+    if (typeof roleOrParams === 'string') {
+      queryParams.append('role', roleOrParams);
+    } else if (roleOrParams) {
+      if (roleOrParams.role) queryParams.append('role', roleOrParams.role);
+      if (roleOrParams.limit !== undefined) queryParams.append('limit', String(roleOrParams.limit));
+      if (roleOrParams.page !== undefined) queryParams.append('page', String(roleOrParams.page));
+      if (roleOrParams.approvalStatus) queryParams.append('approvalStatus', roleOrParams.approvalStatus);
+    }
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `/users?${queryString}` : '/users';
     const response = await apiClient.get<readonly User[]>(url);
     return handleApiResponse<readonly User[]>(response);
   },

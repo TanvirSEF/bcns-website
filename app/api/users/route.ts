@@ -69,15 +69,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get optional role filter from query params
+    // Forward query parameters to the backend
     const { searchParams } = new URL(request.url);
     const role = searchParams.get("role");
+    const page = searchParams.get("page");
+    const limit = searchParams.get("limit");
+    const approvalStatus = searchParams.get("approvalStatus");
 
-    // Build backend URL with optional role filter
-    let backendUrl = `${config.backendUrl}/api/users`;
-    if (role) {
-      backendUrl += `?role=${encodeURIComponent(role)}`;
-    }
+    const queryParams = new URLSearchParams();
+    if (role) queryParams.append("role", role);
+    if (page) queryParams.append("page", page);
+    if (limit) queryParams.append("limit", limit);
+    if (approvalStatus) queryParams.append("approvalStatus", approvalStatus);
+
+    const queryString = queryParams.toString();
+    const backendUrl = queryString 
+      ? `${config.backendUrl}/api/users?${queryString}` 
+      : `${config.backendUrl}/api/users`;
 
     const response = await fetchWithTimeout(backendUrl, {
       headers: {

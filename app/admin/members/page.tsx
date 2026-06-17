@@ -12,7 +12,11 @@ import {
   Building,
   Loader2,
   UserCheck,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -43,11 +47,16 @@ export default function MembersPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null)
+  
+  // Pagination State
+  const [lifetimePage, setLifetimePage] = useState(1)
+  const [generalPage, setGeneralPage] = useState(1)
+  const pageSize = 10
 
   const fetchMembers = async () => {
     try {
       setLoading(true)
-      const usersData = await api.admin.getAllUsers()
+      const usersData = await api.admin.getAllUsers({ approvalStatus: 'approved', limit: 0 })
       setMembers([...usersData])
       setFilteredMembers([...usersData])
     } catch (error) {
@@ -80,6 +89,12 @@ export default function MembersPage() {
     setFilteredMembers(filtered)
   }, [searchQuery, members])
 
+  // Reset page numbers when search query or members list changes
+  useEffect(() => {
+    setLifetimePage(1)
+    setGeneralPage(1)
+  }, [searchQuery, members])
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -105,6 +120,77 @@ export default function MembersPage() {
   const generalMembers = filteredMembers.filter(
     (m) => m.membershipType !== "lifetime"
   )
+
+  // Calculate paginated slices
+  const totalLifetimePages = Math.ceil(lifetimeMembers.length / pageSize)
+  const totalGeneralPages = Math.ceil(generalMembers.length / pageSize)
+
+  const paginatedLifetimeMembers = lifetimeMembers.slice(
+    (lifetimePage - 1) * pageSize,
+    lifetimePage * pageSize
+  )
+  const paginatedGeneralMembers = generalMembers.slice(
+    (generalPage - 1) * pageSize,
+    generalPage * pageSize
+  )
+
+  const PaginationControls = ({
+    currentPage,
+    totalPages,
+    onPageChange,
+  }: {
+    currentPage: number
+    totalPages: number
+    onPageChange: (page: number) => void
+  }) => {
+    if (totalPages <= 1) return null
+
+    return (
+      <div className="flex items-center justify-end space-x-2 py-4 border-t px-4 bg-muted/10">
+        <div className="flex min-w-[100px] items-center justify-center text-sm font-medium text-muted-foreground mr-4">
+          Page {currentPage} of {totalPages}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => onPageChange(1)}
+            disabled={currentPage === 1}
+          >
+            <span className="sr-only">Go to first page</span>
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <span className="sr-only">Go to previous page</span>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <span className="sr-only">Go to next page</span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => onPageChange(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            <span className="sr-only">Go to last page</span>
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   const handleMembershipStatusChange = async (
     userId: string,
@@ -334,25 +420,32 @@ export default function MembersPage() {
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Member</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Affiliation</TableHead>
-                    <TableHead>Membership Type</TableHead>
-                    <TableHead>Member ID</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Joined</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {lifetimeMembers.map((member) => (
-                    <MemberRow key={member.id} member={member} />
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="flex flex-col gap-4">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Member</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Affiliation</TableHead>
+                      <TableHead>Membership Type</TableHead>
+                      <TableHead>Member ID</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Joined</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedLifetimeMembers.map((member) => (
+                      <MemberRow key={member.id} member={member} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <PaginationControls
+                currentPage={lifetimePage}
+                totalPages={totalLifetimePages}
+                onPageChange={setLifetimePage}
+              />
             </div>
           )}
         </CardContent>
@@ -384,25 +477,32 @@ export default function MembersPage() {
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Member</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Affiliation</TableHead>
-                    <TableHead>Membership Type</TableHead>
-                    <TableHead>Member ID</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Joined</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {generalMembers.map((member) => (
-                    <MemberRow key={member.id} member={member} />
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="flex flex-col gap-4">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Member</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Affiliation</TableHead>
+                      <TableHead>Membership Type</TableHead>
+                      <TableHead>Member ID</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Joined</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedGeneralMembers.map((member) => (
+                      <MemberRow key={member.id} member={member} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <PaginationControls
+                currentPage={generalPage}
+                totalPages={totalGeneralPages}
+                onPageChange={setGeneralPage}
+              />
             </div>
           )}
         </CardContent>
