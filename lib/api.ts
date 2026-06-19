@@ -26,6 +26,7 @@ import {
   SendOTPResponse,
   VerifyOTPResponse,
   EventCreateInput,
+  EventUpdateInput,
   GetUploadUrlsRequest,
   GetUploadUrlsResponse,
 } from '@/types/api';
@@ -283,6 +284,33 @@ export const eventApi = {
     });
     return handleApiResponse<Event>(response);
   },
+
+  updateEvent: async (
+    eventId: string,
+    eventData: EventUpdateInput & { eventImage?: File },
+  ): Promise<Event> => {
+    const formData = new FormData();
+    // Append only the fields that are present so the backend can partially update
+    if (eventData.title !== undefined) formData.append('title', eventData.title);
+    if (eventData.description !== undefined) formData.append('description', eventData.description);
+    if (eventData.date !== undefined) formData.append('date', eventData.date);
+    if (eventData.time !== undefined) formData.append('time', eventData.time);
+    if (eventData.category !== undefined) formData.append('category', eventData.category);
+    if (eventData.location !== undefined) formData.append('location', eventData.location);
+    // Only send a new image when one was selected; otherwise the backend keeps the existing one
+    if (eventData.eventImage) {
+      formData.append('eventImage', eventData.eventImage);
+    }
+
+    // apiClient.patch detects FormData and strips the Content-Type header automatically
+    const response = await apiClient.patch<Event>(`/events/${eventId}`, formData);
+    return handleApiResponse<Event>(response);
+  },
+
+  deleteEvent: async (eventId: string): Promise<OperationResponse> => {
+    const response = await apiClient.delete<OperationResponse>(`/events/${eventId}`);
+    return handleApiResponse<OperationResponse>(response);
+  },
 };
 
 // Gallery API
@@ -520,6 +548,12 @@ export const getEvent = (eventId: string): Promise<Event> =>
   eventApi.getEvent(eventId);
 export const createEvent = (eventData: EventCreateInput & { eventImage?: File }): Promise<Event> =>
   eventApi.createEvent(eventData);
+export const updateEvent = (
+  eventId: string,
+  eventData: EventUpdateInput & { eventImage?: File },
+): Promise<Event> => eventApi.updateEvent(eventId, eventData);
+export const deleteEvent = (eventId: string): Promise<OperationResponse> =>
+  eventApi.deleteEvent(eventId);
 export const registerForEvent = (): Promise<OperationResponse> =>
   Promise.resolve({ success: true, message: 'Success' });
 

@@ -9,19 +9,81 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Plus, Edit, Trash2, MapPin, Clock, Loader2, Image as ImageIcon, RefreshCw } from "lucide-react";
+import { Calendar, Plus, Edit, Trash2, MapPin, Clock, Loader2, Image as ImageIcon, RefreshCw, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { toast } from "react-toastify";
 import { Event } from "@/types/api";
 import { api } from "@/lib/api";
 import Image from "next/image";
+
+// Reusable client-side pagination controls (mirrors the admin members page)
+function PaginationControls({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="flex items-center justify-end space-x-2 py-4 border-t px-4 bg-muted/10">
+      <div className="flex min-w-[100px] items-center justify-center text-sm font-medium text-muted-foreground mr-4">
+        Page {currentPage} of {totalPages}
+      </div>
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          className="h-8 w-8 p-0"
+          onClick={() => onPageChange(1)}
+          disabled={currentPage === 1}
+        >
+          <span className="sr-only">Go to first page</span>
+          <ChevronsLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          className="h-8 w-8 p-0"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          <span className="sr-only">Go to previous page</span>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          className="h-8 w-8 p-0"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          <span className="sr-only">Go to next page</span>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          className="h-8 w-8 p-0"
+          onClick={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+        >
+          <span className="sr-only">Go to last page</span>
+          <ChevronsRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function EventsManagement() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [_editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Event | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState<{
     title: string;
     description: string;
@@ -39,6 +101,9 @@ export default function EventsManagement() {
   });
   const [eventImage, setEventImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // Client-side pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     fetchEvents();
@@ -100,6 +165,7 @@ export default function EventsManagement() {
       toast.success("Event created successfully");
       setIsCreateDialogOpen(false);
       resetForm();
+      setCurrentPage(1);
       fetchEvents();
     } catch (error) {
       console.error("Failed to create event:", error);
@@ -109,17 +175,59 @@ export default function EventsManagement() {
     }
   };
 
-  // Note: Edit functionality will be implemented when update API is available
-  // const handleEditEvent = async () => {
-  //   if (!editingEvent) return;
-  //   toast.info("Edit functionality will be implemented when update API is available");
-  // };
+  const handleUpdateEvent = async () => {
+    if (!editingEvent) return;
 
-  const handleDeleteEvent = async (_eventId: string) => {
-    if (!confirm("Are you sure you want to delete this event?")) return;
-    
-    // Note: Delete functionality would require a DELETE endpoint
-    toast.info("Delete functionality will be implemented when delete API is available");
+    // Validate required fields
+    if (!formData.title || !formData.date || !formData.category) {
+      toast.error("Please fill in all required fields (Title, Date, Category)");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      // Convert category to lowercase for backend (backend expects: program, workshop, meeting)
+      // Send a new image only when one was selected; otherwise the backend keeps the existing image
+      await api.events.updateEvent(editingEvent.id, {
+        ...formData,
+        category: formData.category.toLowerCase() as "program" | "workshop" | "meeting",
+        ...(eventImage && { eventImage }),
+      });
+
+      toast.success("Event updated successfully");
+      setIsEditDialogOpen(false);
+      setEditingEvent(null);
+      resetForm();
+      fetchEvents();
+    } catch (error) {
+      console.error("Failed to update event:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update event");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteClick = (event: Event) => {
+    setDeleteTarget(event);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      setIsDeleting(true);
+      await api.events.deleteEvent(deleteTarget.id);
+      toast.success(`Event "${deleteTarget.title}" deleted successfully`);
+      setIsDeleteDialogOpen(false);
+      setDeleteTarget(null);
+      fetchEvents();
+    } catch (error) {
+      console.error("Failed to delete event:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete event");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const openEditDialog = (event: Event) => {
@@ -173,6 +281,14 @@ export default function EventsManagement() {
     const [hours, minutes] = timeString.split(":");
     return `${hours}:${minutes}`;
   };
+
+  // Derive the current page slice, clamping the page so deletes never leave us out of range
+  const totalPages = Math.ceil(events.length / pageSize) || 1;
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+  const paginatedEvents = events.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize
+  );
 
   return (
     <div className="space-y-8">
@@ -380,7 +496,7 @@ export default function EventsManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {events.map((event) => (
+                  {paginatedEvents.map((event) => (
                     <TableRow key={event.id}>
                       <TableCell>
                         <div className="w-16 h-16 rounded-md overflow-hidden bg-muted flex items-center justify-center">
@@ -442,7 +558,7 @@ export default function EventsManagement() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDeleteEvent(event.id)}
+                            onClick={() => handleDeleteClick(event)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -452,12 +568,17 @@ export default function EventsManagement() {
                   ))}
                 </TableBody>
               </Table>
+              <PaginationControls
+                currentPage={safePage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Edit Event Dialog - Placeholder for future implementation */}
+      {/* Edit Event Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
         setIsEditDialogOpen(open);
         if (!open) {
@@ -465,16 +586,200 @@ export default function EventsManagement() {
           resetForm();
         }
       }}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Event</DialogTitle>
             <DialogDescription>
-              Update event information (Edit API coming soon)
+              Update event information
             </DialogDescription>
           </DialogHeader>
-          <div className="p-4 text-center text-muted-foreground">
-            Edit functionality will be available once the update API endpoint is implemented.
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-title" className="text-right">
+                Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="edit-title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="edit-description" className="text-right pt-2">
+                Description <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="col-span-3"
+                rows={4}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-date" className="text-right">
+                Date <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="edit-date"
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-time" className="text-right">
+                Time <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="edit-time"
+                type="time"
+                value={formData.time}
+                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-category" className="text-right">
+                Category <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value: "Program" | "Workshop" | "Meeting") =>
+                  setFormData({ ...formData, category: value })
+                }
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Program">Program</SelectItem>
+                  <SelectItem value="Workshop">Workshop</SelectItem>
+                  <SelectItem value="Meeting">Meeting</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-location" className="text-right">
+                Location <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="edit-location"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="edit-eventImage" className="text-right pt-2">
+                Event Image
+              </Label>
+              <div className="col-span-3 space-y-2">
+                <Input
+                  id="edit-eventImage"
+                  type="file"
+                  accept=".png,.jpeg,.jpg"
+                  onChange={handleImageChange}
+                  className="cursor-pointer"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Optional. Select a new image to replace the current one. Accepted formats: PNG, JPEG, JPG (max 5MB)
+                </p>
+                {imagePreview && (
+                  <div className="mt-2">
+                    <Image
+                      src={imagePreview}
+                      alt="Preview"
+                      width={400}
+                      height={192}
+                      className="w-full h-48 object-cover rounded-md border"
+                      unoptimized
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditDialogOpen(false);
+                setEditingEvent(null);
+                resetForm();
+              }}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateEvent} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Event Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => {
+        setIsDeleteDialogOpen(open);
+        if (!open) {
+          setDeleteTarget(null);
+        }
+      }}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Event</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-foreground">
+                {deleteTarget?.title}
+              </span>
+              ? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setDeleteTarget(null);
+              }}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

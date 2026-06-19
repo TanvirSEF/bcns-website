@@ -408,6 +408,16 @@ export interface EventCreateInput {
   readonly imageUrl?: string;
 }
 
+export interface EventUpdateInput {
+  readonly title?: string;
+  readonly description?: string;
+  readonly date?: ISODateString;
+  readonly time?: string;
+  readonly category?: "program" | "workshop" | "meeting";
+  readonly location?: string;
+  readonly imageUrl?: string;
+}
+
 export interface DocumentCreateInput {
   readonly title: string;
   readonly description?: string;
