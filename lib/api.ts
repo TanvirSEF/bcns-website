@@ -278,6 +278,9 @@ export const eventApi = {
     if (eventData.time) formData.append('time', eventData.time);
     formData.append('category', eventData.category);
     if (eventData.location) formData.append('location', eventData.location);
+    if (eventData.attendees) formData.append('attendees', eventData.attendees);
+    if (eventData.decisions) formData.append('decisions', eventData.decisions);
+    if (eventData.registrationUrl) formData.append('registrationUrl', eventData.registrationUrl);
     if (eventData.eventImage) {
       formData.append('eventImage', eventData.eventImage);
     }
@@ -301,6 +304,9 @@ export const eventApi = {
     if (eventData.time !== undefined) formData.append('time', eventData.time);
     if (eventData.category !== undefined) formData.append('category', eventData.category);
     if (eventData.location !== undefined) formData.append('location', eventData.location);
+    if (eventData.attendees !== undefined) formData.append('attendees', eventData.attendees);
+    if (eventData.decisions !== undefined) formData.append('decisions', eventData.decisions);
+    if (eventData.registrationUrl !== undefined) formData.append('registrationUrl', eventData.registrationUrl);
     // Only send a new image when one was selected; otherwise the backend keeps the existing one
     if (eventData.eventImage) {
       formData.append('eventImage', eventData.eventImage);

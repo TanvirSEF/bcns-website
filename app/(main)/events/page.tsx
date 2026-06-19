@@ -22,6 +22,7 @@ type ApiEvent = {
   location?: string;
   category?: string;
   slug?: string;
+  description?: string;
 };
 
 function formatEventDate(date: string): string {
@@ -109,7 +110,7 @@ export default async function EventsPage() {
                               )}
                             </div>
                           </div>
-                          {event.slug && (
+                          {event.description && event.slug && (
                             <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-gray-100">
                               <Link
                                 href={`/events/${event.slug}`}

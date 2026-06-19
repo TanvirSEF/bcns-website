@@ -21,6 +21,7 @@ type ApiEvent = {
   location?: string;
   category?: string;
   slug?: string;
+  description?: string;
 };
 
 function formatEventDate(date: string): string {
@@ -104,7 +105,7 @@ export default async function ConferencePage() {
                               </>
                             )}
                           </div>
-                          {event.slug && (
+                          {event.description && event.slug && (
                             <div className="flex items-center gap-2 mt-2">
                               <Link href={`/events/${event.slug}`} className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 text-sm font-semibold">View Summary</Link>
                             </div>

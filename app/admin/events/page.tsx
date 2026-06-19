@@ -91,6 +91,9 @@ export default function EventsManagement() {
     time: string;
     category: "Program" | "Workshop" | "Meeting";
     location: string;
+    attendees: string;
+    registrationUrl: string;
+    decisions: string;
   }>({
     title: "",
     description: "",
@@ -98,6 +101,9 @@ export default function EventsManagement() {
     time: "",
     category: "Program",
     location: "",
+    attendees: "",
+    registrationUrl: "",
+    decisions: "",
   });
   const [eventImage, setEventImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -248,6 +254,9 @@ export default function EventsManagement() {
       time: event.time ?? "",
       category: categoryValue,
       location: event.location ?? "",
+      attendees: event.attendees ?? "",
+      registrationUrl: event.registrationUrl ?? "",
+      decisions: event.decisions ?? "",
     });
     setEventImage(null);
     setImagePreview(event.imageUrl || null);
@@ -262,6 +271,9 @@ export default function EventsManagement() {
       time: "",
       category: "Program",
       location: "",
+      attendees: "",
+      registrationUrl: "",
+      decisions: "",
     });
     setEventImage(null);
     setImagePreview(null);
@@ -394,6 +406,44 @@ export default function EventsManagement() {
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="attendees" className="text-right">
+                    Attendees
+                  </Label>
+                  <Input
+                    id="attendees"
+                    value={formData.attendees}
+                    onChange={(e) => setFormData({ ...formData, attendees: e.target.value })}
+                    placeholder="e.g. 200+ or 26"
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="registrationUrl" className="text-right">
+                    Registration URL
+                  </Label>
+                  <Input
+                    id="registrationUrl"
+                    type="url"
+                    value={formData.registrationUrl}
+                    onChange={(e) => setFormData({ ...formData, registrationUrl: e.target.value })}
+                    placeholder="https://example.com/register"
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-start gap-4">
+                  <Label htmlFor="decisions" className="text-right pt-2">
+                    Decisions
+                  </Label>
+                  <Textarea
+                    id="decisions"
+                    value={formData.decisions}
+                    onChange={(e) => setFormData({ ...formData, decisions: e.target.value })}
+                    placeholder="Key decisions or resolutions from this event (optional)"
+                    className="col-span-3"
+                    rows={3}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-start gap-4">
@@ -664,6 +714,44 @@ export default function EventsManagement() {
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-attendees" className="text-right">
+                Attendees
+              </Label>
+              <Input
+                id="edit-attendees"
+                value={formData.attendees}
+                onChange={(e) => setFormData({ ...formData, attendees: e.target.value })}
+                placeholder="e.g. 200+ or 26"
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-registrationUrl" className="text-right">
+                Registration URL
+              </Label>
+              <Input
+                id="edit-registrationUrl"
+                type="url"
+                value={formData.registrationUrl}
+                onChange={(e) => setFormData({ ...formData, registrationUrl: e.target.value })}
+                placeholder="https://example.com/register"
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="edit-decisions" className="text-right pt-2">
+                Decisions
+              </Label>
+              <Textarea
+                id="edit-decisions"
+                value={formData.decisions}
+                onChange={(e) => setFormData({ ...formData, decisions: e.target.value })}
+                placeholder="Key decisions or resolutions from this event (optional)"
+                className="col-span-3"
+                rows={3}
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
