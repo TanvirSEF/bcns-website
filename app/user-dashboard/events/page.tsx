@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Calendar, Clock, MapPin, ExternalLink, Filter } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Filter, Heart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { api } from "@/lib/api";
+import { useFavorites } from "@/hooks/use-favorites";
 import { Event } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -30,6 +31,7 @@ export default function UserEventsPage() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
+  const { favoredIds, toggle } = useFavorites("event");
 
   React.useEffect(() => {
     const fetchEvents = async () => {
@@ -210,6 +212,14 @@ export default function UserEventsPage() {
                       >
                         {event.category || "Program"}
                       </Badge>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="absolute bottom-3 right-3 h-8 w-8 p-0 z-10 bg-white/90 hover:bg-white shadow-sm"
+                        onClick={(e) => { e.stopPropagation(); toggle(event.id); }}
+                      >
+                        <Heart className={`h-4 w-4 ${favoredIds.has(event.id) ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
+                      </Button>
                     </div>
                   ) : (
                     <div className="relative h-48 w-full bg-gradient-to-br from-emerald-100 to-green-100 flex items-center justify-center">
@@ -224,6 +234,14 @@ export default function UserEventsPage() {
                       >
                         {event.category || "Program"}
                       </Badge>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="absolute bottom-3 right-3 h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm"
+                        onClick={(e) => { e.stopPropagation(); toggle(event.id); }}
+                      >
+                        <Heart className={`h-4 w-4 ${favoredIds.has(event.id) ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
+                      </Button>
                     </div>
                   )}
 
@@ -318,6 +336,14 @@ export default function UserEventsPage() {
                       >
                         {event.category || "Program"}
                       </Badge>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="absolute bottom-3 right-3 h-8 w-8 p-0 z-10 bg-white/90 hover:bg-white shadow-sm"
+                        onClick={(e) => { e.stopPropagation(); toggle(event.id); }}
+                      >
+                        <Heart className={`h-4 w-4 ${favoredIds.has(event.id) ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
+                      </Button>
                     </div>
                   ) : (
                     <div className="relative h-56 w-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
@@ -332,6 +358,14 @@ export default function UserEventsPage() {
                       >
                         {event.category || "Program"}
                       </Badge>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="absolute bottom-3 right-3 h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm"
+                        onClick={(e) => { e.stopPropagation(); toggle(event.id); }}
+                      >
+                        <Heart className={`h-4 w-4 ${favoredIds.has(event.id) ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
+                      </Button>
                     </div>
                   )}
 

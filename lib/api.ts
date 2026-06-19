@@ -11,6 +11,8 @@ import {
   Photo,
   Poll,
   Publication,
+  Favorite,
+  FavoriteTargetType,
   ZoomMeeting,
   ActivityLog,
   LoginResponse,
@@ -180,6 +182,17 @@ export const userApi = {
       '/users/me/profile-picture/delete'
     );
 
+    return handleApiResponse<OperationResponse>(response);
+  },
+
+  uploadDocument: async (file: File, title?: string): Promise<OperationResponse> => {
+    const formData = new FormData();
+    formData.append('document', file);
+    if (title) formData.append('title', title);
+    const response = await apiClient.post<OperationResponse>(
+      '/users/me/documents',
+      formData,
+    );
     return handleApiResponse<OperationResponse>(response);
   },
 
@@ -504,6 +517,26 @@ export const zoomApi = {
   },
 };
 
+// Favorites API
+export const favoritesApi = {
+  getFavorites: async (): Promise<readonly Favorite[]> => {
+    const response = await apiClient.get<readonly Favorite[]>('/favorites');
+    return handleApiResponse<readonly Favorite[]>(response);
+  },
+
+  addFavorite: async (targetType: FavoriteTargetType, targetId: string): Promise<Favorite> => {
+    const response = await apiClient.post<Favorite>('/favorites', { targetType, targetId });
+    return handleApiResponse<Favorite>(response);
+  },
+
+  removeFavorite: async (targetType: FavoriteTargetType, targetId: string): Promise<OperationResponse> => {
+    const response = await apiClient.delete<OperationResponse>(
+      `/favorites?targetType=${targetType}&targetId=${targetId}`,
+    );
+    return handleApiResponse<OperationResponse>(response);
+  },
+};
+
 export const api = {
   auth: authApi,
   users: userApi,
@@ -513,6 +546,7 @@ export const api = {
   publications: publicationApi,
   polls: pollApi,
   zoom: zoomApi,
+  favorites: favoritesApi,
 };
 
 // Backward compatibility exports

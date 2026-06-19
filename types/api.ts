@@ -172,6 +172,22 @@ export interface Publication {
   readonly createdAt: ISODateString;
   readonly updatedAt: ISODateString;
   readonly publishedAt?: ISODateString;
+  readonly category?: string;
+  readonly fileUrl?: string;
+}
+
+export type FavoriteTargetType = "publication" | "event" | "member";
+
+export interface Favorite {
+  readonly id: UUID;
+  readonly targetType: FavoriteTargetType;
+  readonly targetId: UUID;
+  readonly createdAt: ISODateString;
+  readonly title?: string;
+  readonly description?: string;
+  readonly category?: string;
+  readonly date?: ISODateString;
+  readonly author?: string;
 }
 
 export interface ZoomMeeting {

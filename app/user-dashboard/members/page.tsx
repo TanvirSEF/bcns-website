@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Search, Mail, Phone, MapPin, Calendar, User, Building2 } from "lucide-react";
+import { Search, Mail, Phone, MapPin, Calendar, User, Building2, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getAllMembers } from "@/lib/api";
+import { useFavorites } from "@/hooks/use-favorites";
 import { User as UserType } from "@/types/api";
 import { toast } from "react-toastify";
 
@@ -17,6 +18,7 @@ export default function UserMembersPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const { favoredIds, toggle } = useFavorites("member");
 
   React.useEffect(() => {
     const fetchMembers = async () => {
@@ -173,9 +175,19 @@ export default function UserMembersPage() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors mb-1">
-                      {member.name || "Name not available"}
-                    </h3>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors">
+                        {member.name || "Name not available"}
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 flex-shrink-0"
+                        onClick={() => toggle(member.id)}
+                      >
+                        <Heart className={`h-4 w-4 ${favoredIds.has(member.id) ? "fill-red-500 text-red-500" : ""}`} />
+                      </Button>
+                    </div>
                     {member.affiliation && (
                       <div className="flex items-center text-sm text-gray-600 mb-3">
                         <Building2 className="h-3 w-3 mr-1.5 flex-shrink-0" />

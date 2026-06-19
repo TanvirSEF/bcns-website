@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { FileText, Download, Calendar, CheckCircle, Clock, XCircle, ExternalLink } from "lucide-react";
+import { FileText, Download, Calendar, CheckCircle, Clock, XCircle, ExternalLink, Upload, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 import { DocumentStatus } from "@/types/api";
 import { toast } from "react-toastify";
@@ -23,59 +25,83 @@ export default function UserDocumentsPage() {
   const [documents, setDocuments] = React.useState<Document[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [uploadFile, setUploadFile] = React.useState<File | null>(null);
+  const [uploadTitle, setUploadTitle] = React.useState("");
+  const [uploading, setUploading] = React.useState(false);
+
+  const fetchDocuments = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const userData = await api.auth.getProfile();
+      const userWithDocs = userData as typeof userData & { documents?: unknown[] };
+      const userDocs = Array.isArray(userWithDocs.documents) ? userWithDocs.documents : [];
+
+      const formattedDocs: Document[] = userDocs.map((doc: unknown) => {
+        const docData = doc as {
+          _id?: string;
+          id?: string;
+          title?: string;
+          fileUrl?: string;
+          status?: string;
+          uploadedAt?: string;
+          createdAt?: string;
+        };
+        const uploadedAt = docData.uploadedAt || docData.createdAt;
+        return {
+          id: docData._id || docData.id || "",
+          title: docData.title || "Untitled Document",
+          fileUrl: docData.fileUrl || "",
+          status: docData.status || DocumentStatus.PENDING,
+          ...(uploadedAt && { uploadedAt }),
+        };
+      });
+
+      setDocuments(formattedDocs);
+    } catch (err) {
+      console.error("Failed to fetch documents:", err);
+      const errorMessage = err instanceof Error
+        ? err.message
+        : "Failed to load documents. Please try again later.";
+      setError(errorMessage);
+      toast.error("Failed to load documents");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   React.useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Fetch user profile which includes documents array from backend
-        const userData = await api.auth.getProfile();
-        
-        // Extract documents from user data (backend returns documents array in user profile)
-        // Type assertion needed because User type doesn't include documents field
-        const userWithDocs = userData as typeof userData & { documents?: unknown[] };
-        const userDocs = Array.isArray(userWithDocs.documents) ? userWithDocs.documents : [];
-        
-        // Transform documents to match our interface
-        const formattedDocs: Document[] = userDocs.map((doc: unknown) => {
-          const docData = doc as {
-            _id?: string;
-            id?: string;
-            title?: string;
-            fileUrl?: string;
-            status?: string;
-            uploadedAt?: string;
-            createdAt?: string;
-          };
-          
-          const uploadedAt = docData.uploadedAt || docData.createdAt;
-          
-          return {
-            id: docData._id || docData.id || "",
-            title: docData.title || "Untitled Document",
-            fileUrl: docData.fileUrl || "",
-            status: docData.status || DocumentStatus.PENDING,
-            ...(uploadedAt && { uploadedAt }),
-          };
-        });
-        
-        setDocuments(formattedDocs);
-      } catch (err) {
-        console.error("Failed to fetch documents:", err);
-        const errorMessage = err instanceof Error 
-          ? err.message 
-          : "Failed to load documents. Please try again later.";
-        setError(errorMessage);
-        toast.error("Failed to load documents");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDocuments();
-  }, []);
+  }, [fetchDocuments]);
+
+  const handleUpload = async () => {
+    if (!uploadFile) return;
+    if (uploadFile.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+    const allowedTypes = ["application/pdf", "image/png", "image/jpeg", "image/jpg"];
+    if (!allowedTypes.includes(uploadFile.type)) {
+      toast.error("Only PDF, PNG, JPEG files are allowed");
+      return;
+    }
+    try {
+      setUploading(true);
+      await api.users.uploadDocument(uploadFile, uploadTitle.trim() || undefined);
+      toast.success("Document uploaded successfully");
+      setUploadFile(null);
+      setUploadTitle("");
+      const fileInput = document.getElementById("doc-file") as HTMLInputElement | null;
+      if (fileInput) fileInput.value = "";
+      await fetchDocuments();
+    } catch (error) {
+      console.error("Failed to upload document:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to upload document");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
@@ -177,6 +203,58 @@ export default function UserDocumentsPage() {
         <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">My Documents</h1>
         <p className="text-gray-700">View and manage your uploaded documents.</p>
       </div>
+
+      {/* Upload Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Upload className="h-5 w-5 text-emerald-600" />
+            Upload New Document
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="doc-title">Document Title (optional)</Label>
+              <Input
+                id="doc-title"
+                placeholder="e.g. BMDC Certificate"
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="doc-file">Select File</Label>
+              <Input
+                id="doc-file"
+                type="file"
+                accept=".pdf,.png,.jpeg,.jpg"
+                onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Accepted: PDF, PNG, JPEG, JPG (max 10MB). Documents start as "pending" and require admin approval.
+          </p>
+          <Button
+            onClick={handleUpload}
+            disabled={!uploadFile || uploading}
+            className="bg-emerald-600 hover:bg-emerald-700"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Document
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Documents Grid */}
       {documents.length > 0 ? (
