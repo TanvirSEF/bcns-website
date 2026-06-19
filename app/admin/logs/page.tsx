@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Activity, Search, Download, Eye, Clock, User, Globe, Monitor, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "react-toastify";
 import { ActivityLog } from "@/types/api";
 import { getActivityLogs } from "@/lib/api";
@@ -22,6 +23,8 @@ export default function ActivityLogsManagement() {
   const [userFilter, setUserFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedLog, setSelectedLog] = useState<ActivityLog | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const pageSize = 10;
 
   useEffect(() => {
@@ -400,8 +403,8 @@ export default function ActivityLogsManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        // TODO: Implement detailed view
-                        toast.info("Detailed view functionality coming soon");
+                        setSelectedLog(log);
+                        setDetailOpen(true);
                       }}
                     >
                       <Eye className="h-4 w-4" />
@@ -440,6 +443,52 @@ export default function ActivityLogsManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Log Detail Dialog */}
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedLog && getActionBadge(selectedLog.action)}
+            </DialogTitle>
+            <DialogDescription>Activity log details</DialogDescription>
+          </DialogHeader>
+          {selectedLog && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Description</span>
+                <span className="font-medium text-right max-w-[60%]">{selectedLog.description}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Admin</span>
+                <span className="font-medium">{selectedLog.userName || selectedLog.userEmail || selectedLog.userId}</span>
+              </div>
+              {selectedLog.userEmail && selectedLog.userName && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email</span>
+                  <span className="font-medium">{selectedLog.userEmail}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Date & Time</span>
+                <span className="font-medium">{formatDate(selectedLog.createdAt)}</span>
+              </div>
+              {selectedLog.ipAddress && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">IP Address</span>
+                  <span className="font-medium font-mono">{selectedLog.ipAddress}</span>
+                </div>
+              )}
+              {selectedLog.userAgent && (
+                <div className="space-y-1">
+                  <span className="text-muted-foreground">User Agent</span>
+                  <p className="text-xs bg-muted p-2 rounded font-mono break-all">{selectedLog.userAgent}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
