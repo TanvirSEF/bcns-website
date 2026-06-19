@@ -71,6 +71,7 @@ function ProfilePageContent() {
     phone: "",
     designation: "",
     affiliation: "",
+    bmdcNo: "",
     mailingAddress: "",
     permanentAddress: "",
     bio: "",
@@ -172,6 +173,7 @@ function ProfilePageContent() {
 
   // Profile picture upload with progress
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [removingPhoto, setRemovingPhoto] = useState(false);
   const { loading: uploadLoading, execute: executeUpload } = useAsyncSubmit(
     async (file: File) => {
       const response = await api.users.uploadProfilePicture(file, (progress) => {
@@ -214,6 +216,7 @@ function ProfilePageContent() {
           phone: user.phone || "",
           designation: u.designation || "",
           affiliation: user.affiliation || "",
+          bmdcNo: user.bmdcNo || "",
           mailingAddress: user.mailingAddress || "",
           permanentAddress: user.permanentAddress || "",
           bio: user.bio || "",
@@ -345,6 +348,7 @@ function ProfilePageContent() {
       ...(formData.phone && { phone: formData.phone }),
       ...(formData.designation && { designation: formData.designation }),
       ...(formData.affiliation && { affiliation: formData.affiliation }),
+      ...(formData.bmdcNo && { bmdcNo: formData.bmdcNo }),
       ...(formData.mailingAddress && { mailingAddress: formData.mailingAddress }),
       ...(formData.permanentAddress && { permanentAddress: formData.permanentAddress }),
       ...(formData.bio && { bio: formData.bio }),
@@ -372,6 +376,7 @@ function ProfilePageContent() {
         phone: updatedUser.phone || "",
         designation: u.designation || "",
         affiliation: updatedUser.affiliation || "",
+        bmdcNo: updatedUser.bmdcNo || "",
         mailingAddress: updatedUser.mailingAddress || "",
         permanentAddress: updatedUser.permanentAddress || "",
         bio: updatedUser.bio || "",
@@ -487,9 +492,25 @@ function ProfilePageContent() {
     }
 
     await executeUpload(file);
-    
+
     // Clear the input so the same file can be uploaded again if needed
     event.target.value = '';
+  };
+
+  const handleRemoveProfilePicture = async () => {
+    if (!window.confirm("Remove your profile photo?")) return;
+    try {
+      setRemovingPhoto(true);
+      await api.users.deleteProfilePicture();
+      // Clear the photo in context + UI (backend already unset it and removed the R2 object)
+      updateUser({ profilePictureUrl: "" });
+      toast.success("Profile photo removed");
+    } catch (error) {
+      console.error("Failed to remove profile photo:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to remove profile photo");
+    } finally {
+      setRemovingPhoto(false);
+    }
   };
 
   return (
@@ -547,6 +568,22 @@ function ProfilePageContent() {
                     </div>
                   )}
                 </div>
+                {user?.profilePictureUrl && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRemoveProfilePicture}
+                    disabled={removingPhoto || uploadLoading}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    {removingPhoto ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-2" />
+                    )}
+                    Remove Photo
+                  </Button>
+                )}
               </div>
               <CardTitle className="mt-4">{user?.name || "User"}</CardTitle>
               <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
@@ -780,6 +817,20 @@ function ProfilePageContent() {
                       onChange={(e) => handleInputChange("designation", e.target.value)}
                       disabled={!isEditing}
                       placeholder="e.g. Assistant Professor, Consultant"
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bmdcNo">BM&DC No.</Label>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="bmdcNo"
+                      value={formData.bmdcNo}
+                      onChange={(e) => handleInputChange("bmdcNo", e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="e.g. A-12345"
                       className="pl-9"
                     />
                   </div>

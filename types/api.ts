@@ -318,6 +318,7 @@ export interface UserUpdateInput {
   readonly affiliation?: string;
   readonly mailingAddress?: string;
   readonly permanentAddress?: string;
+  readonly bmdcNo?: string;
   readonly primaryResearchInterest?: string;
   readonly secondaryResearchInterest?: string;
   readonly educationQualifications?: readonly EducationQualification[];
