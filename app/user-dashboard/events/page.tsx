@@ -24,18 +24,6 @@ function formatDate(dateString: string): { day: string; month: string; fullDate:
   return { day, month, fullDate };
 }
 
-function formatTime(timeString: string): string {
-  if (/^\d{2}:\d{2}$/.test(timeString)) {
-    return timeString;
-  }
-  try {
-    const [hours, minutes] = timeString.split(":");
-    return `${hours}:${minutes}`;
-  } catch {
-    return timeString;
-  }
-}
-
 export default function UserEventsPage() {
   const router = useRouter();
   const [events, setEvents] = React.useState<Event[]>([]);
@@ -254,7 +242,7 @@ export default function UserEventsPage() {
                       {event.time && (
                         <div className="flex items-center text-sm text-gray-700">
                           <Clock className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
-                          <span>{formatTime(event.time)}</span>
+                          <span>{event.time}</span>
                         </div>
                       )}
 
@@ -362,7 +350,7 @@ export default function UserEventsPage() {
                       {event.time && (
                         <div className="flex items-center text-sm text-gray-700">
                           <Clock className="h-4 w-4 mr-2 text-gray-600 flex-shrink-0" />
-                          <span>{formatTime(event.time)}</span>
+                          <span>{event.time}</span>
                         </div>
                       )}
 

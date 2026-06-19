@@ -275,13 +275,6 @@ export default function EventsManagement() {
     });
   };
 
-  const formatTime = (timeString?: string) => {
-    if (!timeString) return "";
-    // Handle both HH:mm and HH:mm:ss formats
-    const [hours, minutes] = timeString.split(":");
-    return `${hours}:${minutes}`;
-  };
-
   // Derive the current page slice, clamping the page so deletes never leave us out of range
   const totalPages = Math.ceil(events.length / pageSize) || 1;
   const safePage = Math.min(Math.max(currentPage, 1), totalPages);
@@ -365,7 +358,8 @@ export default function EventsManagement() {
                   </Label>
                   <Input
                     id="time"
-                    type="time"
+                    type="text"
+                    placeholder="e.g. 10:00 AM or 9:00 AM to 2:00 PM"
                     value={formData.time}
                     onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                     className="col-span-3"
@@ -523,7 +517,7 @@ export default function EventsManagement() {
                           {event.time && (
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Clock className="h-3 w-3" />
-                              <span>{formatTime(event.time)}</span>
+                              <span>{event.time}</span>
                             </div>
                           )}
                         </div>
@@ -605,7 +599,7 @@ export default function EventsManagement() {
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
               <Label htmlFor="edit-description" className="text-right pt-2">
-                Description <span className="text-red-500">*</span>
+                Description
               </Label>
               <Textarea
                 id="edit-description"
@@ -630,11 +624,12 @@ export default function EventsManagement() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-time" className="text-right">
-                Time <span className="text-red-500">*</span>
+                Time
               </Label>
               <Input
                 id="edit-time"
-                type="time"
+                type="text"
+                placeholder="e.g. 10:00 AM or 9:00 AM to 2:00 PM"
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                 className="col-span-3"
@@ -662,7 +657,7 @@ export default function EventsManagement() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-location" className="text-right">
-                Location <span className="text-red-500">*</span>
+                Location
               </Label>
               <Input
                 id="edit-location"
