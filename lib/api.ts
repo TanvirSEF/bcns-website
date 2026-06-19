@@ -416,6 +416,11 @@ export const publicationApi = {
     const response = await apiClient.get<Publication>(`/publications/${publicationId}`);
     return handleApiResponse<Publication>(response);
   },
+
+  deletePublication: async (publicationId: string): Promise<OperationResponse> => {
+    const response = await apiClient.delete<OperationResponse>(`/publications/${publicationId}`);
+    return handleApiResponse<OperationResponse>(response);
+  },
 };
 
 // Poll API

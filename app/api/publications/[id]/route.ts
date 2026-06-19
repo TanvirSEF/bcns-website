@@ -146,3 +146,58 @@ export async function GET(
   }
 }
 
+// DELETE /api/publications/:id - Delete publication (Admin only)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const token = getToken(request);
+
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { id: publicationId } = await params;
+    if (!publicationId) {
+      return NextResponse.json(
+        { success: false, message: "Publication ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const response = await fetch(
+      `${config.backendUrl}/api/publications/${publicationId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return NextResponse.json(
+        {
+          success: false,
+          message: errorData.message || "Failed to delete publication",
+        },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: "Publication deleted successfully" });
+  } catch (error) {
+    console.error("Delete publication API error:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete publication" },
+      { status: 500 }
+    );
+  }
+}
+

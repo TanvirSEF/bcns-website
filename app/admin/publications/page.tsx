@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Eye, User, Calendar, FileText, Upload, Loader2, Download } from "lucide-react";
+import { Plus, Eye, User, Calendar, FileText, Upload, Loader2, Download, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { Publication } from "@/types/api";
 import { api } from "@/lib/api";
@@ -27,6 +27,9 @@ export default function PublicationsManagement() {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Publication | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchPublications();
@@ -106,6 +109,29 @@ export default function PublicationsManagement() {
       toast.error(error instanceof Error ? error.message : "Failed to create publication");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteClick = (publication: Publication) => {
+    setDeleteTarget(publication);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      setIsDeleting(true);
+      await api.publications.deletePublication(deleteTarget.id);
+      toast.success(`Publication "${deleteTarget.title}" deleted successfully`);
+      setIsDeleteDialogOpen(false);
+      setDeleteTarget(null);
+      fetchPublications();
+    } catch (error) {
+      console.error("Failed to delete publication:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete publication");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -350,16 +376,26 @@ export default function PublicationsManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {pub.fileUrl && (
+                        <div className="flex items-center gap-2">
+                          {pub.fileUrl && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(pub.fileUrl, '_blank')}
+                              title="View PDF"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(pub.fileUrl, '_blank')}
-                            title="View PDF"
+                            onClick={() => handleDeleteClick(publication)}
+                            title="Delete"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -370,6 +406,55 @@ export default function PublicationsManagement() {
         </CardContent>
       </Card>
 
+      {/* Delete Publication Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => {
+        setIsDeleteDialogOpen(open);
+        if (!open) {
+          setDeleteTarget(null);
+        }
+      }}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Publication</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-foreground">
+                {deleteTarget?.title}
+              </span>
+              ? This will also remove its PDF file and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setDeleteTarget(null);
+              }}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
