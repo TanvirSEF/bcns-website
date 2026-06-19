@@ -255,8 +255,12 @@ export const adminApi = {
 
 // Event API
 export const eventApi = {
-  getEvents: async (category?: string): Promise<readonly Event[]> => {
-    const url = category ? `/events?category=${encodeURIComponent(category)}` : '/events';
+  getEvents: async (category?: string, limit?: number): Promise<readonly Event[]> => {
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    if (limit) params.set('limit', String(limit));
+    const qs = params.toString();
+    const url = qs ? `/events?${qs}` : '/events';
     const response = await apiClient.get<readonly Event[]>(url);
     return handleApiResponse<readonly Event[]>(response);
   },

@@ -336,7 +336,7 @@ export default function EventsManagement() {
                 </div>
                 <div className="grid grid-cols-4 items-start gap-4">
                   <Label htmlFor="description" className="text-right pt-2">
-                    Description <span className="text-red-500">*</span>
+                    Description
                   </Label>
                   <Textarea
                     id="description"
@@ -344,7 +344,6 @@ export default function EventsManagement() {
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="col-span-3"
                     rows={4}
-                    required
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -362,7 +361,7 @@ export default function EventsManagement() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="time" className="text-right">
-                    Time <span className="text-red-500">*</span>
+                    Time
                   </Label>
                   <Input
                     id="time"
@@ -370,7 +369,6 @@ export default function EventsManagement() {
                     value={formData.time}
                     onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                     className="col-span-3"
-                    required
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -395,14 +393,13 @@ export default function EventsManagement() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="location" className="text-right">
-                    Location <span className="text-red-500">*</span>
+                    Location
                   </Label>
                   <Input
                     id="location"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     className="col-span-3"
-                    required
                   />
                 </div>
                 <div className="grid grid-cols-4 items-start gap-4">
@@ -616,7 +613,6 @@ export default function EventsManagement() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="col-span-3"
                 rows={4}
-                required
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -642,7 +638,6 @@ export default function EventsManagement() {
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                 className="col-span-3"
-                required
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -674,7 +669,6 @@ export default function EventsManagement() {
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 className="col-span-3"
-                required
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">

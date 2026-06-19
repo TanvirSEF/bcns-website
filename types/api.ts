@@ -104,10 +104,15 @@ export interface Event {
   readonly updatedAt: ISODateString;
   readonly description?: string;
   readonly location?: string;
-  readonly category?: "Program" | "Workshop" | "Meeting";
+  readonly category?: "program" | "workshop" | "meeting";
   readonly time?: string;
   readonly imageUrl?: URL;
   readonly isRegistered: boolean;
+  // Optional enrichment fields (public detail page)
+  readonly slug?: string;
+  readonly attendees?: string;
+  readonly decisions?: string;
+  readonly registrationUrl?: string;
 }
 
 export interface Document {
@@ -406,6 +411,10 @@ export interface EventCreateInput {
   readonly category: "program" | "workshop" | "meeting";
   readonly location?: string;
   readonly imageUrl?: string;
+  readonly slug?: string;
+  readonly attendees?: string;
+  readonly decisions?: string;
+  readonly registrationUrl?: string;
 }
 
 export interface EventUpdateInput {
@@ -416,6 +425,10 @@ export interface EventUpdateInput {
   readonly category?: "program" | "workshop" | "meeting";
   readonly location?: string;
   readonly imageUrl?: string;
+  readonly slug?: string;
+  readonly attendees?: string;
+  readonly decisions?: string;
+  readonly registrationUrl?: string;
 }
 
 export interface DocumentCreateInput {

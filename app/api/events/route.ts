@@ -16,6 +16,10 @@ interface BackendEvent {
   createdAt?: string;
   updatedAt?: string;
   isRegistered?: boolean;
+  slug?: string;
+  attendees?: string;
+  decisions?: string;
+  registrationUrl?: string;
 }
 
 function getToken(request: NextRequest): string | null {
@@ -26,31 +30,24 @@ function getToken(request: NextRequest): string | null {
   return request.cookies.get("auth_token")?.value || null;
 }
 
-// GET /api/events - Get all events (with optional category filter)
+// GET /api/events - Get all events (public; optional category/page/limit)
 export async function GET(request: NextRequest) {
   try {
     const token = getToken(request);
 
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // Get optional category filter from query params
+    // Forward category / page / limit to the backend (findAll is public)
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
-
-    // Build backend URL with optional category filter
-    let backendUrl = `${config.backendUrl}/api/events`;
-    if (category) {
-      backendUrl += `?category=${encodeURIComponent(category)}`;
+    const params = new URLSearchParams();
+    for (const key of ["category", "page", "limit"]) {
+      const value = searchParams.get(key);
+      if (value) params.set(key, value);
     }
+    const qs = params.toString();
+    const backendUrl = `${config.backendUrl}/api/events${qs ? `?${qs}` : ""}`;
 
     const response = await fetch(backendUrl, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: token ? `Bearer ${token}` : "",
         "Content-Type": "application/json",
       },
     });
@@ -92,6 +89,10 @@ export async function GET(request: NextRequest) {
       createdAt: event.createdAt || new Date().toISOString(),
       updatedAt: event.updatedAt || new Date().toISOString(),
       isRegistered: event.isRegistered || false,
+      slug: event.slug || undefined,
+      attendees: event.attendees || undefined,
+      decisions: event.decisions || undefined,
+      registrationUrl: event.registrationUrl || undefined,
     }));
 
     return NextResponse.json({

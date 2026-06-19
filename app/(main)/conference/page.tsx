@@ -4,14 +4,49 @@ import { Footer } from "@/components/footer";
 import { Card } from "@/components/ui/card";
 import { Calendar, MapPin } from "lucide-react";
 import Link from "next/link";
-import { eventsData } from "@/data/events";
+import config from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Conference | BCNS - Bangladesh Child Neurology Society",
   description: "Annual conferences, symposiums, and scientific meetings organized by BCNS.",
 };
 
-export default function ConferencePage() {
+export const revalidate = 3600;
+
+type ApiEvent = {
+  id?: string;
+  title: string;
+  date: string;
+  time?: string;
+  location?: string;
+  category?: string;
+  slug?: string;
+};
+
+function formatEventDate(date: string): string {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return date;
+  return d.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+}
+
+async function getEvents(): Promise<ApiEvent[]> {
+  try {
+    const res = await fetch(`${config.backendUrl}/api/events?limit=100`, {
+      headers: { "Content-Type": "application/json" },
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    const data = json.data;
+    return Array.isArray(data) ? (data as ApiEvent[]) : [];
+  } catch (err) {
+    console.error("Failed to load events for conference:", err);
+    return [];
+  }
+}
+
+export default async function ConferencePage() {
+  const events = await getEvents();
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
       <Navbar />
@@ -41,37 +76,47 @@ export default function ConferencePage() {
             <div className="w-20 h-1 bg-blue-600 rounded-full mx-auto"></div>
           </div>
 
-          {([
-            { key: "program", title: "Programs", badge: "bg-blue-100 text-blue-700" },
-            { key: "workshop", title: "Workshops", badge: "bg-amber-100 text-amber-700" },
-            { key: "meeting", title: "Meetings", badge: "bg-slate-100 text-slate-700" },
-          ] as const).map((section) => {
-            const items = eventsData.filter((e) => e.type === section.key);
-            if (items.length === 0) return null;
-            return (
-              <div key={section.key} className="mb-12">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">{section.title}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {items.map((event) => (
-                    <Card key={event.slug} className="p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-                      <span className={`absolute top-4 right-4 text-xs font-semibold px-2.5 py-1 rounded-full ${section.badge}`}>{section.title}</span>
-                      <div className="flex flex-col gap-3">
-                        <h4 className="text-xl font-semibold text-gray-900">{event.title}</h4>
-                        <div className="flex flex-wrap items-center gap-3 text-gray-700">
-                          <span className="inline-flex items-center gap-2"><Calendar className="w-4 h-4 text-blue-600" /> {event.time ? `${event.date}, ${event.time}` : event.date}</span>
-                          <span className="hidden sm:inline">•</span>
-                          <span className="inline-flex items-center gap-2"><MapPin className="w-4 h-4 text-blue-600" /> {event.venue}</span>
+          {events.length === 0 ? (
+            <div className="text-center text-gray-600 py-12">No events available right now.</div>
+          ) : (
+            ([
+              { key: "program", title: "Programs", badge: "bg-blue-100 text-blue-700" },
+              { key: "workshop", title: "Workshops", badge: "bg-amber-100 text-amber-700" },
+              { key: "meeting", title: "Meetings", badge: "bg-slate-100 text-slate-700" },
+            ] as const).map((section) => {
+              const items = events.filter((e) => e.category === section.key);
+              if (items.length === 0) return null;
+              return (
+                <div key={section.key} className="mb-12">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">{section.title}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {items.map((event) => (
+                      <Card key={event.id ?? event.slug} className="p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                        <span className={`absolute top-4 right-4 text-xs font-semibold px-2.5 py-1 rounded-full ${section.badge}`}>{section.title}</span>
+                        <div className="flex flex-col gap-3">
+                          <h4 className="text-xl font-semibold text-gray-900">{event.title}</h4>
+                          <div className="flex flex-wrap items-center gap-3 text-gray-700">
+                            <span className="inline-flex items-center gap-2"><Calendar className="w-4 h-4 text-blue-600" /> {event.time ? `${formatEventDate(event.date)}, ${event.time}` : formatEventDate(event.date)}</span>
+                            {event.location && (
+                              <>
+                                <span className="hidden sm:inline">•</span>
+                                <span className="inline-flex items-center gap-2"><MapPin className="w-4 h-4 text-blue-600" /> {event.location}</span>
+                              </>
+                            )}
+                          </div>
+                          {event.slug && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <Link href={`/events/${event.slug}`} className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 text-sm font-semibold">View Summary</Link>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Link href={`/events/${event.slug}`} className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 text-sm font-semibold">View Summary</Link>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </section>
 

@@ -16,6 +16,10 @@ interface BackendEvent {
   createdAt?: string;
   updatedAt?: string;
   isRegistered?: boolean;
+  slug?: string;
+  attendees?: string;
+  decisions?: string;
+  registrationUrl?: string;
 }
 
 function getToken(request: NextRequest): string | null {
@@ -26,7 +30,7 @@ function getToken(request: NextRequest): string | null {
   return request.cookies.get("auth_token")?.value || null;
 }
 
-// GET /api/events/:id - Get single event
+// GET /api/events/:id - Get single event (public)
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -34,18 +38,11 @@ export async function GET(
   try {
     const token = getToken(request);
 
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
     const { id: eventId } = await params;
 
     const response = await fetch(`${config.backendUrl}/api/events/${eventId}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: token ? `Bearer ${token}` : "",
         "Content-Type": "application/json",
       },
     });
@@ -79,6 +76,10 @@ export async function GET(
       createdAt: event.createdAt || new Date().toISOString(),
       updatedAt: event.updatedAt || new Date().toISOString(),
       isRegistered: event.isRegistered || false,
+      slug: event.slug || undefined,
+      attendees: event.attendees || undefined,
+      decisions: event.decisions || undefined,
+      registrationUrl: event.registrationUrl || undefined,
     };
 
     return NextResponse.json({
