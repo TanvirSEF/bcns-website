@@ -38,7 +38,7 @@ export function SectionCards() {
         // Fetch all stats in parallel
         const [users, events] = await Promise.all([
           api.admin.getAllUsers({ limit: 0 }).catch(() => []),
-          api.events.getEvents().catch(() => []),
+          api.events.getEvents(undefined, 100).catch(() => []),
         ])
 
         // Calculate total documents from all users

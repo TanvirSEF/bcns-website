@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Calendar, Clock, MapPin, ExternalLink, Filter, Heart } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Filter, Heart, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,8 @@ export default function UserEventsPage() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
+  const [pastPage, setPastPage] = React.useState(1);
+  const pastPageSize = 6;
   const { favoredIds, toggle } = useFavorites("event");
 
   React.useEffect(() => {
@@ -38,7 +40,7 @@ export default function UserEventsPage() {
       try {
         setLoading(true);
         setError(null);
-        const fetchedEvents = await api.events.getEvents();
+        const fetchedEvents = await api.events.getEvents(undefined, 100);
         // Sort events by date (upcoming first)
         const sortedEvents = [...fetchedEvents].sort((a, b) => {
           return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -65,6 +67,16 @@ export default function UserEventsPage() {
   const now = new Date();
   const upcomingEvents = filteredEvents.filter((event) => new Date(event.date) >= now);
   const pastEvents = filteredEvents.filter((event) => new Date(event.date) < now);
+
+  // Pagination for past events (clamp so deletes/filter never leave out of range)
+  const totalPastPages = Math.ceil(pastEvents.length / pastPageSize) || 1;
+  const safePastPage = Math.min(Math.max(pastPage, 1), totalPastPages);
+  const paginatedPastEvents = pastEvents.slice(
+    (safePastPage - 1) * pastPageSize,
+    safePastPage * pastPageSize,
+  );
+
+  React.useEffect(() => { setPastPage(1); }, [selectedCategory]);
 
   // Get unique categories
   const categories = Array.from(
@@ -299,7 +311,7 @@ export default function UserEventsPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Past Events</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {pastEvents.map((event) => {
+            {paginatedPastEvents.map((event) => {
               const { day, month, fullDate } = formatDate(event.date);
               const categoryColor =
                 categoryColors[event.category || "Program"] || categoryColors.Program;
@@ -415,6 +427,26 @@ export default function UserEventsPage() {
               );
             })}
           </div>
+          {/* Pagination for past events */}
+          {totalPastPages > 1 && (
+            <div className="flex items-center justify-center gap-2 py-4 border-t mt-4">
+              <span className="text-sm font-medium text-gray-600 mr-4">
+                Page {safePastPage} of {totalPastPages}
+              </span>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setPastPage(1)} disabled={safePastPage === 1}>
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setPastPage(safePastPage - 1)} disabled={safePastPage === 1}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setPastPage(safePastPage + 1)} disabled={safePastPage === totalPastPages}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setPastPage(totalPastPages)} disabled={safePastPage === totalPastPages}>
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

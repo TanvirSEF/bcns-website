@@ -33,7 +33,7 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
   React.useEffect(() => {
     const fetchUpcomingEventsCount = async () => {
       try {
-        const events = await api.events.getEvents();
+        const events = await api.events.getEvents(undefined, 100);
         const now = new Date();
         const upcomingCount = events.filter((event) => new Date(event.date) >= now).length;
         setUpcomingEventsCount(upcomingCount > 0 ? upcomingCount.toString() : undefined);

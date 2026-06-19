@@ -118,7 +118,7 @@ export default function EventsManagement() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const eventsData = await api.events.getEvents();
+      const eventsData = await api.events.getEvents(undefined, 100);
       setEvents([...eventsData]);
     } catch (error) {
       console.error("Failed to fetch events:", error);
