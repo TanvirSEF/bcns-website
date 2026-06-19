@@ -658,7 +658,10 @@ export const turnOff2FA = (): Promise<OperationResponse> =>
 export const authenticate2FA = (): Promise<OperationResponse> =>
   Promise.resolve({ success: true, message: 'Success' });
 
-export const getActivityLogs = (): Promise<readonly ActivityLog[]> => Promise.resolve([]);
+export const getActivityLogs = async (): Promise<readonly ActivityLog[]> => {
+  const response = await apiClient.get<readonly ActivityLog[]>('/logs');
+  return handleApiResponse<readonly ActivityLog[]>(response);
+};
 
 export { apiClient };
 

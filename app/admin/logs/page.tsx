@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, Search, Download, Eye, Clock, User, Globe, Monitor } from "lucide-react";
+import { Activity, Search, Download, Eye, Clock, User, Globe, Monitor, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { toast } from "react-toastify";
 import { ActivityLog } from "@/types/api";
+import { getActivityLogs } from "@/lib/api";
 
 export default function ActivityLogsManagement() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
@@ -20,6 +21,8 @@ export default function ActivityLogsManagement() {
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [userFilter, setUserFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     fetchLogs();
@@ -28,73 +31,8 @@ export default function ActivityLogsManagement() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await getActivityLogs();
-      // setLogs(response);
-      
-      // Mock data for now
-      setLogs([
-        {
-          id: "1",
-          action: "login",
-          description: "User logged in successfully",
-          userId: "user123",
-          userEmail: "dr.ahmed@bcns.org.bd",
-          ipAddress: "192.168.1.100",
-          userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          createdAt: "2024-01-25T10:30:00Z",
-        },
-        {
-          id: "2",
-          action: "create_event",
-          description: "Created new event: Annual Conference 2024",
-          userId: "admin456",
-          userEmail: "admin@bcns.org.bd",
-          ipAddress: "192.168.1.101",
-          userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-          createdAt: "2024-01-25T09:15:00Z",
-        },
-        {
-          id: "3",
-          action: "upload_document",
-          description: "Uploaded document: Research Proposal",
-          userId: "user789",
-          userEmail: "dr.fatima@bcns.org.bd",
-          ipAddress: "192.168.1.102",
-          userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
-          createdAt: "2024-01-25T08:45:00Z",
-        },
-        {
-          id: "4",
-          action: "update_profile",
-          description: "Updated profile information",
-          userId: "user123",
-          userEmail: "dr.ahmed@bcns.org.bd",
-          ipAddress: "192.168.1.100",
-          userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          createdAt: "2024-01-25T07:20:00Z",
-        },
-        {
-          id: "5",
-          action: "delete_event",
-          description: "Deleted event: Old Workshop",
-          userId: "admin456",
-          userEmail: "admin@bcns.org.bd",
-          ipAddress: "192.168.1.101",
-          userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-          createdAt: "2024-01-25T06:30:00Z",
-        },
-        {
-          id: "6",
-          action: "register_event",
-          description: "Registered for event: Pediatric Neurology Workshop",
-          userId: "user789",
-          userEmail: "dr.fatima@bcns.org.bd",
-          ipAddress: "192.168.1.102",
-          userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
-          createdAt: "2024-01-25T05:15:00Z",
-        },
-      ]);
+      const response = await getActivityLogs();
+      setLogs([...response]);
     } catch (error) {
       toast.error("Failed to fetch activity logs");
     } finally {
@@ -154,7 +92,16 @@ export default function ActivityLogsManagement() {
     }
 
     setFilteredLogs(filtered);
+    setCurrentPage(1);
   }, [logs, searchQuery, actionFilter, userFilter, dateFilter]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredLogs.length / pageSize) || 1;
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+  const paginatedLogs = filteredLogs.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize,
+  );
 
   useEffect(() => {
     filterLogs();
@@ -167,6 +114,8 @@ export default function ActivityLogsManagement() {
       create_event: "bg-green-100 text-green-800",
       update_event: "bg-yellow-100 text-yellow-800",
       delete_event: "bg-red-100 text-red-800",
+      delete_poll: "bg-red-100 text-red-800",
+      delete_publication: "bg-red-100 text-red-800",
       upload_document: "bg-purple-100 text-purple-800",
       update_profile: "bg-indigo-100 text-indigo-800",
       register_event: "bg-teal-100 text-teal-800",
@@ -411,7 +360,7 @@ export default function ActivityLogsManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredLogs.map((log) => (
+              {paginatedLogs.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell>
                     {getActionBadge(log.action)}
@@ -425,8 +374,8 @@ export default function ActivityLogsManagement() {
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
                       <div>
-                        <div className="font-medium">{log.userEmail}</div>
-                        <div className="text-sm text-muted-foreground">ID: {log.userId}</div>
+                        <div className="font-medium">{log.userName || log.userEmail || "Unknown"}</div>
+                        <div className="text-sm text-muted-foreground">{log.userEmail || `ID: ${log.userId}`}</div>
                       </div>
                     </div>
                   </TableCell>
@@ -466,6 +415,27 @@ export default function ActivityLogsManagement() {
           {filteredLogs.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               No activity logs found matching the current filters.
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 py-4 border-t mt-2">
+              <span className="text-sm font-medium text-muted-foreground mr-4">
+                Page {safePage} of {totalPages}
+              </span>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setCurrentPage(1)} disabled={safePage === 1}>
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setCurrentPage(safePage - 1)} disabled={safePage === 1}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setCurrentPage(safePage + 1)} disabled={safePage === totalPages}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setCurrentPage(totalPages)} disabled={safePage === totalPages}>
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
             </div>
           )}
         </CardContent>

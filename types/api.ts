@@ -212,6 +212,7 @@ export interface ActivityLog {
   readonly description: string;
   readonly userId: UUID;
   readonly userEmail: EmailAddress;
+  readonly userName?: string;
   readonly createdAt: ISODateString;
   readonly ipAddress?: string;
   readonly userAgent?: string;
