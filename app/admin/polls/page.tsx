@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, Plus, Vote, Calendar, Loader2, X } from "lucide-react";
+import { BarChart3, Plus, Vote, Calendar, Loader2, X, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { Poll } from "@/types/api";
 import { api, PollResults } from "@/lib/api";
@@ -29,6 +29,9 @@ export default function PollsManagement() {
     endDate: "",
   });
   const [optionInput, setOptionInput] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Poll | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchPolls();
@@ -111,6 +114,29 @@ export default function PollsManagement() {
       endDate: "",
     });
     setOptionInput("");
+  };
+
+  const handleDeleteClick = (poll: Poll) => {
+    setDeleteTarget(poll);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      setIsDeleting(true);
+      await api.polls.deletePoll(deleteTarget.id);
+      toast.success("Poll deleted successfully");
+      setIsDeleteDialogOpen(false);
+      setDeleteTarget(null);
+      fetchPolls();
+    } catch (error) {
+      console.error("Failed to delete poll:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete poll");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const addOption = () => {
@@ -383,14 +409,24 @@ export default function PollsManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => fetchPollResults(poll.id)}
-                        >
-                          <BarChart3 className="h-4 w-4 mr-2" />
-                          View Results
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fetchPollResults(poll.id)}
+                          >
+                            <BarChart3 className="h-4 w-4 mr-2" />
+                            View Results
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteClick(poll)}
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -446,6 +482,56 @@ export default function PollsManagement() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsResultsDialogOpen(false)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Poll Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => {
+        setIsDeleteDialogOpen(open);
+        if (!open) {
+          setDeleteTarget(null);
+        }
+      }}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Poll</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-foreground">
+                {deleteTarget?.question || (deleteTarget as any)?.title}
+              </span>
+              ? All votes cast for this poll will also be removed. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setDeleteTarget(null);
+              }}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

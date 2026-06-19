@@ -453,6 +453,11 @@ export const pollApi = {
     return handleApiResponse<Poll>(response);
   },
 
+  deletePoll: async (pollId: string): Promise<OperationResponse> => {
+    const response = await apiClient.delete<OperationResponse>(`/polls/${pollId}`);
+    return handleApiResponse<OperationResponse>(response);
+  },
+
   createPoll: async (pollData: PollCreateInput): Promise<Poll> => {
     const response = await apiClient.post<Poll>('/polls', pollData);
     return handleApiResponse<Poll>(response);

@@ -143,3 +143,58 @@ export async function GET(
   }
 }
 
+// DELETE /api/polls/:id - Delete poll (Admin only)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const token = getToken(request);
+
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { id: pollId } = await params;
+    if (!pollId) {
+      return NextResponse.json(
+        { success: false, message: "Poll ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const response = await fetch(
+      `${config.backendUrl}/api/polls/${pollId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return NextResponse.json(
+        {
+          success: false,
+          message: errorData.message || "Failed to delete poll",
+        },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: "Poll deleted successfully" });
+  } catch (error) {
+    console.error("Delete poll API error:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete poll" },
+      { status: 500 }
+    );
+  }
+}
+
