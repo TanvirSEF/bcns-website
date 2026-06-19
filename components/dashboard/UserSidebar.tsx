@@ -9,6 +9,8 @@ import {
   Building2,
   FileText,
   FileCheck,
+  Activity,
+  Settings as SettingsIcon,
 } from "lucide-react";
 import { UserNavMain } from "./UserNavMain";
 import { UserNavUser } from "./UserNavUser";
@@ -82,6 +84,16 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
         title: "My Documents",
         url: "/user-dashboard/documents",
         icon: FileText,
+      },
+      {
+        title: "My Activities",
+        url: "/user-dashboard/activities",
+        icon: Activity,
+      },
+      {
+        title: "Settings",
+        url: "/user-dashboard/settings",
+        icon: SettingsIcon,
       },
     ],
   };
