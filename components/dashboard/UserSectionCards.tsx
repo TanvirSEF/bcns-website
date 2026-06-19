@@ -1,6 +1,7 @@
 "use client";
 
-import { TrendingUp, Users, Calendar, BookOpen, Award } from "lucide-react";
+import * as React from "react";
+import { Award, Heart, FileText, Calendar } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,90 +11,103 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
+import { api } from "@/lib/api";
 
 export function UserSectionCards() {
   const { user } = useAuth();
+  const [favoritesCount, setFavoritesCount] = React.useState<number | null>(null);
+  const [documentsCount, setDocumentsCount] = React.useState<number | null>(null);
+  const [upcomingEvents, setUpcomingEvents] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const [favs, profile, events] = await Promise.all([
+          api.favorites.getFavorites().catch(() => []),
+          api.auth.getProfile().catch(() => null),
+          api.events.getEvents(undefined, 100).catch(() => []),
+        ]);
+        if (!active) return;
+
+        setFavoritesCount(favs.length);
+
+        const docs = (profile as any)?.documents;
+        setDocumentsCount(Array.isArray(docs) ? docs.length : 0);
+
+        const now = new Date();
+        const upcoming = (events as any[]).filter(
+          (e) => new Date(e.date) >= now,
+        ).length;
+        setUpcomingEvents(upcoming);
+      } catch {
+        /* best-effort — cards show — */
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const cards = [
+    {
+      title: "Membership",
+      value: user?.membershipStatus
+        ? user.membershipStatus.charAt(0).toUpperCase() + user.membershipStatus.slice(1)
+        : "—",
+      badge: user?.membershipType === "lifetime" ? "Lifetime Member" : "General Member",
+      icon: Award,
+      iconBg: "bg-emerald-100",
+      iconColor: "text-emerald-600",
+      badgeBg: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    },
+    {
+      title: "My Favorites",
+      value: favoritesCount !== null ? String(favoritesCount) : "...",
+      badge: "Publications, Events & Members",
+      icon: Heart,
+      iconBg: "bg-red-100",
+      iconColor: "text-red-500",
+      badgeBg: "bg-red-100 text-red-800 border-red-200",
+    },
+    {
+      title: "My Documents",
+      value: documentsCount !== null ? String(documentsCount) : "...",
+      badge: "Uploaded documents",
+      icon: FileText,
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-600",
+      badgeBg: "bg-amber-100 text-amber-800 border-amber-200",
+    },
+    {
+      title: "Upcoming Events",
+      value: upcomingEvents !== null ? String(upcomingEvents) : "...",
+      badge: upcomingEvents && upcomingEvents > 0 ? "Join the next event" : "Check back soon",
+      icon: Calendar,
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+      badgeBg: "bg-blue-100 text-blue-800 border-blue-200",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="bg-white shadow-sm border-0 ring-1 ring-gray-200 hover:ring-emerald-300 transition-all duration-200">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">Membership Status</CardTitle>
-          <div className="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-            <Award className="h-4 w-4 text-emerald-600" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-gray-900">
-            {user?.membershipStatus || "Active"}
-          </div>
-          <div className="flex items-center space-x-2 mt-3">
-            <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 border-emerald-200">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              {user?.membershipExpiry || "Valid until 2025"}
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="bg-white shadow-sm border-0 ring-1 ring-gray-200 hover:ring-blue-300 transition-all duration-200">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">Events Attended</CardTitle>
-          <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
-            <Calendar className="h-4 w-4 text-blue-600" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-gray-900">
-            {user?.eventsAttended || 12}
-          </div>
-          <div className="flex items-center space-x-2 mt-3">
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +{user?.eventsThisMonth || 3} this month
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="bg-white shadow-sm border-0 ring-1 ring-gray-200 hover:ring-purple-300 transition-all duration-200">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">Publications Read</CardTitle>
-          <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center">
-            <BookOpen className="h-4 w-4 text-purple-600" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-gray-900">
-            {user?.publicationsRead || 28}
-          </div>
-          <div className="flex items-center space-x-2 mt-3">
-            <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +{user?.publicationsThisWeek || 5} this week
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="bg-white shadow-sm border-0 ring-1 ring-gray-200 hover:ring-orange-300 transition-all duration-200">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">Network Connections</CardTitle>
-          <div className="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
-            <Users className="h-4 w-4 text-orange-600" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-gray-900">
-            {user?.networkConnections || 47}
-          </div>
-          <div className="flex items-center space-x-2 mt-3">
-            <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +{user?.newConnections || 2} new
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
+      {cards.map((card) => (
+        <Card key={card.title} className="bg-white shadow-sm border-0 ring-1 ring-gray-200 hover:ring-emerald-300 transition-all duration-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600">{card.title}</CardTitle>
+            <div className={`h-8 w-8 rounded-lg ${card.iconBg} flex items-center justify-center`}>
+              <card.icon className={`h-4 w-4 ${card.iconColor}`} />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-gray-900">{card.value}</div>
+            <div className="flex items-center space-x-2 mt-3">
+              <Badge variant="secondary" className={card.badgeBg}>
+                {card.badge}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

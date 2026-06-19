@@ -18,6 +18,7 @@ interface BackendUser {
   phone?: string;
   affiliation?: string;
   designation?: string;
+  bmdcNo?: string;
   mailingAddress?: string;
   permanentAddress?: string;
   bio?: string;
@@ -165,7 +166,7 @@ export async function GET(request: NextRequest) {
     yPosition -= sectionSpacing;
 
     // Professional Information
-    if (user.affiliation || user.designation) {
+    if (user.affiliation || user.designation || user.bmdcNo) {
       addText("Professional Information", 16, true);
       yPosition -= 5;
       if (user.designation) {
@@ -173,6 +174,9 @@ export async function GET(request: NextRequest) {
       }
       if (user.affiliation) {
         addText(`Affiliation: ${user.affiliation}`, 12);
+      }
+      if (user.bmdcNo) {
+        addText(`BM&DC No.: ${user.bmdcNo}`, 12);
       }
       yPosition -= sectionSpacing;
     }
