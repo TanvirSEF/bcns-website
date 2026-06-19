@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { toast } from "react-toastify"
-import { 
-  Users, 
-  RefreshCw, 
+import {
+  Users,
+  RefreshCw,
   Search,
   Mail,
   Phone,
@@ -16,7 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  Eye
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -327,6 +329,14 @@ export default function MembersPage() {
           {formatDate(member.createdAt)}
         </div>
       </TableCell>
+      <TableCell>
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/admin/members/${member.id}`}>
+            <Eye className="h-4 w-4 mr-1" />
+            View
+          </Link>
+        </Button>
+      </TableCell>
     </TableRow>
   )
 
@@ -432,6 +442,7 @@ export default function MembersPage() {
                       <TableHead>Member ID</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Joined</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -489,6 +500,7 @@ export default function MembersPage() {
                       <TableHead>Member ID</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Joined</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

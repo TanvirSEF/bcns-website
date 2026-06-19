@@ -76,6 +76,11 @@ export interface User {
   readonly membershipExpiry?: ISODateString;
   readonly membershipType?: 'general' | 'lifetime';
   readonly memberId?: string;
+  readonly formNo?: string;
+  readonly refNo?: string;
+  readonly approvedAt?: ISODateString;
+  readonly approvalStatus?: string;
+  readonly isEmailVerified?: boolean;
 
   readonly specialization?: string;
   readonly institution?: string;

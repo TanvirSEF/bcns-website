@@ -24,6 +24,10 @@ interface BackendUser {
   updatedAt?: string;
   updated_at?: string;
   approvalStatus?: string;
+  bmdcNo?: string;
+  formNo?: string;
+  refNo?: string;
+  approvedAt?: string;
   isEmailVerified?: boolean;
   membershipStatus?: string;
   membershipType?: 'general' | 'lifetime';
@@ -136,6 +140,10 @@ export async function GET(request: NextRequest) {
         createdAt: user.createdAt || user.created_at,
         updatedAt: user.updatedAt || user.updated_at,
         approvalStatus: user.approvalStatus || "approved",
+        bmdcNo: user.bmdcNo || "",
+        formNo: user.formNo || "",
+        refNo: user.refNo || "",
+        approvedAt: user.approvedAt,
         isEmailVerified: user.isEmailVerified || false,
         membershipStatus: user.membershipStatus || "active",
         membershipType: user.membershipType,
