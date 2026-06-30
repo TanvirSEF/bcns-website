@@ -624,8 +624,8 @@ function ProfilePageContent() {
       // would reset formData and wipe any unsaved education/training edits.
       // The endpoint returns the uploaded fileUrl, so we track it locally.
       const res = await api.users.uploadDocument(file, title);
-      if (res?.document?.fileUrl) {
-        setSessionDocs((prev) => ({ ...prev, [title]: res.document.fileUrl }));
+      if (res?.fileUrl) {
+        setSessionDocs((prev) => ({ ...prev, [title]: res.fileUrl }));
       }
       toast.success("Document uploaded successfully");
     } catch (error) {

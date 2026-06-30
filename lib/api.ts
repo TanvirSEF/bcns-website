@@ -33,9 +33,15 @@ import {
   GetUploadUrlsResponse,
 } from '@/types/api';
 
+// NOTE: the /api proxy (app/api/users/me/documents/route.ts) re-wraps the
+// backend { success, document } into { success, data: document }, and
+// handleApiResponse then unwraps `data` — so this resolves to the document
+// object itself, not { success, document }.
 type UploadDocumentResponse = {
-  success: boolean;
-  document: { title: string; fileUrl: string; status: string; uploadedAt?: string };
+  title: string;
+  fileUrl: string;
+  status: string;
+  uploadedAt?: string;
 };
 
 function handleApiResponse<T>(response: unknown): T {
@@ -266,6 +272,19 @@ export const adminApi = {
     const response = await apiClient.patch<OperationResponse>(
       `/users/admin/${userId}/membership-status`,
       { membershipStatus }
+    );
+    return handleApiResponse<OperationResponse>(response);
+  },
+
+  updateDocumentStatus: async (
+    userId: string,
+    documentIndex: number,
+    status: "approved" | "rejected" | "pending",
+    rejectionReason?: string,
+  ): Promise<OperationResponse> => {
+    const response = await apiClient.patch<OperationResponse>(
+      `/users/admin/${userId}/documents/${documentIndex}/status`,
+      { status, ...(rejectionReason ? { rejectionReason } : {}) },
     );
     return handleApiResponse<OperationResponse>(response);
   },

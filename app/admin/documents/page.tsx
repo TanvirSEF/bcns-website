@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Download, Clock, User, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Download, Clock, User, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "react-toastify";
 import { Document, DocumentStatus } from "@/types/api";
 import { api } from "@/lib/api";
@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 interface DocumentWithUser extends Document {
   uploadedBy: string;
   userEmail: string;
+  userId: string;
+  documentIndex: number;
 }
 
 export default function DocumentsManagement() {
@@ -21,6 +23,7 @@ export default function DocumentsManagement() {
   const [filteredDocuments, setFilteredDocuments] = useState<DocumentWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [updatingKey, setUpdatingKey] = useState<string | null>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,7 +47,7 @@ export default function DocumentsManagement() {
         const userWithDocs = user as typeof user & { documents?: unknown[] };
         const userDocs = Array.isArray(userWithDocs.documents) ? userWithDocs.documents : [];
         
-        userDocs.forEach((doc: unknown) => {
+        userDocs.forEach((doc: unknown, documentIndex: number) => {
           const docData = doc as {
             _id?: string;
             id?: string;
@@ -78,6 +81,8 @@ export default function DocumentsManagement() {
             fileUrl: docData.fileUrl || "",
             status: (docData.status as DocumentStatus) || DocumentStatus.PENDING,
             uploadedBy: user.id || "",
+            userId: user.id || "",
+            documentIndex,
             userEmail: user.email,
             createdAt: createdAtValue,
             updatedAt: updatedAtValue,
@@ -191,6 +196,43 @@ export default function DocumentsManagement() {
       window.open(fileUrl, "_blank");
     } else {
       toast.error("Document URL not available");
+    }
+  };
+
+  const handleStatusUpdate = async (
+    document: DocumentWithUser,
+    status: "approved" | "rejected",
+  ) => {
+    let rejectionReason: string | undefined;
+    if (status === "rejected") {
+      const reason = window.prompt("Reason for rejection (optional):");
+      if (reason === null) return; // admin cancelled
+      rejectionReason = reason.trim() || undefined;
+    }
+
+    const key = `${document.userId}-${document.documentIndex}`;
+    setUpdatingKey(key);
+    try {
+      await api.admin.updateDocumentStatus(
+        document.userId,
+        document.documentIndex,
+        status,
+        rejectionReason,
+      );
+
+      const patchStatus = (list: DocumentWithUser[]) =>
+        list.map((d) =>
+          d.userId === document.userId && d.documentIndex === document.documentIndex
+            ? { ...d, status: status as DocumentStatus }
+            : d,
+        );
+      setDocuments(patchStatus);
+      setFilteredDocuments(patchStatus);
+      toast.success(`Document ${status}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to update status");
+    } finally {
+      setUpdatingKey(null);
     }
   };
 
@@ -325,15 +367,43 @@ export default function DocumentsManagement() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDownload(document.fileUrl)}
-                            className="hover:bg-primary hover:text-primary-foreground"
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownload(document.fileUrl)}
+                              className="hover:bg-primary hover:text-primary-foreground"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={
+                                document.status === DocumentStatus.APPROVED ||
+                                updatingKey === `${document.userId}-${document.documentIndex}`
+                              }
+                              onClick={() => handleStatusUpdate(document, "approved")}
+                              className="border-green-200 text-green-700 hover:bg-green-600 hover:text-white"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={
+                                document.status === DocumentStatus.REJECTED ||
+                                updatingKey === `${document.userId}-${document.documentIndex}`
+                              }
+                              onClick={() => handleStatusUpdate(document, "rejected")}
+                              className="border-red-200 text-red-700 hover:bg-red-600 hover:text-white"
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
