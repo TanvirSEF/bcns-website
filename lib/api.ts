@@ -20,6 +20,7 @@ import {
   OperationResponse,
   FileUploadResponse,
   UserUpdateInput,
+  AdminUserUpdateInput,
   LoginInput,
   RegisterInput,
   SendOTPInput,
@@ -287,6 +288,41 @@ export const adminApi = {
       { status, ...(rejectionReason ? { rejectionReason } : {}) },
     );
     return handleApiResponse<OperationResponse>(response);
+  },
+
+  updateUser: async (userId: string, data: AdminUserUpdateInput): Promise<User> => {
+    const response = await apiClient.patch<User>(`/users/admin/${userId}`, data);
+    return handleApiResponse<User>(response);
+  },
+
+  uploadProfilePicture: async (
+    userId: string,
+    file: File,
+    onProgress?: (progress: number) => void,
+  ): Promise<{ profilePictureUrl: string }> => {
+    const response = await apiClient.uploadFile<{ profilePictureUrl: string }>(
+      `/users/admin/${userId}/profile-picture`,
+      file,
+      undefined,
+      onProgress,
+      "profilePicture",
+    );
+    return handleApiResponse<{ profilePictureUrl: string }>(response);
+  },
+
+  uploadDocument: async (
+    userId: string,
+    file: File,
+    title?: string,
+  ): Promise<UploadDocumentResponse> => {
+    const formData = new FormData();
+    formData.append("document", file);
+    if (title) formData.append("title", title);
+    const response = await apiClient.post<UploadDocumentResponse>(
+      `/users/admin/${userId}/documents`,
+      formData,
+    );
+    return handleApiResponse<UploadDocumentResponse>(response);
   },
 };
 

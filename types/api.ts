@@ -342,6 +342,32 @@ export interface UserUpdateInput {
   readonly training?: readonly Training[];
 }
 
+export interface AdminUserUpdateInput {
+  readonly name?: string | undefined;
+  readonly email?: EmailAddress | undefined;
+  readonly username?: string | undefined;
+  readonly phone?: string | undefined;
+  readonly designation?: string | undefined;
+  readonly affiliation?: string | undefined;
+  readonly bmdcNo?: string | undefined;
+  readonly bio?: string | undefined;
+  readonly role?: "admin" | "member" | "moderator" | undefined;
+  readonly membershipType?: "general" | "lifetime" | undefined;
+  readonly membershipStatus?: "active" | "inactive" | undefined;
+  readonly approvalStatus?: "pending" | "approved" | undefined;
+  readonly memberId?: string | undefined;
+  readonly formNo?: string | undefined;
+  readonly refNo?: string | undefined;
+  readonly isEmailVerified?: boolean | undefined;
+  readonly mailingAddress?: string | undefined;
+  readonly permanentAddress?: string | undefined;
+  readonly specialization?: string | undefined;
+  readonly primaryResearchInterest?: string | undefined;
+  readonly secondaryResearchInterest?: string | undefined;
+  readonly educationQualifications?: readonly EducationQualification[] | undefined;
+  readonly training?: readonly Training[] | undefined;
+}
+
 export interface PasswordChangeInput {
   readonly currentPassword: string;
   readonly newPassword: string;

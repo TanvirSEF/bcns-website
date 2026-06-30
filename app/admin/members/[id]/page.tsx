@@ -5,11 +5,12 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Loader2, UserX } from "lucide-react";
+import { ArrowLeft, Loader2, UserX, Pencil } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "@/lib/api";
 import type { User } from "@/types/api";
 import { MemberProfile } from "@/components/admin/MemberProfile";
+import { EditMemberDialog } from "@/components/admin/EditMemberDialog";
 
 export default function MemberDetailPage() {
   const params = useParams<{ id: string }>();
@@ -18,6 +19,7 @@ export default function MemberDetailPage() {
   const [member, setMember] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -67,7 +69,22 @@ export default function MemberDetailPage() {
             Full profile, documents, and membership information.
           </p>
         </div>
+        {member && (
+          <Button onClick={() => setEditOpen(true)}>
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit Member
+          </Button>
+        )}
       </div>
+
+      {member && (
+        <EditMemberDialog
+          user={member}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          onSaved={(u) => setMember(u)}
+        />
+      )}
 
       {/* Body */}
       {loading ? (
