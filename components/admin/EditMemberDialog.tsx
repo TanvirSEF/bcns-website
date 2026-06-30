@@ -266,6 +266,7 @@ export function EditMemberDialog({
   const [docs, setDocs] = useState<readonly UserDocument[]>(user.documents ?? []);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [removingPhoto, setRemovingPhoto] = useState(false);
   const [docTitle, setDocTitle] = useState("");
   const photoInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -428,6 +429,24 @@ export function EditMemberDialog({
     }
   };
 
+  const onRemovePhoto = async () => {
+    setRemovingPhoto(true);
+    try {
+      await api.admin.deleteProfilePicture(user.id);
+      setPhotoUrl("");
+      onSaved({ ...user, profilePictureUrl: "" });
+      toast.success("Profile picture removed");
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError
+          ? error.getUserFriendlyMessage()
+          : "Failed to remove picture",
+      );
+    } finally {
+      setRemovingPhoto(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 flex flex-col gap-0">
@@ -440,7 +459,7 @@ export function EditMemberDialog({
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Avatar className="h-14 w-14 border border-primary/10">
-                  <AvatarImage src={photoUrl} />
+                  {photoUrl ? <AvatarImage src={photoUrl} /> : null}
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                     {getInitials(user.name)}
                   </AvatarFallback>
@@ -486,9 +505,28 @@ export function EditMemberDialog({
                   )}
                 </DialogDescription>
               </div>
-              <Badge variant="secondary" className="capitalize hidden sm:inline-flex">
-                {watchedRole}
-              </Badge>
+              <div className="flex items-center gap-2">
+                {photoUrl ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    disabled={removingPhoto}
+                    onClick={onRemovePhoto}
+                  >
+                    {removingPhoto ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-1" />
+                    )}
+                    Remove
+                  </Button>
+                ) : null}
+                <Badge variant="secondary" className="capitalize hidden sm:inline-flex">
+                  {watchedRole}
+                </Badge>
+              </div>
             </div>
           </DialogHeader>
 

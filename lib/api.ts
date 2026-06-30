@@ -324,6 +324,13 @@ export const adminApi = {
     );
     return handleApiResponse<UploadDocumentResponse>(response);
   },
+
+  deleteProfilePicture: async (userId: string): Promise<OperationResponse> => {
+    const response = await apiClient.patch<OperationResponse>(
+      `/users/admin/${userId}/profile-picture/delete`,
+    );
+    return handleApiResponse<OperationResponse>(response);
+  },
 };
 
 // Event API
