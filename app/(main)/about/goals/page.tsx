@@ -147,7 +147,7 @@ export default function GoalsPage() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-blue-800">
+      <section className="relative overflow-hidden bg-linear-to-br from-blue-700 via-indigo-700 to-blue-800">
         <div className="absolute inset-0 opacity-20" aria-hidden>
           <div className="absolute -top-20 -left-24 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-blue-300/10 blur-3xl" />
@@ -169,7 +169,7 @@ export default function GoalsPage() {
       </section>
 
       {/* Goals Introduction */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-blue-50/40 via-white to-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-linear-to-b from-blue-50/40 via-white to-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white/90 backdrop-blur border border-blue-100/70 shadow-sm rounded-2xl p-6 sm:p-8 mb-12">
@@ -198,14 +198,14 @@ export default function GoalsPage() {
                   className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 p-6 group hover:border-blue-200"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <div className={`w-12 h-12 rounded-lg ${colors.bg} ${colors.text} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                         <Icon className="h-6 w-6" />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600`}>
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white bg-linear-to-r from-blue-600 to-indigo-600`}>
                           {goal.id}
                         </span>
                         <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
@@ -228,7 +228,7 @@ export default function GoalsPage() {
       <section className="py-12 sm:py-16 lg:py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 sm:p-12 text-white">
+            <div className="bg-linear-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 sm:p-12 text-white">
               <h2 className="text-2xl sm:text-3xl font-bold mb-4">
                 Join Us in Achieving These Goals
               </h2>

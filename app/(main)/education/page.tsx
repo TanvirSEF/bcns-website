@@ -82,11 +82,11 @@ export default function EducationPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-purple-50">
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative py-16 sm:py-20 md:py-24 bg-gradient-to-br from-purple-600 via-pink-600 to-rose-600">
+      <section className="relative py-16 sm:py-20 md:py-24 bg-linear-to-br from-purple-600 via-pink-600 to-rose-600">
         <div className="absolute inset-0 bg-[url('/images/child_neurology.png')] bg-cover bg-center opacity-10"></div>
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative z-10 container mx-auto px-4">
@@ -210,7 +210,7 @@ export default function EducationPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
+      <section className="py-16 bg-linear-to-br from-purple-50 to-pink-50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">

@@ -191,7 +191,7 @@ export function CountdownTimerWithControls({
     <div className={cn("space-y-2", className)}>
       <div className={cn(
         "flex items-center justify-center gap-3 px-4 py-3 rounded-xl transition-all duration-300",
-        "bg-gradient-to-r backdrop-blur-sm border",
+        "bg-linear-to-r backdrop-blur-sm border",
         isExpired 
           ? "from-red-50 to-red-100 border-red-200 text-red-700" 
           : isWarning 

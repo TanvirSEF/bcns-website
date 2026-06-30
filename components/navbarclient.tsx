@@ -133,10 +133,10 @@ export function NavbarClient() {
                           (user?.avatar as string)
                         }
                         alt="Avatar"
-                        className="mr-2 h-6 w-6 rounded-full object-cover flex-shrink-0"
+                        className="mr-2 h-6 w-6 rounded-full object-cover shrink-0"
                       />
                     ) : (
-                      <User className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <User className="mr-2 h-4 w-4 shrink-0" />
                     )}
                     {user?.name || "User Menu"}
                   </>
@@ -168,7 +168,7 @@ export function NavbarClient() {
             >
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     {user?.profilePictureUrl || user?.avatar ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -526,7 +526,7 @@ export function NavbarClient() {
                       >
                         <DropdownMenuLabel className="p-0 font-normal">
                           <div className="flex items-center justify-start gap-2 p-3 border-b border-gray-200">
-                            <div className="flex-shrink-0">
+                            <div className="shrink-0">
                               {user?.profilePictureUrl || user?.avatar ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img

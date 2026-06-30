@@ -124,7 +124,7 @@ export function EmailComposer({
                                         className="flex items-center justify-between bg-gray-50 border rounded-lg px-3 py-2"
                                     >
                                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                                            <Paperclip className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                            <Paperclip className="h-4 w-4 text-gray-400 shrink-0" />
                                             <div className="min-w-0 flex-1">
                                                 <p className="text-sm font-medium truncate">{file.name}</p>
                                                 <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
@@ -132,7 +132,7 @@ export function EmailComposer({
                                         </div>
                                         <button
                                             onClick={() => removeAttachment(index)}
-                                            className="ml-2 text-red-500 hover:text-red-700 flex-shrink-0"
+                                            className="ml-2 text-red-500 hover:text-red-700 shrink-0"
                                             aria-label="Remove attachment"
                                         >
                                             <X className="h-4 w-4" />

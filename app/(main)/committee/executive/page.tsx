@@ -61,7 +61,7 @@ const Executive = () => {
           </div>
         ) : (
           <div className="mb-3 w-full flex justify-center">
-            <div className="w-32 h-40 sm:w-36 sm:h-44 md:w-40 md:h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-base md:text-lg rounded-lg border border-gray-300">
+            <div className="w-32 h-40 sm:w-36 sm:h-44 md:w-40 md:h-48 bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-base md:text-lg rounded-lg border border-gray-300">
               {member.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
             </div>
           </div>

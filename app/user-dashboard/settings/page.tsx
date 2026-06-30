@@ -81,7 +81,7 @@ export default function UserSettingsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+      <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
         <h1 className="text-2xl font-bold tracking-tight mb-2 text-gray-900">Settings</h1>
         <p className="text-gray-700">Manage your account, notifications, and preferences.</p>
       </div>

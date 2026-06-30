@@ -162,7 +162,7 @@ function DefaultErrorFallback({ error, errorInfo, level, resetError }: DefaultEr
   return (
     <div className={`
       flex items-center justify-center p-4
-      ${level === 'page' ? 'min-h-screen bg-gradient-to-br from-slate-50 via-red-50 to-pink-100' : 'min-h-[200px]'}
+      ${level === 'page' ? 'min-h-screen bg-linear-to-br from-slate-50 via-red-50 to-pink-100' : 'min-h-[200px]'}
     `}>
       <Card className="w-full max-w-md">
         <CardHeader>

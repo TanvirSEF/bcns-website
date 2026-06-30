@@ -99,7 +99,7 @@ export function PhotoGalleryPreview() {
   ];
 
   return (
-    <section id="gallery" className="py-10 sm:py-14 lg:py-16 bg-gradient-to-b from-blue-50/40 via-white to-white overflow-hidden">
+    <section id="gallery" className="py-10 sm:py-14 lg:py-16 bg-linear-to-b from-blue-50/40 via-white to-white overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-10">
@@ -135,18 +135,18 @@ export function PhotoGalleryPreview() {
                 quality={80}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent transition-opacity"></div>
               <div className="relative z-10 p-3 sm:p-4 space-y-2 transform transition-transform duration-300 ease-out translate-y-6 group-hover:translate-y-0">
                 <h3 className="text-base sm:text-lg font-bold text-white line-clamp-2">
                   {image.eventName}
                 </h3>
                 <div className="space-y-1.5 text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <div className="flex items-center text-[11px] sm:text-xs">
-                    <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <Calendar className="h-4 w-4 mr-2 shrink-0" />
                     <span className="truncate">{image.date}</span>
                   </div>
                   <div className="flex items-center text-[11px] sm:text-xs">
-                    <Users className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <Users className="h-4 w-4 mr-2 shrink-0" />
                     <span className="truncate">{image.attendees}</span>
                   </div>
                 </div>
@@ -163,7 +163,7 @@ export function PhotoGalleryPreview() {
         {/* Compact statistics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12">
           <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-blue-100/60">
-            <div className="flex-shrink-0 w-11 h-11 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full">
+            <div className="shrink-0 w-11 h-11 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full">
               <Calendar className="h-5 w-5" />
             </div>
             <div>
@@ -174,7 +174,7 @@ export function PhotoGalleryPreview() {
             </div>
           </div>
           <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-blue-100/60">
-            <div className="flex-shrink-0 w-11 h-11 flex items-center justify-center bg-green-100 text-green-600 rounded-full">
+            <div className="shrink-0 w-11 h-11 flex items-center justify-center bg-green-100 text-green-600 rounded-full">
               <Users className="h-5 w-5" />
             </div>
             <div>
@@ -185,7 +185,7 @@ export function PhotoGalleryPreview() {
             </div>
           </div>
           <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-blue-100/60">
-            <div className="flex-shrink-0 w-11 h-11 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full">
+            <div className="shrink-0 w-11 h-11 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full">
               <FileText className="h-5 w-5" />
             </div>
             <div>

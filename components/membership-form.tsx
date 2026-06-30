@@ -678,7 +678,7 @@ export function MembershipForm() {
               <React.Fragment key={step.number}>
                 <div className="flex flex-col items-center flex-1 min-w-0">
                   <div
-                    className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-colors flex-shrink-0 ${isActive
+                    className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-colors shrink-0 ${isActive
                       ? "bg-primary text-primary-foreground border-primary"
                       : isCompleted
                         ? "bg-green-500 text-white border-green-500"
@@ -700,7 +700,7 @@ export function MembershipForm() {
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`w-2 sm:w-4 md:w-8 lg:w-12 h-0.5 flex-shrink-0 mx-0.5 sm:mx-1 ${isCompleted ? "bg-green-500" : "bg-slate-300"
+                    className={`w-2 sm:w-4 md:w-8 lg:w-12 h-0.5 shrink-0 mx-0.5 sm:mx-1 ${isCompleted ? "bg-green-500" : "bg-slate-300"
                       }`}
                   />
                 )}
@@ -714,11 +714,11 @@ export function MembershipForm() {
 
   return (
     <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-2xl rounded-xl sm:rounded-2xl overflow-hidden w-full max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent p-4 sm:p-6 md:p-8">
+      <CardHeader className="bg-linear-to-r from-primary/10 to-transparent p-4 sm:p-6 md:p-8">
         <CardTitle className="text-xl sm:text-2xl font-bold text-primary">
           Member Registration
         </CardTitle>
-        <CardDescription className="text-xs sm:text-sm leading-relaxed break-words">
+        <CardDescription className="text-xs sm:text-sm leading-relaxed wrap-break-word">
           Join our community of professionals. Please complete the steps below.
         </CardDescription>
         <StepIndicator />
@@ -1160,7 +1160,7 @@ export function MembershipForm() {
                         ) : (
                           <div className="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
                             <div className="flex items-center gap-2 truncate">
-                              <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                              <FileText className="w-4 h-4 text-primary shrink-0" />
                               <span className="text-sm truncate max-w-[250px]">{documentFile.name}</span>
                               <span className="text-xs text-muted-foreground">({(documentFile.size / 1024).toFixed(0)}kb)</span>
                             </div>
@@ -1256,7 +1256,7 @@ export function MembershipForm() {
                         ) : (
                           <div className="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
                             <div className="flex items-center gap-2 truncate">
-                              <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                              <FileText className="w-4 h-4 text-primary shrink-0" />
                               <span className="text-sm truncate max-w-[250px]">{documentFile.name}</span>
                               <span className="text-xs text-muted-foreground">({(documentFile.size / 1024).toFixed(0)}kb)</span>
                             </div>
@@ -1368,7 +1368,7 @@ export function MembershipForm() {
                               />
                             </div>
                           ) : (
-                            <FileText className="w-8 h-8 text-primary flex-shrink-0" />
+                            <FileText className="w-8 h-8 text-primary shrink-0" />
                           )}
                           <div className="flex flex-col">
                             <span className="text-sm font-medium truncate max-w-[300px]">{nidDocument.name}</span>

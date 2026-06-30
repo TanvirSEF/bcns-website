@@ -50,7 +50,7 @@ export function SimpleChart() {
         </CardAction>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <div className="aspect-auto min-h-56 w-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center">
+        <div className="aspect-auto min-h-56 w-full bg-linear-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <TrendingUp className="h-12 w-12 text-blue-400 mx-auto mb-2" />
             <p className="text-gray-600">Chart visualization would go here</p>

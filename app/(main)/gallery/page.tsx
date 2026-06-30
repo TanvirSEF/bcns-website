@@ -82,7 +82,7 @@ const eventCategories = [
 
 export default function GalleryPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white">
+    <div className="min-h-screen bg-linear-to-b from-blue-50/40 via-white to-white">
       <Navbar />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -115,7 +115,7 @@ export default function GalleryPage() {
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
                 
                 {/* Image Count Badge */}
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm font-semibold text-gray-800">

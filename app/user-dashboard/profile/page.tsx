@@ -31,7 +31,8 @@ import {
   Briefcase,
   FileText,
   Check,
-  Info
+  Info,
+  Upload
 } from "lucide-react";
 import { useRequireAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -49,6 +50,77 @@ import {
 
 const USERNAME_REGEX = /^[a-z0-9_]+$/;
 
+// Document titles — used both when uploading and to match an already-uploaded
+// document back to its field on profile load (documents[] is a flat array).
+const EDU_TITLE = (qualification: string, year: string, institution: string) =>
+  `Education Certificate: ${qualification || "Qualification"} | ${year || "—"} | ${institution || "Institution"}`;
+const TRAIN_TITLE = (period: string, institute: string) =>
+  `Training Certificate: ${period || "—"} | ${institute || "Institute"}`;
+const NID_TITLE = "NID Document";
+
+// Reusable inline document-upload control used next to education / training
+// entries and for the NID field. Uploads go through POST /users/me/documents
+// (same R2-backed, admin-approved store the My Documents page uses).
+function ProfileDocUpload({
+  uploading,
+  existing,
+  onFile,
+  label = "Upload",
+}: {
+  uploading: boolean;
+  existing?: { fileUrl?: string } | undefined;
+  onFile: (file: File) => void;
+  label?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.png,.jpeg,.jpg"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onFile(f);
+          e.target.value = "";
+        }}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={uploading}
+        onClick={() => inputRef.current?.click()}
+      >
+        {uploading ? (
+          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+        ) : (
+          <Upload className="h-4 w-4 mr-1" />
+        )}
+        {existing?.fileUrl ? "Replace" : label}
+      </Button>
+      {existing?.fileUrl ? (
+        <>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-emerald-700"
+            onClick={() => existing.fileUrl && window.open(existing.fileUrl, "_blank")}
+          >
+            <FileText className="h-4 w-4 mr-1" />
+            View
+          </Button>
+          <span className="text-xs text-emerald-600 flex items-center gap-1">
+            <Check className="h-3 w-3" /> Uploaded (pending approval)
+          </span>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 function ProfilePageContent() {
   const { user, isLoading, isAuthorized, updateUser, refreshUser } = useRequireAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -58,6 +130,11 @@ function ProfilePageContent() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadingDocs, setUploadingDocs] = useState<Record<string, boolean>>({});
+  // fileUrl of docs uploaded in THIS session, keyed by title. Lets us show the
+  // "View" link immediately after upload WITHOUT refetching the profile (which
+  // would wipe unsaved education/training text edits).
+  const [sessionDocs, setSessionDocs] = useState<Record<string, string>>({});
   
   // Use ref for synchronous checking to prevent race conditions
   const isSavingRef = useRef(false);
@@ -513,10 +590,73 @@ function ProfilePageContent() {
     }
   };
 
+  // ---- Document uploads (NID + education / training certificates) ----
+  // Each upload is pushed into the user's documents[] array via the existing
+  // POST /users/me/documents endpoint (R2-backed, status 'pending') and titled
+  // so it can be matched back to its field on reload.
+  const findDoc = (title: string) => {
+    // Prefer a doc uploaded this session (avoids a profile refetch).
+    const sessionUrl = sessionDocs[title];
+    if (sessionUrl) return { fileUrl: sessionUrl };
+    // Otherwise scan saved documents, preferring the most recent match
+    // (so "Replace" shows the latest upload, not the oldest).
+    const docs = user?.documents ?? [];
+    for (let i = docs.length - 1; i >= 0; i--) {
+      const d = docs[i];
+      if (d && d.title === title) return { fileUrl: d.fileUrl };
+    }
+    return undefined;
+  };
+
+  const handleUploadDoc = async (file: File, title: string, key: string) => {
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+    const allowed = ["application/pdf", "image/png", "image/jpeg", "image/jpg"];
+    if (!allowed.includes(file.type)) {
+      toast.error("Only PDF, PNG, or JPG files are allowed");
+      return;
+    }
+    setUploadingDocs((prev) => ({ ...prev, [key]: true }));
+    try {
+      // Intentionally NOT calling refreshUser() here — refetching the profile
+      // would reset formData and wipe any unsaved education/training edits.
+      // The endpoint returns the uploaded fileUrl, so we track it locally.
+      const res = await api.users.uploadDocument(file, title);
+      if (res?.document?.fileUrl) {
+        setSessionDocs((prev) => ({ ...prev, [title]: res.document.fileUrl }));
+      }
+      toast.success("Document uploaded successfully");
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.getUserFriendlyMessage()
+          : "Failed to upload document. Please try again.";
+      toast.error(message);
+    } finally {
+      setUploadingDocs((prev) => ({ ...prev, [key]: false }));
+    }
+  };
+
+  const handleUploadEducationDoc = (index: number, file: File) => {
+    const edu = formData.educationQualifications[index];
+    if (!edu) return;
+    handleUploadDoc(file, EDU_TITLE(edu.qualification, edu.year, edu.institution), `edu-${index}`);
+  };
+
+  const handleUploadTrainingDoc = (index: number, file: File) => {
+    const t = formData.training[index];
+    if (!t) return;
+    handleUploadDoc(file, TRAIN_TITLE(t.period, t.institute), `train-${index}`);
+  };
+
+  const handleUploadNid = (file: File) => handleUploadDoc(file, NID_TITLE, "nid");
+
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+      <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
         <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">My Profile</h1>
         <p className="text-gray-700">Manage your personal information and professional details.</p>
       </div>
@@ -593,38 +733,38 @@ function ProfilePageContent() {
             <CardContent className="space-y-4">
               {(user as { username?: string })?.username && (
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <AtSign className="h-4 w-4 flex-shrink-0" />
+                  <AtSign className="h-4 w-4 shrink-0" />
                   <span>@{((user as { username?: string }).username)}</span>
                 </div>
               )}
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Mail className="h-4 w-4 flex-shrink-0" />
+                <Mail className="h-4 w-4 shrink-0" />
                 <span>{user?.email || "user@example.com"}</span>
               </div>
               {user?.phone && (
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Phone className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-words">{user.phone}</span>
+                  <Phone className="h-4 w-4 shrink-0" />
+                  <span className="wrap-break-word">{user.phone}</span>
                 </div>
               )}
               {user?.mailingAddress && (
                 <div className="flex items-start space-x-2 text-sm text-gray-600">
-                  <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span className="break-words">{user.mailingAddress}</span>
+                  <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span className="wrap-break-word">{user.mailingAddress}</span>
                 </div>
               )}
               {user?.affiliation && (
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Award className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-words">{user.affiliation}</span>
+                  <Award className="h-4 w-4 shrink-0" />
+                  <span className="wrap-break-word">{user.affiliation}</span>
                 </div>
               )}
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Calendar className="h-4 w-4 flex-shrink-0" />
+                <Calendar className="h-4 w-4 shrink-0" />
                 <span>Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : "2020"}</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Award className="h-4 w-4 flex-shrink-0" />
+                <Award className="h-4 w-4 shrink-0" />
                 <span className="capitalize">{user?.membershipStatus?.replace('_', ' ') || "Professional Member"}</span>
               </div>
             </CardContent>
@@ -953,7 +1093,8 @@ function ProfilePageContent() {
             <CardContent>
               <div className="space-y-4">
                 {formData.educationQualifications.map((edu, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 bg-gray-50 rounded-lg">
+                  <div key={index} className="p-4 bg-gray-50 rounded-lg space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     <div className="md:col-span-4 space-y-2">
                       <Label>Qualification</Label>
                       <Input
@@ -994,6 +1135,13 @@ function ProfilePageContent() {
                         </Button>
                       </div>
                     )}
+                    </div>
+                    <ProfileDocUpload
+                      uploading={!!uploadingDocs[`edu-${index}`]}
+                      existing={findDoc(EDU_TITLE(edu.qualification, edu.year, edu.institution))}
+                      onFile={(f) => handleUploadEducationDoc(index, f)}
+                      label="Upload Certificate"
+                    />
                   </div>
                 ))}
               </div>
@@ -1024,7 +1172,8 @@ function ProfilePageContent() {
             <CardContent>
               <div className="space-y-4">
                 {formData.training.map((training, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end p-4 bg-gray-50 rounded-lg">
+                  <div key={index} className="p-4 bg-gray-50 rounded-lg space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     <div className="md:col-span-5 space-y-2">
                       <Label>Period</Label>
                       <Input
@@ -1056,9 +1205,40 @@ function ProfilePageContent() {
                         </Button>
                       </div>
                     )}
+                    </div>
+                    <ProfileDocUpload
+                      uploading={!!uploadingDocs[`train-${index}`]}
+                      existing={findDoc(TRAIN_TITLE(training.period, training.institute))}
+                      onFile={(f) => handleUploadTrainingDoc(index, f)}
+                      label="Upload Certificate"
+                    />
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* NID Document */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                NID Document
+              </CardTitle>
+              <CardDescription>
+                Upload or replace your National ID (NID) document.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProfileDocUpload
+                uploading={!!uploadingDocs["nid"]}
+                existing={findDoc(NID_TITLE)}
+                onFile={handleUploadNid}
+                label="Upload NID"
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                Accepted: PDF, PNG, JPG (max 10MB). Uploaded documents start as pending and require admin approval.
+              </p>
             </CardContent>
           </Card>
 

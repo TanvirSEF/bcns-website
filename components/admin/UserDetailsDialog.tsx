@@ -253,7 +253,7 @@ function InfoItem({ icon: Icon, label, value, fullWidth = false, className = "" 
         <div className={`space-y-1 ${fullWidth ? "col-span-full" : ""}`}>
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
             <div className="flex items-center gap-2">
-                {Icon && <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" />}
                 <p className={`text-sm font-medium ${className}`}>{value || "N/A"}</p>
             </div>
         </div>

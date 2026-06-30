@@ -74,18 +74,18 @@ export default function TermsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-pink-50">
       <Navbar />
       
       {/* Hero Section */}
       <section className="relative py-16 sm:py-20 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-r from-blue-600 to-pink-600 rounded-full mb-6">
               <Scale className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Terms of <span className="bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent">Service</span>
+              Terms of <span className="bg-linear-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent">Service</span>
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Please read these terms carefully before using our website and services.
@@ -106,7 +106,7 @@ export default function TermsPage() {
                 <Card key={index} className="h-full hover:shadow-lg transition-shadow duration-300">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-3 text-xl">
-                      <div className="p-2 bg-gradient-to-r from-blue-600 to-pink-600 rounded-lg">
+                      <div className="p-2 bg-linear-to-r from-blue-600 to-pink-600 rounded-lg">
                         <section.icon className="w-6 h-6 text-white" />
                       </div>
                       <span>{section.title}</span>
@@ -116,7 +116,7 @@ export default function TermsPage() {
                     <ul className="space-y-3">
                       {section.content.map((item, itemIndex) => (
                         <li key={itemIndex} className="flex items-start space-x-3">
-                          <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full mt-2 flex-shrink-0"></div>
+                          <div className="w-2 h-2 bg-linear-to-r from-blue-600 to-pink-600 rounded-full mt-2 shrink-0"></div>
                           <span className="text-gray-700">{item}</span>
                         </li>
                       ))}
@@ -130,7 +130,7 @@ export default function TermsPage() {
             <Card className="mb-8">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-3 text-xl">
-                  <div className="p-2 bg-gradient-to-r from-blue-600 to-pink-600 rounded-lg">
+                  <div className="p-2 bg-linear-to-r from-blue-600 to-pink-600 rounded-lg">
                     <FileText className="w-6 h-6 text-white" />
                   </div>
                   <span>Additional Terms</span>

@@ -134,7 +134,7 @@ export function EventsAnnouncements() {
   };
 
   return (
-    <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-b from-blue-50/60 via-white to-white overflow-hidden">
+    <section className="py-8 sm:py-12 md:py-16 bg-linear-to-b from-blue-50/60 via-white to-white overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="text-center mb-6 sm:mb-8 md:mb-12">
@@ -202,7 +202,7 @@ export function EventsAnnouncements() {
                         className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                       <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-white rounded-md p-1.5 sm:p-2 text-center shadow-lg">
                         <div className="text-xs sm:text-sm font-bold text-blue-700">
                           {day}
@@ -220,20 +220,20 @@ export function EventsAnnouncements() {
                     </div>
 
                     {/* Card Content */}
-                    <div className="p-3 sm:p-4 flex flex-col flex-grow">
+                    <div className="p-3 sm:p-4 flex flex-col grow">
                       <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 transition-colors group-hover:text-blue-700">
                         {event.title}
                       </h3>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-3 flex-grow">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-3 grow">
                         {event.description}
                       </p>
                       <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500">
                         <div className="flex items-center">
-                          <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+                          <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
                           <span className="truncate">{event.time}</span>
                         </div>
                         <div className="flex items-center">
-                          <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+                          <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
                           <span className="truncate">{event.location}</span>
                         </div>
                       </div>
@@ -280,13 +280,13 @@ export function EventsAnnouncements() {
                           {announcement.title}
                         </h3>
                         <p className="text-xs sm:text-sm text-gray-500 flex items-center">
-                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
                           <span>
                             {formatAnnouncementDate(announcement.date)}
                           </span>
                         </p>
                       </div>
-                      <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0 transition-all duration-300 group-hover:text-blue-700 group-hover:scale-110" />
+                      <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 shrink-0 transition-all duration-300 group-hover:text-blue-700 group-hover:scale-110" />
                     </div>
                   </a>
                 ))}

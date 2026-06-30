@@ -27,7 +27,7 @@ export function LeadershipProfile({ isOpen, onClose, leader }: LeadershipProfile
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl">
+        <div className="relative bg-linear-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl">
           <Button
             onClick={onClose}
             variant="ghost"
@@ -91,7 +91,7 @@ export function LeadershipProfile({ isOpen, onClose, leader }: LeadershipProfile
 
             {/* Right Side - Message */}
             <div className="lg:col-span-2">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6">
+              <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg p-6">
                 <h4 className="text-lg font-bold text-gray-800 mb-4">
                   Message from the BCNS {leader.position}
                 </h4>

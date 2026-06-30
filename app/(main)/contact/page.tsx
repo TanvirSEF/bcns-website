@@ -74,10 +74,10 @@ export default function ContactPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 overflow-hidden">
       <Navbar />
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white py-16 sm:py-20 lg:py-24">
+      <section className="relative bg-linear-to-r from-slate-900 via-blue-900 to-slate-900 text-white py-16 sm:py-20 lg:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <Badge className="bg-blue-600 hover:bg-blue-700 text-white mb-4 sm:mb-6">
@@ -168,7 +168,7 @@ export default function ContactPage() {
                     >
                       <CardContent className="p-4 sm:p-6">
                         <div className="flex items-start space-x-4">
-                          <div className="flex-shrink-0">
+                          <div className="shrink-0">
                             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                               <Mail className="h-5 w-5 text-blue-600" />
                             </div>

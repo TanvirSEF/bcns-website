@@ -51,11 +51,11 @@ export default function GuidelinesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-blue-50">
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative py-16 sm:py-20 md:py-24 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600">
+      <section className="relative py-16 sm:py-20 md:py-24 bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600">
         <div className="absolute inset-0 bg-[url('/images/child_neurology.png')] bg-cover bg-center opacity-10"></div>
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative z-10 container mx-auto px-4">

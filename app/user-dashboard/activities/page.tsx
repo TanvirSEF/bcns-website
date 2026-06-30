@@ -177,7 +177,7 @@ export default function UserActivitiesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+      <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
         <h1 className="text-2xl font-bold tracking-tight mb-2 text-gray-900">My Activities</h1>
         <p className="text-gray-700">A timeline of your engagement with BCNS — favorites, documents, and membership milestones.</p>
       </div>
@@ -192,7 +192,7 @@ export default function UserActivitiesPage() {
         ].map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-4 flex items-center gap-3">
-              <stat.icon className={`h-7 w-7 flex-shrink-0 ${stat.color}`} />
+              <stat.icon className={`h-7 w-7 shrink-0 ${stat.color}`} />
               <div className="min-w-0">
                 <p className={`font-bold ${stat.small ? "text-sm" : "text-xl"}`}>{stat.value}</p>
                 <p className="text-xs text-muted-foreground">{stat.label}</p>
@@ -242,7 +242,7 @@ export default function UserActivitiesPage() {
                       <div className="absolute left-[18px] top-8 bottom-0 w-px bg-gray-200" />
                     )}
                     {/* Icon */}
-                    <div className={`relative z-10 h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ring-4 ring-white ${getTypeColor(item.type)}`}>
+                    <div className={`relative z-10 h-9 w-9 rounded-full flex items-center justify-center shrink-0 ring-4 ring-white ${getTypeColor(item.type)}`}>
                       <Icon className="h-4 w-4" />
                     </div>
                     {/* Content */}

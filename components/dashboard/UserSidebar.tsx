@@ -99,7 +99,7 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
   };
   return (
     <Sidebar collapsible="offcanvas" className="border-r bg-white shadow-sm" {...props}>
-      <SidebarHeader className="border-b bg-gradient-to-r from-emerald-50 to-green-50 p-4">
+      <SidebarHeader className="border-b bg-linear-to-r from-emerald-50 to-green-50 p-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton

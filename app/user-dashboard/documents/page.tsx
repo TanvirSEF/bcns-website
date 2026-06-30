@@ -152,7 +152,7 @@ export default function UserDocumentsPage() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+        <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
           <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">My Documents</h1>
           <p className="text-gray-700">View and manage your uploaded documents.</p>
         </div>
@@ -176,7 +176,7 @@ export default function UserDocumentsPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+        <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
           <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">My Documents</h1>
           <p className="text-gray-700">View and manage your uploaded documents.</p>
         </div>
@@ -199,7 +199,7 @@ export default function UserDocumentsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+      <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
         <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">My Documents</h1>
         <p className="text-gray-700">View and manage your uploaded documents.</p>
       </div>
@@ -267,7 +267,7 @@ export default function UserDocumentsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex-shrink-0 rounded-lg bg-emerald-100 p-3">
+                    <div className="shrink-0 rounded-lg bg-emerald-100 p-3">
                       <FileText className="h-6 w-6 text-emerald-600" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -285,7 +285,7 @@ export default function UserDocumentsPage() {
 
                 {doc.uploadedAt && (
                   <div className="flex items-center text-sm text-gray-600">
-                    <Calendar className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
+                    <Calendar className="h-4 w-4 mr-2 text-emerald-600 shrink-0" />
                     <span>Uploaded: {formatDate(doc.uploadedAt)}</span>
                   </div>
                 )}

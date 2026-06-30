@@ -110,7 +110,7 @@ const data = {
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" className="border-r bg-white shadow-sm" {...props}>
-      <SidebarHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+      <SidebarHeader className="border-b bg-linear-to-r from-blue-50 to-indigo-50 p-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton

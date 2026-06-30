@@ -126,11 +126,11 @@ function PaymentPageContent() {
   return (
     <>
       <NavbarClient />
-      <section className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12">
+      <section className="min-h-screen bg-linear-to-br from-blue-50 via-white to-green-50 py-12">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
+            <div className="mx-auto mb-4 w-16 h-16 bg-linear-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
               <CreditCard className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -251,7 +251,7 @@ function PaymentPageContent() {
                         <ol className="space-y-2">
                           {selectedMethodData.instructions.map((instruction, index) => (
                             <li key={index} className="flex gap-3 text-sm text-gray-700">
-                              <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-semibold">
+                              <span className="shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-semibold">
                                 {index + 1}
                               </span>
                               <span className={`flex-1 pt-0.5 ${instruction.startsWith('Account Name:') ? 'text-base sm:text-lg font-semibold text-gray-900' : ''}`}>
@@ -284,7 +284,7 @@ function PaymentPageContent() {
                       <Button
                         onClick={handlePaymentComplete}
                         disabled={!paymentConfirmed}
-                        className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+                        className="w-full bg-linear-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"
                       >
                         Continue to Login
                         <ArrowRight className="w-5 h-5" />
@@ -308,7 +308,7 @@ function PaymentPageContent() {
             <Card className="mt-6 bg-blue-50 border-blue-200">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
                   <div className="text-sm text-blue-900">
                     <p className="font-semibold mb-1">Important Notice:</p>
                     <ul className="list-disc list-inside space-y-1 text-blue-700">
@@ -332,7 +332,7 @@ function PaymentPageContent() {
 export default function PaymentPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-green-50">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-green-50">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="text-gray-600">Loading payment page...</p>

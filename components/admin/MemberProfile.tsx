@@ -46,8 +46,8 @@ function InfoItem({
         {label}
       </p>
       <div className="flex items-center gap-2">
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
-        <p className={`text-sm font-medium break-words ${className}`}>{display}</p>
+        {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" />}
+        <p className={`text-sm font-medium wrap-break-word ${className}`}>{display}</p>
       </div>
     </div>
   );
@@ -301,7 +301,7 @@ export function MemberProfile({ user }: { user: User }) {
                   key={index}
                   className="flex items-center gap-3 p-3 rounded-md border bg-card"
                 >
-                  <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center shrink-0">
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">

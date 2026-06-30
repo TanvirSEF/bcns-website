@@ -135,7 +135,7 @@ function LoginPageContent() {
       <NavbarClient />
       <section className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white">
         {/* Left brand panel (hidden on mobile) */}
-        <div className="relative hidden lg:flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-blue-800">
+        <div className="relative hidden lg:flex items-center justify-center overflow-hidden bg-linear-to-br from-blue-700 via-indigo-700 to-blue-800">
           <div
             className="absolute inset-0 pointer-events-none opacity-20"
             aria-hidden
@@ -165,9 +165,9 @@ function LoginPageContent() {
               <div className="mb-6 text-center">
                 <div className="relative mb-4">
                   {/* Animated gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl blur-xl opacity-20 animate-pulse"></div>
+                  <div className="absolute inset-0 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl blur-xl opacity-20 animate-pulse"></div>
                   {/* BCNS Logo/Text */}
-                  <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-4 sm:p-5 shadow-lg">
+                  <div className="relative bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-4 sm:p-5 shadow-lg">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-wider">
                         BCNS
@@ -195,14 +195,14 @@ function LoginPageContent() {
 
               {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-start space-x-2">
-                  <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
                   <span className="text-sm text-red-700">{error}</span>
                 </div>
               )}
 
               {success && (
                 <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md flex items-start space-x-2">
-                  <ShieldCheck className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <ShieldCheck className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                   <span className="text-sm text-green-700">{success}</span>
                 </div>
               )}

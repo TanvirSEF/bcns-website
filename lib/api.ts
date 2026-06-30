@@ -33,6 +33,11 @@ import {
   GetUploadUrlsResponse,
 } from '@/types/api';
 
+type UploadDocumentResponse = {
+  success: boolean;
+  document: { title: string; fileUrl: string; status: string; uploadedAt?: string };
+};
+
 function handleApiResponse<T>(response: unknown): T {
   // If response is null, undefined or empty string but it reached here (meaning it was a success status),
   // return it as successfully cast data, or an empty object if T is expected to be an object.
@@ -185,15 +190,15 @@ export const userApi = {
     return handleApiResponse<OperationResponse>(response);
   },
 
-  uploadDocument: async (file: File, title?: string): Promise<OperationResponse> => {
+  uploadDocument: async (file: File, title?: string): Promise<UploadDocumentResponse> => {
     const formData = new FormData();
     formData.append('document', file);
     if (title) formData.append('title', title);
-    const response = await apiClient.post<OperationResponse>(
+    const response = await apiClient.post<UploadDocumentResponse>(
       '/users/me/documents',
       formData,
     );
-    return handleApiResponse<OperationResponse>(response);
+    return handleApiResponse<UploadDocumentResponse>(response);
   },
 
   getMembers: async (): Promise<readonly User[]> => {

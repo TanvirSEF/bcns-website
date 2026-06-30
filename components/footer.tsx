@@ -92,7 +92,7 @@ export function Footer() {
                   href={link.href}
                   className="flex items-center space-x-2 sm:space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group cursor-pointer"
                 >
-                  <link.icon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                  <link.icon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-blue-400 transition-colors shrink-0" />
                   <span className="text-xs sm:text-sm font-medium truncate">{link.name}</span>
                 </Link>
               ))}
@@ -111,7 +111,7 @@ export function Footer() {
                   href={link.href}
                   className="flex items-center space-x-2 sm:space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group cursor-pointer"
                 >
-                  <link.icon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-pink-400 transition-colors flex-shrink-0" />
+                  <link.icon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-pink-400 transition-colors shrink-0" />
                   <span className="text-xs sm:text-sm font-medium truncate">{link.name}</span>
                 </Link>
               ))}
@@ -130,7 +130,7 @@ export function Footer() {
                   href={link.href}
                   className="flex items-center space-x-2 sm:space-x-3 text-gray-300 hover:text-white transition-colors duration-200 group cursor-pointer"
                 >
-                  <link.icon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-pink-400 transition-colors flex-shrink-0" />
+                  <link.icon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-pink-400 transition-colors shrink-0" />
                   <span className="text-xs sm:text-sm font-medium truncate">{link.name}</span>
                 </Link>
               ))}
@@ -148,7 +148,7 @@ export function Footer() {
                   <Link
                     key={social.name}
                     href={social.href}
-                    className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition-all duration-200 group flex-shrink-0 cursor-pointer"
+                    className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition-all duration-200 group shrink-0 cursor-pointer"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -159,15 +159,15 @@ export function Footer() {
 
               <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center space-x-2 sm:space-x-3 text-gray-300">
-                  <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
+                  <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0" />
                   <span className="text-xs sm:text-sm">+880 1711261736</span>
                 </div>
                 <div className="flex items-center space-x-2 sm:space-x-3 text-gray-300">
-                  <Mail className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
+                  <Mail className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0" />
                   <span className="text-xs sm:text-sm break-all">office@bcns.org.bd</span>
                 </div>
                 <div className="flex items-start space-x-2 sm:space-x-3 text-gray-300">
-                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0 mt-0.5" />
+                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs sm:text-sm leading-relaxed block">
                       Room no. 703, Block- F, Floor- 7, IPNA, BMU, Dhaka-1000
@@ -184,7 +184,7 @@ export function Footer() {
       <div className="border-t border-gray-800">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
-            <div className="text-xs sm:text-sm text-gray-400 text-center sm:text-left break-words max-w-full px-2">
+            <div className="text-xs sm:text-sm text-gray-400 text-center sm:text-left wrap-break-word max-w-full px-2">
               © {currentYear} Bangladesh Child Neurology Society (BCNS). All
               rights reserved.
             </div>
@@ -210,7 +210,7 @@ export function Footer() {
               >
                 <Sparkles className="h-3.5 w-3.5 text-blue-300 group-hover:text-blue-200" />
                 <span className="hidden sm:inline text-gray-300">Developed by</span>
-                <span className="font-semibold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                <span className="font-semibold bg-linear-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
                   Zephlo Tech
                 </span>
               </a>

@@ -50,18 +50,18 @@ async function getEvents(): Promise<ApiEvent[]> {
 export default async function EventsPage() {
   const events = await getEvents();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-pink-50">
       <Navbar />
 
       {/* Hero Section */}
       <section className="relative py-16 sm:py-20 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-r from-blue-600 to-pink-600 rounded-full mb-6">
               <Calendar className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Events & <span className="bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent">Conferences</span>
+              Events & <span className="bg-linear-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent">Conferences</span>
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Join us for upcoming conferences, workshops, and educational events in child neurology.
@@ -99,12 +99,12 @@ export default async function EventsPage() {
                             <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 leading-tight">{event.title}</h4>
                             <div className="flex flex-col gap-2 text-gray-700 text-sm">
                               <span className="inline-flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                <Calendar className="w-4 h-4 text-blue-600 shrink-0" />
                                 <span>{event.time ? `${formatEventDate(event.date)}, ${event.time}` : formatEventDate(event.date)}</span>
                               </span>
                               {event.location && (
                                 <span className="inline-flex items-start gap-2">
-                                  <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                                  <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                                   <span className="line-clamp-2">{event.location}</span>
                                 </span>
                               )}

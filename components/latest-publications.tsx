@@ -64,7 +64,7 @@ export function LatestPublications() {
   };
 
   return (
-    <section className="py-10 sm:py-12 lg:py-14 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 overflow-hidden">
+    <section className="py-10 sm:py-12 lg:py-14 bg-linear-to-b from-slate-900 via-slate-900 to-slate-800 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-10">

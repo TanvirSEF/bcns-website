@@ -87,7 +87,7 @@ export default function UserPublicationsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+      <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
         <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">Publications</h1>
         <p className="text-gray-700">Access research papers, articles, and publications from BCNS.</p>
       </div>
@@ -133,7 +133,7 @@ export default function UserPublicationsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between gap-3">
                   <CardTitle className="text-lg leading-snug">{p.title}</CardTitle>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     {p.category && (
                       <Badge variant="secondary" className="capitalize whitespace-nowrap">
                         {p.category}

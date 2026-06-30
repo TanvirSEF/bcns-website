@@ -82,7 +82,7 @@ export default function UserMembersPage() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+        <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
           <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">Members</h1>
           <p className="text-gray-700">Connect with fellow BCNS members and pediatric neurologists.</p>
         </div>
@@ -109,7 +109,7 @@ export default function UserMembersPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+        <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
           <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">Members</h1>
           <p className="text-gray-700">Connect with fellow BCNS members and pediatric neurologists.</p>
         </div>
@@ -132,7 +132,7 @@ export default function UserMembersPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+      <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
         <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">Members</h1>
         <p className="text-gray-700">Connect with fellow BCNS members and pediatric neurologists.</p>
       </div>
@@ -170,7 +170,7 @@ export default function UserMembersPage() {
                 <div className="flex items-start space-x-4">
                   <Avatar className="h-12 w-12 border-2 border-emerald-100">
                     <AvatarImage src={member.profilePictureUrl} alt={member.name} />
-                    <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-green-600 text-white font-semibold">
+                    <AvatarFallback className="bg-linear-to-br from-emerald-500 to-green-600 text-white font-semibold">
                       {getInitials(member.name || "User")}
                     </AvatarFallback>
                   </Avatar>
@@ -182,7 +182,7 @@ export default function UserMembersPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 flex-shrink-0"
+                        className="h-7 w-7 p-0 shrink-0"
                         onClick={() => toggle(member.id)}
                       >
                         <Heart className={`h-4 w-4 ${favoredIds.has(member.id) ? "fill-red-500 text-red-500" : ""}`} />
@@ -190,7 +190,7 @@ export default function UserMembersPage() {
                     </div>
                     {member.affiliation && (
                       <div className="flex items-center text-sm text-gray-600 mb-3">
-                        <Building2 className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                        <Building2 className="h-3 w-3 mr-1.5 shrink-0" />
                         <span className="truncate">{member.affiliation}</span>
                       </div>
                     )}
@@ -198,21 +198,21 @@ export default function UserMembersPage() {
                     <div className="space-y-2 mb-4">
                       {member.email && (
                         <div className="flex items-center text-sm text-gray-600">
-                          <Mail className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
+                          <Mail className="h-4 w-4 mr-2 text-emerald-600 shrink-0" />
                           <span className="truncate">{member.email}</span>
                         </div>
                       )}
 
                       {member.phone && (
                         <div className="flex items-center text-sm text-gray-600">
-                          <Phone className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
+                          <Phone className="h-4 w-4 mr-2 text-emerald-600 shrink-0" />
                           <span>{member.phone}</span>
                         </div>
                       )}
 
                       {member.address && (
                         <div className="flex items-center text-sm text-gray-600">
-                          <MapPin className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
+                          <MapPin className="h-4 w-4 mr-2 text-emerald-600 shrink-0" />
                           <span className="truncate">{member.address}</span>
                         </div>
                       )}

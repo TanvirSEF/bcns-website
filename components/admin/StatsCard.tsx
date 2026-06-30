@@ -98,7 +98,7 @@ export function StatsCard({
           <div
             className={cn(
               "w-12 h-12 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300",
-              `bg-gradient-to-br ${colors.bg}`
+              `bg-linear-to-br ${colors.bg}`
             )}
           >
             <Icon className="h-6 w-6 text-white" />

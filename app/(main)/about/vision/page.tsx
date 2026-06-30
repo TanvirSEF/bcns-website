@@ -17,7 +17,7 @@ export default function VisionPage() {
     <div className="min-h-screen bg-white">
       <Navbar />
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-blue-800">
+      <section className="relative overflow-hidden bg-linear-to-br from-blue-700 via-indigo-700 to-blue-800">
         <div className="absolute inset-0 opacity-20" aria-hidden>
           <div className="absolute -top-20 -left-24 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-blue-300/10 blur-3xl" />
@@ -38,7 +38,7 @@ export default function VisionPage() {
       </section>
 
       {/* Content */}
-      <section className="py-10 sm:py-12 lg:py-16 bg-gradient-to-b from-blue-50/40 via-white to-white">
+      <section className="py-10 sm:py-12 lg:py-16 bg-linear-to-b from-blue-50/40 via-white to-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl">
             <div className="bg-white/90 backdrop-blur border border-blue-100/70 shadow-sm rounded-2xl p-6 sm:p-8 mb-8">

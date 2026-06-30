@@ -28,7 +28,7 @@ export default function AboutPage() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-blue-800">
+      <section className="relative overflow-hidden bg-linear-to-br from-blue-700 via-indigo-700 to-blue-800">
         <div className="absolute inset-0 opacity-20" aria-hidden>
           <div className="absolute -top-20 -left-24 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-blue-300/10 blur-3xl" />
@@ -50,7 +50,7 @@ export default function AboutPage() {
       </section>
 
       {/* Introduction Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-blue-50/40 via-white to-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-linear-to-b from-blue-50/40 via-white to-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div>
@@ -78,7 +78,7 @@ export default function AboutPage() {
                   height={400}
                   className="w-full h-auto object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-blue-900/20 to-transparent" />
               </div>
             </div>
           </div>

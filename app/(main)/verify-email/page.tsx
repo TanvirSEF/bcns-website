@@ -304,11 +304,11 @@ function OTPVerificationContent() {
   return (
     <>
       <NavbarClient />
-      <section className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12">
+      <section className="min-h-screen bg-linear-to-br from-blue-50 via-white to-green-50 py-12">
         <div className="container mx-auto px-4 max-w-md">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
+            <div className="mx-auto mb-4 w-16 h-16 bg-linear-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
               <Mail className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -383,7 +383,7 @@ function OTPVerificationContent() {
                   {/* Error Message */}
                   {error && (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                      <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                      <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
                       <div>
                         <p className="text-red-700 font-medium">Verification Failed</p>
                         <p className="text-red-600 text-sm mt-1">{error}</p>
@@ -395,7 +395,7 @@ function OTPVerificationContent() {
                   <Button
                     onClick={handleVerify}
                     disabled={isVerifying || otp.length !== 6 || hasAttemptedVerification}
-                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+                    className="w-full bg-linear-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"
                   >
                     {isVerifying ? (
                       <>
@@ -466,7 +466,7 @@ function OTPVerificationContent() {
           {!success && (
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="flex items-start gap-3">
-                <Lock className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <Lock className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-blue-900 font-medium text-sm">Security Notice</p>
                   <p className="text-blue-700 text-xs mt-1">
@@ -487,7 +487,7 @@ function OTPVerificationContent() {
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-green-50">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-green-50">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="text-gray-600">Loading verification page...</p>

@@ -148,7 +148,7 @@ export default function NoticeBoardPage() {
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
                         {notice.priority === "high" && (
-                          <div className="flex-shrink-0 mt-0.5">
+                          <div className="shrink-0 mt-0.5">
                             <AlertCircle className="h-4 w-4 text-red-500" />
                           </div>
                         )}

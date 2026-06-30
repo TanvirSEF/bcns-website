@@ -207,7 +207,7 @@ export default async function GalleryCategoryPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white">
+    <div className="min-h-screen bg-linear-to-b from-blue-50/40 via-white to-white">
       <Navbar />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}

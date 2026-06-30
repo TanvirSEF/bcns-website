@@ -90,7 +90,7 @@ export function Hero() {
               />
                 <div className="absolute inset-0 bg-black/30" />
                 <div className="absolute inset-x-0 bottom-0">
-                  <div className="bg-gradient-to-t from-black/80 via-black/60 to-transparent">
+                  <div className="bg-linear-to-t from-black/80 via-black/60 to-transparent">
                     <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
                       {slide.title && (
                         <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight tracking-tight drop-shadow-md text-center sm:text-left">

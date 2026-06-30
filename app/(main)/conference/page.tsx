@@ -49,18 +49,18 @@ async function getEvents(): Promise<ApiEvent[]> {
 export default async function ConferencePage() {
   const events = await getEvents();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-pink-50">
       <Navbar />
 
       {/* Hero Section */}
       <section className="relative py-16 sm:py-20 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-pink-600 rounded-full mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-r from-blue-600 to-pink-600 rounded-full mb-6">
               <Calendar className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Annual <span className="bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent">Conference</span>
+              Annual <span className="bg-linear-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent">Conference</span>
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Join us for the premier child neurology conference featuring world-class speakers and cutting-edge research.

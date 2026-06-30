@@ -126,14 +126,14 @@ function ResetPasswordContent() {
 
     if (!token && !error) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 flex items-center justify-center">
+            <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-pink-50 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
+        <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-pink-50">
             <NavbarClient />
 
             <main className="container mx-auto px-4 py-16 sm:py-24">
@@ -143,7 +143,7 @@ function ResetPasswordContent() {
                             <>
                                 {/* Header */}
                                 <div className="text-center mb-8">
-                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-r from-blue-600 to-purple-600 rounded-full mb-4">
                                         <KeyRound className="w-8 h-8 text-white" />
                                     </div>
                                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -157,7 +157,7 @@ function ResetPasswordContent() {
                                 {/* Error Message */}
                                 {error && (
                                     <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                        <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                                         <div className="flex-1">
                                             <p className="text-sm text-red-800 font-medium">{error}</p>
                                             {error.includes("expired") && (
@@ -252,7 +252,7 @@ function ResetPasswordContent() {
                                     <Button
                                         type="submit"
                                         disabled={isLoading || !token || !newPassword || !confirmPassword || newPassword !== confirmPassword}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isLoading ? (
                                             <>
@@ -285,7 +285,7 @@ function ResetPasswordContent() {
                                     </div>
                                     <Button
                                         onClick={() => router.push("/login")}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg font-semibold"
+                                        className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg font-semibold"
                                     >
                                         Go to Login
                                     </Button>
@@ -314,7 +314,7 @@ function ResetPasswordContent() {
 export default function ResetPasswordPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 flex items-center justify-center">
+            <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-pink-50 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
             </div>
         }>

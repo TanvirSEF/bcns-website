@@ -48,7 +48,7 @@ export function MembershipBenefits() {
                 priority
               />
               {/* Subtle overlay for depth */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/10 to-transparent" />
             </div>
 
             {/* Floating stats card */}
@@ -86,7 +86,7 @@ export function MembershipBenefits() {
                   className="flex items-start space-x-3 sm:space-x-4 group"
                 >
                   {/* Icon Container */}
-                  <div className="flex-shrink-0 p-2 sm:p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors duration-300">
+                  <div className="shrink-0 p-2 sm:p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors duration-300">
                     <div className="text-blue-600 group-hover:text-blue-700 transition-colors duration-300">
                       {benefit.icon}
                     </div>

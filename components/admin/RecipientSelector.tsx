@@ -109,7 +109,7 @@ export function RecipientSelector({
                                     <span className="truncate flex-1">{email}</span>
                                     <button
                                         onClick={() => handleRemoveEmail(email)}
-                                        className="ml-2 text-red-500 hover:text-red-700 flex-shrink-0"
+                                        className="ml-2 text-red-500 hover:text-red-700 shrink-0"
                                         aria-label="Remove"
                                     >
                                         <X className="h-4 w-4" />

@@ -95,7 +95,7 @@ export default function UserFavoritesPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+      <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
         <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">My Favorites</h1>
         <p className="text-gray-700">Publications, events, and members you&apos;ve bookmarked.</p>
       </div>
@@ -145,13 +145,13 @@ export default function UserFavoritesPage() {
               <Card key={fav.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-start gap-3">
-                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${getTypeColor(fav.targetType)}`}>
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${getTypeColor(fav.targetType)}`}>
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-semibold leading-snug">{fav.title || "Untitled"}</h3>
-                        <Badge variant="secondary" className="capitalize whitespace-nowrap flex-shrink-0">
+                        <Badge variant="secondary" className="capitalize whitespace-nowrap shrink-0">
                           {fav.targetType}
                         </Badge>
                       </div>
@@ -169,7 +169,7 @@ export default function UserFavoritesPage() {
                       size="sm"
                       onClick={() => handleRemove(fav)}
                       disabled={removingId === fav.id}
-                      className="text-destructive hover:text-destructive flex-shrink-0"
+                      className="text-destructive hover:text-destructive shrink-0"
                     >
                       {removingId === fav.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

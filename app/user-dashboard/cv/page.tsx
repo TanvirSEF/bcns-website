@@ -77,7 +77,7 @@ export default function UserCVPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+      <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
         <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">My CV</h1>
         <p className="text-gray-700">Generate and download your professional CV based on your registration information.</p>
       </div>

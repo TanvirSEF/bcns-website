@@ -92,7 +92,7 @@ export default function UserEventsPage() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+        <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
           <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">Events</h1>
           <p className="text-gray-700">Browse and register for upcoming BCNS events, conferences, and workshops.</p>
         </div>
@@ -114,7 +114,7 @@ export default function UserEventsPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+        <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
           <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">Events</h1>
           <p className="text-gray-700">Browse and register for upcoming BCNS events, conferences, and workshops.</p>
         </div>
@@ -137,7 +137,7 @@ export default function UserEventsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
+      <div className="p-6 bg-linear-to-r from-emerald-50 to-green-50 rounded-lg border shadow-sm">
         <h1 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">Events</h1>
         <p className="text-gray-700">Browse and register for upcoming BCNS events, conferences, and workshops.</p>
       </div>
@@ -234,7 +234,7 @@ export default function UserEventsPage() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="relative h-48 w-full bg-gradient-to-br from-emerald-100 to-green-100 flex items-center justify-center">
+                    <div className="relative h-48 w-full bg-linear-to-br from-emerald-100 to-green-100 flex items-center justify-center">
                       <Calendar className="h-16 w-16 text-emerald-400" />
                       <div className="absolute top-3 left-3 bg-white rounded-md p-2 text-center shadow-lg">
                         <div className="text-sm font-bold text-emerald-700">{day}</div>
@@ -265,20 +265,20 @@ export default function UserEventsPage() {
 
                     <div className="space-y-2 mt-auto pt-2">
                       <div className="flex items-center text-sm text-gray-700">
-                        <Calendar className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
+                        <Calendar className="h-4 w-4 mr-2 text-emerald-600 shrink-0" />
                         <span>{fullDate}</span>
                       </div>
 
                       {event.time && (
                         <div className="flex items-center text-sm text-gray-700">
-                          <Clock className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
+                          <Clock className="h-4 w-4 mr-2 text-emerald-600 shrink-0" />
                           <span>{event.time}</span>
                         </div>
                       )}
 
                       {event.location && (
                         <div className="flex items-center text-sm text-gray-700">
-                          <MapPin className="h-4 w-4 mr-2 text-emerald-600 flex-shrink-0" />
+                          <MapPin className="h-4 w-4 mr-2 text-emerald-600 shrink-0" />
                           <span className="truncate">{event.location}</span>
                         </div>
                       )}
@@ -358,7 +358,7 @@ export default function UserEventsPage() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="relative h-56 w-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <div className="relative h-56 w-full bg-linear-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                       <Calendar className="h-16 w-16 text-gray-400" />
                       <div className="absolute top-3 left-3 bg-white rounded-md p-2 text-center shadow-lg">
                         <div className="text-sm font-bold text-gray-700">{day}</div>
@@ -389,20 +389,20 @@ export default function UserEventsPage() {
 
                     <div className="space-y-2 mt-auto pt-2">
                       <div className="flex items-center text-sm text-gray-700">
-                        <Calendar className="h-4 w-4 mr-2 text-gray-600 flex-shrink-0" />
+                        <Calendar className="h-4 w-4 mr-2 text-gray-600 shrink-0" />
                         <span>{fullDate}</span>
                       </div>
 
                       {event.time && (
                         <div className="flex items-center text-sm text-gray-700">
-                          <Clock className="h-4 w-4 mr-2 text-gray-600 flex-shrink-0" />
+                          <Clock className="h-4 w-4 mr-2 text-gray-600 shrink-0" />
                           <span>{event.time}</span>
                         </div>
                       )}
 
                       {event.location && (
                         <div className="flex items-center text-sm text-gray-700">
-                          <MapPin className="h-4 w-4 mr-2 text-gray-600 flex-shrink-0" />
+                          <MapPin className="h-4 w-4 mr-2 text-gray-600 shrink-0" />
                           <span className="truncate">{event.location}</span>
                         </div>
                       )}

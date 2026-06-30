@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
+        <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-pink-50">
             <NavbarClient />
 
             <main className="container mx-auto px-4 py-16 sm:py-24">
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
                             <>
                                 {/* Header */}
                                 <div className="text-center mb-8">
-                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-r from-blue-600 to-purple-600 rounded-full mb-4">
                                         <Mail className="w-8 h-8 text-white" />
                                     </div>
                                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
                                     <Button
                                         type="submit"
                                         disabled={isLoading}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                                        className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                                     >
                                         {isLoading ? (
                                             <>
@@ -147,7 +147,7 @@ export default function ForgotPasswordPage() {
                                     </div>
                                     <Button
                                         onClick={() => router.push("/login")}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg font-semibold"
+                                        className="w-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-lg font-semibold"
                                     >
                                         Return to Login
                                     </Button>
