@@ -49,20 +49,20 @@ export default function ActivityLogsManagement() {
     // Search filter
     if (searchQuery) {
       filtered = filtered.filter(log =>
-        log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        log.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
+        (log.action || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (log.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (log.userEmail || "").toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // Action filter
     if (actionFilter !== "all") {
-      filtered = filtered.filter(log => log.action === actionFilter);
+      filtered = filtered.filter(log => (log.action || "") === actionFilter);
     }
 
     // User filter
     if (userFilter !== "all") {
-      filtered = filtered.filter(log => log.userId === userFilter);
+      filtered = filtered.filter(log => (log.userId || "") === userFilter);
     }
 
     // Date filter
@@ -73,6 +73,7 @@ export default function ActivityLogsManagement() {
       switch (dateFilter) {
         case "today":
           filtered = filtered.filter(log => {
+            if (!log.createdAt) return false;
             logDate.setTime(Date.parse(log.createdAt));
             return logDate.toDateString() === now.toDateString();
           });
@@ -80,6 +81,7 @@ export default function ActivityLogsManagement() {
         case "week":
           const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           filtered = filtered.filter(log => {
+            if (!log.createdAt) return false;
             logDate.setTime(Date.parse(log.createdAt));
             return logDate >= weekAgo;
           });
@@ -87,6 +89,7 @@ export default function ActivityLogsManagement() {
         case "month":
           const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           filtered = filtered.filter(log => {
+            if (!log.createdAt) return false;
             logDate.setTime(Date.parse(log.createdAt));
             return logDate >= monthAgo;
           });
@@ -124,33 +127,37 @@ export default function ActivityLogsManagement() {
       register_event: "bg-teal-100 text-teal-800",
     };
 
+    const sanitizedAction = action || "unknown";
+
     return (
-      <Badge className={actionColors[action] || "bg-gray-100 text-gray-800"}>
-        {action.replace(/_/g, " ")}
+      <Badge className={actionColors[sanitizedAction] || "bg-gray-100 text-gray-800"}>
+        {sanitizedAction.replace(/_/g, " ")}
       </Badge>
     );
   };
 
   const getUniqueActions = () => {
-    const actions = [...new Set(logs.map(log => log.action))];
+    const actions = [...new Set(logs.map(log => log.action || "unknown"))];
     return actions.sort();
   };
 
   const getUniqueUsers = () => {
     const users = logs.reduce((acc, log) => {
-      if (!acc.find(u => u.id === log.userId)) {
-        acc.push({ id: log.userId, email: log.userEmail });
+      const userId = log.userId || "";
+      const userEmail = log.userEmail || "unknown@bcns.org.bd";
+      if (!acc.find(u => u.id === userId)) {
+        acc.push({ id: userId, email: userEmail });
       }
       return acc;
     }, [] as { id: string; email: string }[]);
-    return users.sort((a, b) => a.email.localeCompare(b.email));
+    return users.sort((a, b) => (a.email || "").localeCompare(b.email || ""));
   };
 
   const exportLogs = () => {
     const csvContent = [
       "Action,Description,User Email,IP Address,User Agent,Date",
       ...filteredLogs.map(log => 
-        `"${log.action}","${log.description}","${log.userEmail}","${log.ipAddress || ''}","${log.userAgent || ''}","${log.createdAt}"`
+        `"${log.action || ''}","${log.description || ''}","${log.userEmail || ''}","${log.ipAddress || ''}","${log.userAgent || ''}","${log.createdAt || ''}"`
       )
     ].join("\n");
 
@@ -296,7 +303,7 @@ export default function ActivityLogsManagement() {
               <span className="text-sm font-medium">Unique Users</span>
             </div>
             <div className="text-2xl font-bold">
-              {new Set(filteredLogs.map(log => log.userId)).size}
+              {new Set(filteredLogs.map(log => log.userId || "")).size}
             </div>
             <p className="text-xs text-muted-foreground">
               Active in selected period
@@ -311,7 +318,7 @@ export default function ActivityLogsManagement() {
               <span className="text-sm font-medium">Unique IPs</span>
             </div>
             <div className="text-2xl font-bold">
-              {new Set(filteredLogs.filter(log => log.ipAddress).map(log => log.ipAddress)).size}
+              {new Set(filteredLogs.filter(log => log.ipAddress).map(log => log.ipAddress || "")).size}
             </div>
             <p className="text-xs text-muted-foreground">
               Different locations
@@ -328,7 +335,8 @@ export default function ActivityLogsManagement() {
             <div className="text-2xl font-bold">
               {(() => {
                 const userCounts = filteredLogs.reduce((acc, log) => {
-                  acc[log.userEmail] = (acc[log.userEmail] || 0) + 1;
+                  const email = log.userEmail || "Unknown";
+                  acc[email] = (acc[email] || 0) + 1;
                   return acc;
                 }, {} as { [key: string]: number });
                 const mostActive = Object.entries(userCounts).sort(([,a], [,b]) => b - a)[0];
@@ -378,7 +386,7 @@ export default function ActivityLogsManagement() {
                       <User className="h-4 w-4" />
                       <div>
                         <div className="font-medium">{log.userName || log.userEmail || "Unknown"}</div>
-                        <div className="text-sm text-muted-foreground">{log.userEmail || `ID: ${log.userId}`}</div>
+                        <div className="text-sm text-muted-foreground">{log.userEmail || (log.userId ? `ID: ${log.userId}` : "N/A")}</div>
                       </div>
                     </div>
                   </TableCell>
