@@ -57,12 +57,12 @@ export default function ActivityLogsManagement() {
 
     // Action filter
     if (actionFilter !== "all") {
-      filtered = filtered.filter(log => (log.action || "") === actionFilter);
+      filtered = filtered.filter(log => (log.action || "unknown") === actionFilter);
     }
 
     // User filter
     if (userFilter !== "all") {
-      filtered = filtered.filter(log => (log.userId || "") === userFilter);
+      filtered = filtered.filter(log => (log.userId || "unknown") === userFilter);
     }
 
     // Date filter
@@ -143,8 +143,8 @@ export default function ActivityLogsManagement() {
 
   const getUniqueUsers = () => {
     const users = logs.reduce((acc, log) => {
-      const userId = log.userId || "";
-      const userEmail = log.userEmail || "unknown@bcns.org.bd";
+      const userId = log.userId || "unknown";
+      const userEmail = log.userEmail || "System/Unknown";
       if (!acc.find(u => u.id === userId)) {
         acc.push({ id: userId, email: userEmail });
       }
