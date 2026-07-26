@@ -3,6 +3,7 @@
 import { Calendar, MapPin, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/lib/api";
 import type { Event } from "@/types/api";
 
@@ -88,8 +89,25 @@ export function EventsTimeline() {
               const stableKey = event.slug || event.id || `${event.title}`;
 
               return (
-                <div key={stableKey} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
-                  <div className="p-5 sm:p-6">
+                <div key={stableKey} className="flex bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                  {/* Event image (or brand-colored placeholder when none) */}
+                  <div className="relative w-24 sm:w-40 shrink-0 bg-linear-to-br from-blue-500 to-blue-700">
+                    {event.imageUrl ? (
+                      <Image
+                        src={event.imageUrl}
+                        alt={event.title}
+                        fill
+                        sizes="160px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-white/70" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0 p-5 sm:p-6">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">{event.title}</h3>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex flex-col gap-2">
