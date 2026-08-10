@@ -31,10 +31,10 @@ export function Hero() {
   }, [api]);
 
   const heroSlides = [
-    {
-      image: "/images/bannerr.jpg",
-      title: "",
-    },
+    // {
+    //   image: "/images/bannerr.jpg",
+    //   title: "",
+    // },
     {
       image: "/images/banner.jpg",
       title: "BCNS – 1st Executive Committee Meeting, 2025",
