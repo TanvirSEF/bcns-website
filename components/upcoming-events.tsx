@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Calendar, Clock, MapPin } from "lucide-react";
+import { Heart, Users, Sparkles } from "lucide-react";
 
 export function UpcomingEvents() {
   return (
@@ -16,60 +16,52 @@ export function UpcomingEvents() {
           {/* Label */}
           <div className="hidden sm:flex items-center space-x-2 bg-white/95 backdrop-blur-sm text-blue-600 px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wide shrink-0 shadow-sm">
             <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
-            <span>UPCOMING EVENT</span>
+            <span>WELCOME</span>
           </div>
 
           {/* Content */}
           <div className="w-full sm:flex-1 overflow-hidden">
-            {/* Show welcome message */}
+            {/* Show default marquee message */}
             <div className="marquee-track">
-              <div className="flex items-center gap-x-4 shrink-0 whitespace-nowrap pr-12">
-                <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse shrink-0" />
-                <span className="font-bold text-xs sm:text-sm text-white">
-                  Scientific Seminar on "Management of Childhood Epilepsy: An Evidence Based Approach"
+              <div className="flex items-center gap-x-3 shrink-0 whitespace-nowrap pr-8">
+                <Heart className="h-4 w-4 text-pink-300 animate-pulse shrink-0" />
+                <span className="font-semibold text-xs sm:text-sm text-white">
+                  Welcome to Bangladesh Child Neurology Society (BCNS)
                 </span>
-                
-                <span className="hidden sm:inline text-white/50">•</span>
-                <Calendar className="h-4 w-4 text-green-300 shrink-0" />
+                <span className="hidden sm:inline text-white/70">•</span>
+                <Users className="h-4 w-4 text-green-300 shrink-0" />
                 <span className="text-xs sm:text-sm text-blue-50">
-                  Date: 17th June 2026, Wednesday
+                  Advancing Child Neurology in Bangladesh
                 </span>
-
-                <span className="hidden sm:inline text-white/50">•</span>
-                <Clock className="h-4 w-4 text-pink-300 shrink-0" />
+                <span className="hidden sm:inline text-white/70">•</span>
+                <Sparkles className="h-4 w-4 text-yellow-300 shrink-0" />
                 <span className="text-xs sm:text-sm text-blue-50">
-                  Time: 10:00 AM
+                  Professional Development • Research • Collaboration
                 </span>
-
-                <span className="hidden sm:inline text-white/50">•</span>
-                <MapPin className="h-4 w-4 text-red-300 shrink-0" />
-                <span className="text-xs sm:text-sm text-blue-50">
-                  Venue: Seminar Room, Department of Paediatrics, Rangpur Medical College Hospital
+                <span className="hidden sm:inline text-white/70">•</span>
+                <span className="text-xs sm:text-sm bg-linear-to-r from-pink-500 to-purple-500 text-white px-2.5 py-0.5 rounded-full font-medium shadow-xs">
+                  Join Our Community
                 </span>
               </div>
               {/* Duplicate for seamless looping */}
-              <div className="flex items-center gap-x-4 shrink-0 whitespace-nowrap pr-12" aria-hidden="true">
-                <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse shrink-0" />
-                <span className="font-bold text-xs sm:text-sm text-white">
-                  Scientific Seminar on "Management of Childhood Epilepsy: An Evidence Based Approach"
+              <div className="flex items-center gap-x-3 shrink-0 whitespace-nowrap pr-8" aria-hidden="true">
+                <Heart className="h-4 w-4 text-pink-300 animate-pulse shrink-0" />
+                <span className="font-semibold text-xs sm:text-sm text-white">
+                  Welcome to Bangladesh Child Neurology Society (BCNS)
                 </span>
-                
-                <span className="hidden sm:inline text-white/50">•</span>
-                <Calendar className="h-4 w-4 text-green-300 shrink-0" />
+                <span className="hidden sm:inline text-white/70">•</span>
+                <Users className="h-4 w-4 text-green-300 shrink-0" />
                 <span className="text-xs sm:text-sm text-blue-50">
-                  Date: 17th June 2026, Wednesday
+                  Advancing Child Neurology in Bangladesh
                 </span>
-
-                <span className="hidden sm:inline text-white/50">•</span>
-                <Clock className="h-4 w-4 text-pink-300 shrink-0" />
+                <span className="hidden sm:inline text-white/70">•</span>
+                <Sparkles className="h-4 w-4 text-yellow-300 shrink-0" />
                 <span className="text-xs sm:text-sm text-blue-50">
-                  Time: 10:00 AM
+                  Professional Development • Research • Collaboration
                 </span>
-
-                <span className="hidden sm:inline text-white/50">•</span>
-                <MapPin className="h-4 w-4 text-red-300 shrink-0" />
-                <span className="text-xs sm:text-sm text-blue-50">
-                  Venue: Seminar Room, Department of Paediatrics, Rangpur Medical College Hospital
+                <span className="hidden sm:inline text-white/70">•</span>
+                <span className="text-xs sm:text-sm bg-linear-to-r from-pink-500 to-purple-500 text-white px-2.5 py-0.5 rounded-full font-medium shadow-xs">
+                  Join Our Community
                 </span>
               </div>
             </div>
