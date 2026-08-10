@@ -350,7 +350,9 @@ export const eventApi = {
     return handleApiResponse<Event>(response);
   },
 
-  createEvent: async (eventData: EventCreateInput & { eventImage?: File }): Promise<Event> => {
+  createEvent: async (
+    eventData: EventCreateInput & { eventImage?: File; eventImagesFiles?: File[] }
+  ): Promise<Event> => {
     const formData = new FormData();
     formData.append('title', eventData.title);
     if (eventData.description) formData.append('description', eventData.description);
@@ -364,8 +366,12 @@ export const eventApi = {
     if (eventData.eventImage) {
       formData.append('eventImage', eventData.eventImage);
     }
+    if (eventData.eventImagesFiles && eventData.eventImagesFiles.length > 0) {
+      eventData.eventImagesFiles.forEach((file) => {
+        formData.append('eventImages', file);
+      });
+    }
 
-    // Use post method with FormData - apiClient handles it correctly
     const response = await apiClient.post<Event>('/events', formData, {
       skipAuth: false,
     });
@@ -374,10 +380,9 @@ export const eventApi = {
 
   updateEvent: async (
     eventId: string,
-    eventData: EventUpdateInput & { eventImage?: File },
+    eventData: EventUpdateInput & { eventImage?: File; eventImagesFiles?: File[]; existingImages?: string[] },
   ): Promise<Event> => {
     const formData = new FormData();
-    // Append only the fields that are present so the backend can partially update
     if (eventData.title !== undefined) formData.append('title', eventData.title);
     if (eventData.description !== undefined) formData.append('description', eventData.description);
     if (eventData.date !== undefined) formData.append('date', eventData.date);
@@ -387,12 +392,20 @@ export const eventApi = {
     if (eventData.attendees !== undefined) formData.append('attendees', eventData.attendees);
     if (eventData.decisions !== undefined) formData.append('decisions', eventData.decisions);
     if (eventData.registrationUrl !== undefined) formData.append('registrationUrl', eventData.registrationUrl);
-    // Only send a new image when one was selected; otherwise the backend keeps the existing one
     if (eventData.eventImage) {
       formData.append('eventImage', eventData.eventImage);
     }
+    if (eventData.eventImagesFiles && eventData.eventImagesFiles.length > 0) {
+      eventData.eventImagesFiles.forEach((file) => {
+        formData.append('eventImages', file);
+      });
+    }
+    if (eventData.existingImages) {
+      eventData.existingImages.forEach((url) => {
+        formData.append('existingImages', url);
+      });
+    }
 
-    // apiClient.patch detects FormData and strips the Content-Type header automatically
     const response = await apiClient.patch<Event>(`/events/${eventId}`, formData);
     return handleApiResponse<Event>(response);
   },

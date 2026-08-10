@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Plus, Edit, Trash2, MapPin, Clock, Loader2, Image as ImageIcon, RefreshCw, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Calendar, Plus, Edit, Trash2, MapPin, Clock, Loader2, Image as ImageIcon, RefreshCw, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { Event } from "@/types/api";
 import { api } from "@/lib/api";
@@ -105,8 +105,9 @@ export default function EventsManagement() {
     registrationUrl: "",
     decisions: "",
   });
-  const [eventImage, setEventImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [eventImagesFiles, setEventImagesFiles] = useState<File[]>([]);
+  const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   // Client-side pagination
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -128,31 +129,50 @@ export default function EventsManagement() {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
-        toast.error("Please select a valid image file (PNG, JPEG, or JPG)");
-        return;
+  const handleMultipleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const validFiles: File[] = [];
+
+    for (const file of files) {
+      if (!file.type.match(/^image\/(png|jpeg|jpg|webp|avif)$/i)) {
+        toast.error(`"${file.name}" is not a valid image format`);
+        continue;
       }
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image size should be less than 5MB");
-        return;
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`"${file.name}" exceeds 10MB limit`);
+        continue;
       }
-      setEventImage(file);
-      // Create preview
+      validFiles.push(file);
+    }
+
+    if (validFiles.length + eventImagesFiles.length + existingImages.length > 10) {
+      toast.error("Maximum 10 images allowed per event");
+      return;
+    }
+
+    setEventImagesFiles((prev) => [...prev, ...validFiles]);
+
+    validFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        setNewImagePreviews((prev) => [...prev, reader.result as string]);
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const removeNewImage = (index: number) => {
+    setEventImagesFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleCreateEvent = async () => {
-    // Validate required fields
     if (!formData.title || !formData.date || !formData.category) {
       toast.error("Please fill in all required fields (Title, Date, Category)");
       return;
@@ -160,12 +180,10 @@ export default function EventsManagement() {
 
     try {
       setIsSubmitting(true);
-      // Convert category to lowercase for backend (backend expects: program, workshop, meeting)
-      // Conditionally include eventImage to avoid exactOptionalPropertyTypes issues
       await api.events.createEvent({
         ...formData,
         category: formData.category.toLowerCase() as "program" | "workshop" | "meeting",
-        ...(eventImage && { eventImage }),
+        ...(eventImagesFiles.length > 0 && { eventImagesFiles }),
       });
       
       toast.success("Event created successfully");
@@ -184,7 +202,6 @@ export default function EventsManagement() {
   const handleUpdateEvent = async () => {
     if (!editingEvent) return;
 
-    // Validate required fields
     if (!formData.title || !formData.date || !formData.category) {
       toast.error("Please fill in all required fields (Title, Date, Category)");
       return;
@@ -192,12 +209,11 @@ export default function EventsManagement() {
 
     try {
       setIsSubmitting(true);
-      // Convert category to lowercase for backend (backend expects: program, workshop, meeting)
-      // Send a new image only when one was selected; otherwise the backend keeps the existing image
       await api.events.updateEvent(editingEvent.id, {
         ...formData,
         category: formData.category.toLowerCase() as "program" | "workshop" | "meeting",
-        ...(eventImage && { eventImage }),
+        ...(eventImagesFiles.length > 0 && { eventImagesFiles }),
+        existingImages,
       });
 
       toast.success("Event updated successfully");
@@ -237,16 +253,13 @@ export default function EventsManagement() {
   };
 
   const openEditDialog = (event: Event) => {
-    setEditingEvent(event); // Store for future edit functionality
-    // Extract date part if ISO string, otherwise use as is
-    // event.date is required in Event type, but TypeScript needs explicit handling
+    setEditingEvent(event);
     const eventDate = String(event.date || "");
     const dateValue = eventDate.includes('T') ? String(eventDate.split('T')[0]) : eventDate;
     const categoryValue: "Program" | "Workshop" | "Meeting" = event.category 
       ? (event.category.charAt(0).toUpperCase() + event.category.slice(1)) as "Program" | "Workshop" | "Meeting"
       : "Program";
     
-    // Ensure all optional fields have default values to satisfy TypeScript
     setFormData({
       title: event.title,
       description: event.description ?? "",
@@ -258,8 +271,13 @@ export default function EventsManagement() {
       registrationUrl: event.registrationUrl ?? "",
       decisions: event.decisions ?? "",
     });
-    setEventImage(null);
-    setImagePreview(event.imageUrl || null);
+
+    const initialImages = Array.isArray(event.eventImages) && event.eventImages.length > 0 
+      ? [...event.eventImages]
+      : (event.imageUrl ? [String(event.imageUrl)] : []);
+    setExistingImages(initialImages);
+    setEventImagesFiles([]);
+    setNewImagePreviews([]);
     setIsEditDialogOpen(true);
   };
 
@@ -275,8 +293,9 @@ export default function EventsManagement() {
       registrationUrl: "",
       decisions: "",
     });
-    setEventImage(null);
-    setImagePreview(null);
+    setEventImagesFiles([]);
+    setNewImagePreviews([]);
+    setExistingImages([]);
   };
 
   const formatDate = (dateString: string) => {
@@ -448,29 +467,47 @@ export default function EventsManagement() {
                 </div>
                 <div className="grid grid-cols-4 items-start gap-4">
                   <Label htmlFor="eventImage" className="text-right pt-2">
-                    Event Image
+                    Event Images
                   </Label>
                   <div className="col-span-3 space-y-2">
                     <Input
                       id="eventImage"
                       type="file"
-                      accept=".png,.jpeg,.jpg"
-                      onChange={handleImageChange}
+                      accept="image/*"
+                      multiple
+                      onChange={handleMultipleImagesChange}
                       className="cursor-pointer"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Optional. Accepted formats: PNG, JPEG, JPG (max 5MB)
+                      Select one or multiple images. <strong>1st image will be the Primary cover photo.</strong> Max 10 images, up to 10MB each.
                     </p>
-                    {imagePreview && (
-                      <div className="mt-2">
-                        <Image
-                          src={imagePreview}
-                          alt="Preview"
-                          width={400}
-                          height={192}
-                          className="w-full h-48 object-cover rounded-md border"
-                          unoptimized
-                        />
+
+                    {newImagePreviews.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-3">
+                        {newImagePreviews.map((src, idx) => (
+                          <div key={idx} className="relative group aspect-video rounded-md overflow-hidden border bg-slate-100">
+                            <Image
+                              src={src}
+                              alt={`Preview ${idx + 1}`}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                            {idx === 0 && (
+                              <span className="absolute top-1 left-1 bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow">
+                                ★ Primary
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => removeNewImage(idx)}
+                              className="absolute top-1 right-1 bg-red-600/90 text-white p-1 rounded-full opacity-90 hover:opacity-100 transition-opacity"
+                              title="Remove image"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -756,29 +793,78 @@ export default function EventsManagement() {
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
               <Label htmlFor="edit-eventImage" className="text-right pt-2">
-                Event Image
+                Event Images
               </Label>
               <div className="col-span-3 space-y-2">
                 <Input
                   id="edit-eventImage"
                   type="file"
-                  accept=".png,.jpeg,.jpg"
-                  onChange={handleImageChange}
+                  accept="image/*"
+                  multiple
+                  onChange={handleMultipleImagesChange}
                   className="cursor-pointer"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Optional. Select a new image to replace the current one. Accepted formats: PNG, JPEG, JPG (max 5MB)
+                  Select images to add. <strong>1st image in the list is the Primary cover photo.</strong>
                 </p>
-                {imagePreview && (
-                  <div className="mt-2">
-                    <Image
-                      src={imagePreview}
-                      alt="Preview"
-                      width={400}
-                      height={192}
-                      className="w-full h-48 object-cover rounded-md border"
-                      unoptimized
-                    />
+
+                {(existingImages.length > 0 || newImagePreviews.length > 0) && (
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {existingImages.map((src, idx) => (
+                      <div key={`existing-${idx}`} className="relative group aspect-video rounded-md overflow-hidden border bg-slate-100">
+                        <Image
+                          src={src}
+                          alt={`Existing ${idx + 1}`}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                        {idx === 0 && (
+                          <span className="absolute top-1 left-1 bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow">
+                            ★ Primary
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeExistingImage(idx)}
+                          className="absolute top-1 right-1 bg-red-600/90 text-white p-1 rounded-full opacity-90 hover:opacity-100 transition-opacity"
+                          title="Remove image"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+
+                    {newImagePreviews.map((src, idx) => {
+                      const overallIdx = existingImages.length + idx;
+                      return (
+                        <div key={`new-${idx}`} className="relative group aspect-video rounded-md overflow-hidden border border-emerald-500/40 bg-slate-100">
+                          <Image
+                            src={src}
+                            alt={`New Preview ${idx + 1}`}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                          {overallIdx === 0 && (
+                            <span className="absolute top-1 left-1 bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow">
+                              ★ Primary
+                            </span>
+                          )}
+                          <span className="absolute bottom-1 left-1 bg-blue-600/90 text-white text-[9px] px-1 rounded">
+                            New
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeNewImage(idx)}
+                            className="absolute top-1 right-1 bg-red-600/90 text-white p-1 rounded-full opacity-90 hover:opacity-100 transition-opacity"
+                            title="Remove image"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -11,8 +11,9 @@ interface BackendEvent {
   category?: string;
   location?: string;
   imageUrl?: string;
-  eventImage?: string; // Backend returns eventImage field
-  image_url?: string; // Alternative field name
+  eventImage?: string;
+  eventImages?: string[];
+  image_url?: string;
   createdAt?: string;
   updatedAt?: string;
   isRegistered?: boolean;
@@ -63,6 +64,11 @@ export async function GET(
     // Handle different response structures
     const event: BackendEvent = (data.event || data.data || data) as BackendEvent;
 
+    const primaryImage = event.eventImage || event.imageUrl || event.image_url || undefined;
+    const imagesArray = Array.isArray(event.eventImages) && event.eventImages.length > 0
+      ? event.eventImages
+      : (primaryImage ? [primaryImage] : []);
+
     const formattedEvent = {
       id: event._id || event.id,
       title: event.title,
@@ -71,8 +77,8 @@ export async function GET(
       time: event.time || "",
       category: event.category || "program",
       location: event.location || "",
-      // Check multiple possible field names for image URL
-      imageUrl: event.eventImage || event.imageUrl || event.image_url || undefined,
+      imageUrl: primaryImage,
+      eventImages: imagesArray,
       createdAt: event.createdAt || new Date().toISOString(),
       updatedAt: event.updatedAt || new Date().toISOString(),
       isRegistered: event.isRegistered || false,
@@ -128,6 +134,7 @@ export async function PATCH(
     let category = formData.get("category") as string;
     const location = formData.get("location") as string;
     const eventImage = formData.get("eventImage") as File | null;
+    const eventImagesFiles = formData.getAll("eventImages");
 
     // Ensure category is lowercase if present (backend expects lowercase)
     if (category) {
@@ -145,6 +152,11 @@ export async function PATCH(
     if (eventImage) {
       backendFormData.append("eventImage", eventImage);
     }
+    eventImagesFiles.forEach((file) => {
+      if (file instanceof File) {
+        backendFormData.append("eventImages", file);
+      }
+    });
 
     const response = await fetch(`${config.backendUrl}/api/events/${eventId}`, {
       method: "PATCH",
@@ -170,6 +182,11 @@ export async function PATCH(
     // Handle different response structures
     const event: BackendEvent = (data.event || data.data || data) as BackendEvent;
 
+    const primaryImage = event.eventImage || event.imageUrl || event.image_url || undefined;
+    const imagesArray = Array.isArray(event.eventImages) && event.eventImages.length > 0
+      ? event.eventImages
+      : (primaryImage ? [primaryImage] : []);
+
     const formattedEvent = {
       id: event._id || event.id,
       title: event.title,
@@ -178,8 +195,8 @@ export async function PATCH(
       time: event.time || "",
       category: event.category || category,
       location: event.location || "",
-      // Check multiple possible field names for image URL
-      imageUrl: event.eventImage || event.imageUrl || event.image_url || undefined,
+      imageUrl: primaryImage,
+      eventImages: imagesArray,
       createdAt: event.createdAt || new Date().toISOString(),
       updatedAt: event.updatedAt || new Date().toISOString(),
       isRegistered: event.isRegistered || false,

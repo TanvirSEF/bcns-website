@@ -112,6 +112,7 @@ export interface Event {
   readonly category?: "program" | "workshop" | "meeting";
   readonly time?: string;
   readonly imageUrl?: URL;
+  readonly eventImages?: readonly string[];
   readonly isRegistered: boolean;
   // Optional enrichment fields (public detail page)
   readonly slug?: string;
@@ -460,6 +461,7 @@ export interface EventCreateInput {
   readonly category: "program" | "workshop" | "meeting";
   readonly location?: string;
   readonly imageUrl?: string;
+  readonly eventImages?: readonly string[];
   readonly slug?: string;
   readonly attendees?: string;
   readonly decisions?: string;
@@ -474,6 +476,7 @@ export interface EventUpdateInput {
   readonly category?: "program" | "workshop" | "meeting";
   readonly location?: string;
   readonly imageUrl?: string;
+  readonly eventImages?: readonly string[];
   readonly slug?: string;
   readonly attendees?: string;
   readonly decisions?: string;

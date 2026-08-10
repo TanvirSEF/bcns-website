@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { Calendar, MapPin, Users, ArrowLeft, Home, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import config from "@/lib/config";
+import { EventGallery } from "@/components/EventGallery";
 
 // Public detail pages are ISR-rendered (events change infrequently)
 export const revalidate = 3600;
@@ -22,6 +23,8 @@ type EventDetail = {
   description?: string;
   decisions?: string;
   registrationUrl?: string;
+  eventImage?: string;
+  eventImages?: string[];
 };
 
 function formatEventDate(date: string): string {
@@ -57,6 +60,10 @@ export default async function EventDetailsPage({ params }: PageProps) {
   const { slug } = await params;
   const event = await getEventBySlug(slug);
   if (!event) return notFound();
+
+  const galleryImages = (Array.isArray(event.eventImages) && event.eventImages.length > 0)
+    ? event.eventImages
+    : (event.eventImage ? [event.eventImage] : []);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-pink-50">
@@ -97,6 +104,9 @@ export default async function EventDetailsPage({ params }: PageProps) {
               )}
             </div>
           </div>
+
+          {/* Event Gallery */}
+          <EventGallery images={galleryImages} title={event.title} />
 
           {/* Content */}
           <div className="bg-white rounded-sm shadow-sm border border-gray-100 p-6">

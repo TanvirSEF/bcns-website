@@ -11,8 +11,9 @@ interface BackendEvent {
   category?: string;
   location?: string;
   imageUrl?: string;
-  eventImage?: string; // Backend returns eventImage field
-  image_url?: string; // Alternative field name
+  eventImage?: string;
+  eventImages?: string[];
+  image_url?: string;
   createdAt?: string;
   updatedAt?: string;
   isRegistered?: boolean;
@@ -76,24 +77,31 @@ export async function GET(request: NextRequest) {
     }
 
     // Map to frontend format
-    const formattedEvents = events.map((event: BackendEvent) => ({
-      id: event._id || event.id,
-      title: event.title,
-      description: event.description || "",
-      date: event.date,
-      time: event.time || "",
-      category: event.category || "program",
-      location: event.location || "",
-      // Check multiple possible field names for image URL
-      imageUrl: event.eventImage || event.imageUrl || event.image_url || undefined,
-      createdAt: event.createdAt || new Date().toISOString(),
-      updatedAt: event.updatedAt || new Date().toISOString(),
-      isRegistered: event.isRegistered || false,
-      slug: event.slug || undefined,
-      attendees: event.attendees || undefined,
-      decisions: event.decisions || undefined,
-      registrationUrl: event.registrationUrl || undefined,
-    }));
+    const formattedEvents = events.map((event: BackendEvent) => {
+      const primaryImage = event.eventImage || event.imageUrl || event.image_url || undefined;
+      const imagesArray = Array.isArray(event.eventImages) && event.eventImages.length > 0
+        ? event.eventImages
+        : (primaryImage ? [primaryImage] : []);
+
+      return {
+        id: event._id || event.id,
+        title: event.title,
+        description: event.description || "",
+        date: event.date,
+        time: event.time || "",
+        category: event.category || "program",
+        location: event.location || "",
+        imageUrl: primaryImage,
+        eventImages: imagesArray,
+        createdAt: event.createdAt || new Date().toISOString(),
+        updatedAt: event.updatedAt || new Date().toISOString(),
+        isRegistered: event.isRegistered || false,
+        slug: event.slug || undefined,
+        attendees: event.attendees || undefined,
+        decisions: event.decisions || undefined,
+        registrationUrl: event.registrationUrl || undefined,
+      };
+    });
 
     return NextResponse.json({
       success: true,
@@ -130,6 +138,7 @@ export async function POST(request: NextRequest) {
     let category = formData.get("category") as string;
     const location = formData.get("location") as string;
     const eventImage = formData.get("eventImage") as File | null;
+    const eventImagesFiles = formData.getAll("eventImages");
 
     // Ensure category is lowercase (backend expects: program, workshop, meeting)
     if (category) {
@@ -158,6 +167,11 @@ export async function POST(request: NextRequest) {
     if (eventImage) {
       backendFormData.append("eventImage", eventImage);
     }
+    eventImagesFiles.forEach((file) => {
+      if (file instanceof File) {
+        backendFormData.append("eventImages", file);
+      }
+    });
 
     const response = await fetch(`${config.backendUrl}/api/events`, {
       method: "POST",
@@ -183,6 +197,7 @@ export async function POST(request: NextRequest) {
     // Handle different response structures
     const event = data.event || data.data || data;
 
+    const primaryImage = event.eventImage || event.imageUrl || event.image_url || undefined;
     const formattedEvent = {
       id: event._id || event.id,
       title: event.title,
@@ -191,8 +206,10 @@ export async function POST(request: NextRequest) {
       time: event.time || "",
       category: event.category || category,
       location: event.location || "",
-      // Check multiple possible field names for image URL
-      imageUrl: event.eventImage || event.imageUrl || event.image_url || undefined,
+      imageUrl: primaryImage,
+      eventImages: Array.isArray(event.eventImages) && event.eventImages.length > 0
+        ? event.eventImages
+        : (primaryImage ? [primaryImage] : []),
       createdAt: event.createdAt || new Date().toISOString(),
       updatedAt: event.updatedAt || new Date().toISOString(),
       isRegistered: event.isRegistered || false,
