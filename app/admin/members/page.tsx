@@ -115,13 +115,24 @@ export default function MembersPage() {
     })
   }
 
-  // Split members into Lifetime and General tables
-  const lifetimeMembers = filteredMembers.filter(
-    (m) => m.membershipType === "lifetime"
-  )
-  const generalMembers = filteredMembers.filter(
-    (m) => m.membershipType !== "lifetime"
-  )
+  // Sort members by their numeric member ID, ascending (e.g. BCNS0000001 → BCNS0000002 …).
+  // Members without a member ID are pushed to the end of the list.
+  const byMemberIdAsc = (a: User, b: User) => {
+    const numA = a.memberId ? parseInt(a.memberId.replace(/\D/g, ""), 10) : Infinity
+    const numB = b.memberId ? parseInt(b.memberId.replace(/\D/g, ""), 10) : Infinity
+    return (
+      (Number.isNaN(numA) ? Infinity : numA) -
+      (Number.isNaN(numB) ? Infinity : numB)
+    )
+  }
+
+  // Split members into Lifetime and General tables, sorted by member ID ascending
+  const lifetimeMembers = filteredMembers
+    .filter((m) => m.membershipType === "lifetime")
+    .sort(byMemberIdAsc)
+  const generalMembers = filteredMembers
+    .filter((m) => m.membershipType !== "lifetime")
+    .sort(byMemberIdAsc)
 
   // Calculate paginated slices
   const totalLifetimePages = Math.ceil(lifetimeMembers.length / pageSize)
