@@ -31,37 +31,29 @@ export function Hero() {
   }, [api]);
 
   const heroSlides = [
-    // {
-    //   image: "/images/bannerr.jpg",
-    //   title: "",
-    // },
     {
-      image: "/images/banner.jpg",
-      title: "BCNS – 1st Executive Committee Meeting, 2025",
+      image: "/images/banner/newbanner1.JPG",
+      title: "Bangladesh Child Neurology Society (BCNS)",
     },
     {
-      image: "/images/banner2.jpg",
-      title: '(CME) on "Paediatric Movement Disorder" was held on 21 June 2025',
+      image: "/images/banner/banner2.avif",
+      // title: "BCNS – Executive Committee Meeting & Conferences",
     },
     {
-      image: "/images/banner3.jpg",
-      title: '(CME) on "Paediatric Movement Disorder" was held on 21 June 2025',
+      image: "/images/banner/banner3.avif",
+      // title: '(CME) on "Paediatric Movement Disorder"',
     },
     {
-      image: "/images/banner5.jpg",
-      title: '(CME) on "Paediatric Movement Disorder" was held on 21 June 2025',
+      image: "/images/banner/banner4.avif",
+      // title: '(CME) on "Paediatric Movement Disorder"',
     },
     {
-      image: "/images/banner7.jpg",
-      title: '(CME) on "Paediatric Movement Disorder"',
+      image: "/images/banner/banner5.jpeg",
+      // title: '(CME) on "Paediatric Movement Disorder"',
     },
     {
-      image: "/images/banner8.jpg",
-      title: '(CME) on "Paediatric Movement Disorder"',
-    },
-    {
-      image: "/images/banner9.jpg",
-      title: '(CME) on "Paediatric Movement Disorder"',
+      image: "/images/banner/banner6.JPG",
+      // title: "Child Neurology Training & Scientific Sessions",
     },
   ];
 
@@ -79,15 +71,15 @@ export function Hero() {
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="pl-0">
               <div className="relative min-h-[20rem] xs:min-h-[24rem] sm:min-h-[28rem] md:min-h-[32rem] lg:min-h-[38rem] xl:min-h-[42rem] 2xl:min-h-[45rem] w-full">
-              <Image
-                src={slide.image}
-                alt={typeof slide.title === "string" ? slide.title : "Banner Image"}
-                fill
-                className="object-cover"
-                priority={index === 0}
-                quality={85}
-                sizes="100vw"
-              />
+                <Image
+                  src={slide.image}
+                  alt={typeof slide.title === "string" ? slide.title : "Banner Image"}
+                  fill
+                  className="object-cover"
+                  priority={index === 0}
+                  quality={85}
+                  sizes="100vw"
+                />
                 <div className="absolute inset-0 bg-black/30" />
                 <div className="absolute inset-x-0 bottom-0">
                   <div className="bg-linear-to-t from-black/80 via-black/60 to-transparent">
@@ -113,11 +105,10 @@ export function Hero() {
         {Array.from({ length: count }).map((_, index) => (
           <button
             key={index}
-            className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
-              current === index + 1
+            className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${current === index + 1
                 ? "bg-white scale-125"
                 : "bg-white/50 hover:bg-white/75"
-            }`}
+              }`}
             onClick={() => api?.scrollTo(index)}
             aria-label={`Go to slide ${index + 1}`}
           />
