@@ -49,10 +49,9 @@ export function UserSectionCards() {
 
   const cards = [
     {
-      title: "Membership",
-      value: user?.membershipStatus
-        ? user.membershipStatus.charAt(0).toUpperCase() + user.membershipStatus.slice(1)
-        : "—",
+      title: "Membership Status",
+      value: user?.memberId ? user.memberId : (user?.membershipStatus ? user.membershipStatus.charAt(0).toUpperCase() + user.membershipStatus.slice(1) : "—"),
+      isMono: Boolean(user?.memberId),
       badge: user?.membershipType === "lifetime" ? "Lifetime Member" : "General Member",
       icon: Award,
       iconBg: "bg-emerald-100",
@@ -62,6 +61,7 @@ export function UserSectionCards() {
     {
       title: "My Favorites",
       value: favoritesCount !== null ? String(favoritesCount) : "...",
+      isMono: false,
       badge: "Publications, Events & Members",
       icon: Heart,
       iconBg: "bg-red-100",
@@ -71,6 +71,7 @@ export function UserSectionCards() {
     {
       title: "My Documents",
       value: documentsCount !== null ? String(documentsCount) : "...",
+      isMono: false,
       badge: "Uploaded documents",
       icon: FileText,
       iconBg: "bg-amber-100",
@@ -80,6 +81,7 @@ export function UserSectionCards() {
     {
       title: "Upcoming Events",
       value: upcomingEvents !== null ? String(upcomingEvents) : "...",
+      isMono: false,
       badge: upcomingEvents && upcomingEvents > 0 ? "Join the next event" : "Check back soon",
       icon: Calendar,
       iconBg: "bg-blue-100",
@@ -99,7 +101,9 @@ export function UserSectionCards() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{card.value}</div>
+            <div className={`text-2xl font-bold text-gray-900 ${card.isMono ? "font-mono text-emerald-700" : ""}`}>
+              {card.value}
+            </div>
             <div className="flex items-center space-x-2 mt-3">
               <Badge variant="secondary" className={card.badgeBg}>
                 {card.badge}

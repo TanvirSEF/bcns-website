@@ -32,7 +32,10 @@ import {
   FileText,
   Check,
   Info,
-  Upload
+  Upload,
+  IdCard,
+  BadgeCheck,
+  Copy
 } from "lucide-react";
 import { useRequireAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -725,12 +728,54 @@ function ProfilePageContent() {
                   </Button>
                 )}
               </div>
-              <CardTitle className="mt-4">{user?.name || "User"}</CardTitle>
-              <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
-                Active Member
-              </Badge>
+              <CardTitle className="mt-4 text-xl font-bold">{user?.name || "User"}</CardTitle>
+              <div className="flex flex-wrap items-center justify-center gap-1.5 mt-2">
+                {user?.membershipType && (
+                  <Badge variant={user.membershipType === "lifetime" ? "default" : "secondary"} className="capitalize">
+                    {user.membershipType === "lifetime" ? "Lifetime Member" : "General Member"}
+                  </Badge>
+                )}
+                <Badge
+                  className={
+                    user?.membershipStatus === "active"
+                      ? "bg-green-500/15 text-green-700 dark:text-green-400 hover:bg-green-500/15 capitalize"
+                      : "bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/15 capitalize"
+                  }
+                >
+                  {user?.membershipStatus || "Inactive"}
+                </Badge>
+              </div>
+              {user?.memberId && (
+                <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-md border text-xs font-mono text-slate-700 dark:text-slate-300">
+                  <IdCard className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                  <span className="font-semibold">ID: {user.memberId}</span>
+                </div>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
+              {user?.memberId && (
+                <div className="flex items-center justify-between text-sm bg-emerald-50/70 dark:bg-emerald-950/30 p-2.5 rounded-md border border-emerald-200/60 dark:border-emerald-900/40">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <IdCard className="h-4 w-4 shrink-0 text-emerald-600" />
+                    <span className="text-xs font-medium text-emerald-900 dark:text-emerald-300">Member ID:</span>
+                    <span className="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400 truncate">{user.memberId}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-1.5 text-xs text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
+                    onClick={() => {
+                      if (user.memberId) {
+                        navigator.clipboard.writeText(user.memberId);
+                        toast.success("Member ID copied!");
+                      }
+                    }}
+                    title="Copy Member ID"
+                  >
+                    <Copy className="h-3 w-3 mr-1" /> Copy
+                  </Button>
+                </div>
+              )}
               {(user as { username?: string })?.username && (
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <AtSign className="h-4 w-4 shrink-0" />
@@ -745,6 +790,12 @@ function ProfilePageContent() {
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <Phone className="h-4 w-4 shrink-0" />
                   <span className="wrap-break-word">{user.phone}</span>
+                </div>
+              )}
+              {user?.bmdcNo && (
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <IdCard className="h-4 w-4 shrink-0" />
+                  <span>BM&DC No: <strong>{user.bmdcNo}</strong></span>
                 </div>
               )}
               {user?.mailingAddress && (
@@ -762,10 +813,6 @@ function ProfilePageContent() {
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <Calendar className="h-4 w-4 shrink-0" />
                 <span>Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : "2020"}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Award className="h-4 w-4 shrink-0" />
-                <span className="capitalize">{user?.membershipStatus?.replace('_', ' ') || "Professional Member"}</span>
               </div>
             </CardContent>
           </Card>
@@ -801,6 +848,91 @@ function ProfilePageContent() {
 
         {/* Profile Details */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Official Membership Credentials Card */}
+          <Card className="border-emerald-500/30 bg-gradient-to-br from-emerald-50/40 via-white to-slate-50/50 shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg font-bold text-slate-800">
+                  <BadgeCheck className="h-5 w-5 text-emerald-600" />
+                  Official Membership Credentials
+                </CardTitle>
+                {user?.membershipType && (
+                  <Badge variant={user.membershipType === "lifetime" ? "default" : "secondary"} className="capitalize">
+                    {user.membershipType === "lifetime" ? "Lifetime Member" : "General Member"}
+                  </Badge>
+                )}
+              </div>
+              <CardDescription>
+                Your official society membership identification and application reference details.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="p-3.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200/80 shadow-2xs space-y-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Official Member ID</span>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-base font-bold font-mono text-emerald-700 dark:text-emerald-400 truncate">
+                      {user?.memberId || "Not Assigned"}
+                    </span>
+                    {user?.memberId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs text-emerald-700 hover:bg-emerald-50 shrink-0"
+                        onClick={() => {
+                          if (user?.memberId) {
+                            navigator.clipboard.writeText(user.memberId);
+                            toast.success("Member ID copied to clipboard!");
+                          }
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200/80 shadow-2xs space-y-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Membership Type</span>
+                  <span className="text-base font-semibold capitalize text-slate-800 dark:text-slate-200">
+                    {user?.membershipType ? `${user.membershipType} Member` : "General Member"}
+                  </span>
+                </div>
+
+                <div className="p-3.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200/80 shadow-2xs space-y-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Membership Status</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-block w-2.5 h-2.5 rounded-full ${user?.membershipStatus === "active" ? "bg-emerald-500" : "bg-amber-500"}`} />
+                    <span className="text-base font-semibold capitalize text-slate-800 dark:text-slate-200">
+                      {user?.membershipStatus || "Inactive"}
+                    </span>
+                  </div>
+                </div>
+
+                {user?.bmdcNo && (
+                  <div className="p-3.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200/80 shadow-2xs space-y-1">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">BM&DC Reg. No</span>
+                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{user.bmdcNo}</span>
+                  </div>
+                )}
+
+                {user?.formNo && (
+                  <div className="p-3.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200/80 shadow-2xs space-y-1">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Form Number</span>
+                    <span className="text-sm font-semibold font-mono text-slate-800 dark:text-slate-200">{user.formNo}</span>
+                  </div>
+                )}
+
+                {user?.refNo && (
+                  <div className="p-3.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200/80 shadow-2xs space-y-1">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Reference Number</span>
+                    <span className="text-sm font-semibold font-mono text-slate-800 dark:text-slate-200">{user.refNo}</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Personal Information */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
