@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, MapPin, Loader2 } from "lucide-react";
+import { Calendar, MapPin, Loader2, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -134,6 +134,17 @@ export function EventsTimeline() {
                           >
                             View Summary
                           </Link>
+                        )}
+                        {event.registrationUrl && (
+                          <a
+                            href={event.registrationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-semibold cursor-pointer"
+                          >
+                            <span>Register</span>
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
                         )}
                       </div>
                     </div>
