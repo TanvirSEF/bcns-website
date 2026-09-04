@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Calendar, AlertCircle } from "lucide-react";
+import { Bell, Calendar, AlertCircle, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { NavbarClient } from "@/components/navbarclient";
 import { Footer } from "@/components/footer";
@@ -18,12 +18,22 @@ export default function NoticeBoardPage() {
   // Notice board data
   const noticeData = [
     {
+      id: "cme-paediatric-neurology-2026",
+      title: "CME on Paediatric Neurology Advances: Genetic Epilepsy, Neuro-immunology & Epilepsy Surgery",
+      type: "event",
+      priority: "high",
+      date: "2026-09-21",
+      isNew: true,
+      registrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdVEQme-8NpsdmL0RPPPeEqXPth3KTZ8O1niuegdd5mgPkVgA/viewform",
+      description: "We are pleased to announce the CME on \"Paediatric Neurology Advances: Genetic Epilepsy, Neuro-immunology & Epilepsy Surgery\" organized by Bangladesh Child Neurology Society (BCNS).\n\n📅 Date: 21 September 2026\n⏰ Time: 09.00 AM\n🏥 Venue: Room no. 507, Lecturer Hall, Super Specialized Hospital, BMU, Dhaka-1100\n\nOnline Registration Link: https://docs.google.com/forms/d/e/1FAIpQLSdVEQme-8NpsdmL0RPPPeEqXPth3KTZ8O1niuegdd5mgPkVgA/viewform"
+    },
+    {
       id: "epilepsy-seminar-2026",
       title: "Scientific Seminar on \"Management of Childhood Epilepsy: An Evidence Based Approach\"",
       type: "event",
       priority: "high",
       date: "2026-06-17",
-      isNew: true,
+      isNew: false,
       description: "We are pleased to announce a scientific seminar on \"Management of Childhood Epilepsy: An Evidence Based Approach\". This educational program will focus on the latest evaluation techniques, diagnostic guidelines, and updated management strategies for childhood epilepsy in pediatric patients. The program aims to enhance clinical knowledge and evidence-based practice. Date: 17th June 2026, Wednesday | Time: 10:00 AM | Venue: Seminar Room, Department of Paediatrics, Rangpur Medical College Hospital."
     },
     {
@@ -176,15 +186,29 @@ export default function NoticeBoardPage() {
                             {notice.description}
                           </p>
                           
-                          <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                            <Calendar className="h-3.5 w-3.5" />
-                            <span>
-                              {new Date(notice.date).toLocaleDateString('en-US', { 
-                                year: 'numeric',
-                                month: 'short', 
-                                day: 'numeric' 
-                              })}
-                            </span>
+                          <div className="flex items-center justify-between gap-2 flex-wrap text-xs text-gray-600 mt-2">
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="h-3.5 w-3.5 text-blue-600" />
+                              <span>
+                                {new Date(notice.date).toLocaleDateString('en-US', { 
+                                  year: 'numeric',
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })}
+                              </span>
+                            </div>
+                            {notice.registrationUrl && (
+                              <a
+                                href={notice.registrationUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline px-2 py-0.5 rounded-sm bg-blue-50"
+                              >
+                                <span>Register</span>
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -246,6 +270,19 @@ export default function NoticeBoardPage() {
                     {selectedNotice.description}
                   </p>
                 </div>
+                {selectedNotice.registrationUrl && (
+                  <div className="pt-3 border-t border-gray-100 flex items-center gap-3">
+                    <a
+                      href={selectedNotice.registrationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-colors shadow-sm cursor-pointer"
+                    >
+                      <span>Register Online</span>
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </div>
+                )}
               </div>
             </>
           )}
