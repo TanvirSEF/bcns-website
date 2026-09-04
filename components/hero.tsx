@@ -36,6 +36,9 @@ export function Hero() {
       title: "Bangladesh Child Neurology Society (BCNS)",
     },
     {
+      image: "/images/banner/banner-image.jpeg",
+    },
+    {
       image: "/images/banner/banner2.avif",
       // title: "BCNS – Executive Committee Meeting & Conferences",
     },
