@@ -32,7 +32,7 @@ Together, let us build a future where every child's brain has the opportunity to
     },
     monir: {
       id: "monir",
-      name: "Dr. Mohammad Monir Hossain",
+      name: "Prof. Dr. Mohammad Monir Hossain",
       position: "General Secretary",
       designation: "Associate Professor",
       institute: "Associate Professor, Paediatric Neurology, National Institute of Neurosciences & Hospital (NINS&H)",
@@ -151,14 +151,14 @@ Together, let us strive to ensure a brighter, healthier future for every child.`
                  <div className="relative w-24 h-32 sm:w-28 sm:h-36 mx-auto mb-2 sm:mb-3">
                    <Image
                      src="/images/monir.jpg"
-                     alt="General Secretary - Dr. Mohammad Monir Hossain"
+                     alt="General Secretary - Prof. Dr. Mohammad Monir Hossain"
                      width={112}
                      height={144}
                      className="w-24 h-32 sm:w-28 sm:h-36 object-cover border border-gray-300"
                    />
                  </div>
                  <p className="text-gray-800 font-semibold text-xs sm:text-sm leading-tight">
-                   Dr. Mohammad Monir Hossain
+                   Prof. Dr. Mohammad Monir Hossain
                  </p>
               </div>
 
