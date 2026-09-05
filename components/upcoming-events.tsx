@@ -15,8 +15,8 @@ interface TickerEvent {
 
 const DEFAULT_EVENT: TickerEvent = {
   title: "CME on Paediatric Neurology Advances: Genetic Epilepsy, Neuro-immunology & Epilepsy Surgery",
-  date: "2026-09-21T09:00:00.000Z",
-  time: "09.00 AM",
+  date: "2026-09-21T08:00:00.000Z",
+  time: "08.00 AM",
   location: "Room no. 507, Lecturer Hall, Super Specialized Hospital, BMU, Dhaka-1100",
   registrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdVEQme-8NpsdmL0RPPPeEqXPth3KTZ8O1niuegdd5mgPkVgA/viewform",
   slug: "cme-on-paediatric-neurology-advances-genetic-epilepsy-neuro-",

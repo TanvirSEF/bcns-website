@@ -25,7 +25,7 @@ export default function NoticeBoardPage() {
       date: "2026-09-21",
       isNew: true,
       registrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdVEQme-8NpsdmL0RPPPeEqXPth3KTZ8O1niuegdd5mgPkVgA/viewform",
-      description: "We are pleased to announce the CME on \"Paediatric Neurology Advances: Genetic Epilepsy, Neuro-immunology & Epilepsy Surgery\" organized by Bangladesh Child Neurology Society (BCNS).\n\n📅 Date: 21 September 2026\n⏰ Time: 09.00 AM\n🏥 Venue: Room no. 507, Lecturer Hall, Super Specialized Hospital, BMU, Dhaka-1100\n\nOnline Registration Link: https://docs.google.com/forms/d/e/1FAIpQLSdVEQme-8NpsdmL0RPPPeEqXPth3KTZ8O1niuegdd5mgPkVgA/viewform"
+      description: "We are pleased to announce the CME on \"Paediatric Neurology Advances: Genetic Epilepsy, Neuro-immunology & Epilepsy Surgery\" organized by Bangladesh Child Neurology Society (BCNS).\n\n📅 Date: 21 September 2026\n⏰ Time: 08.00 AM\n🏥 Venue: Room no. 507, Lecturer Hall, Super Specialized Hospital, BMU, Dhaka-1100\n\nOnline Registration Link: https://docs.google.com/forms/d/e/1FAIpQLSdVEQme-8NpsdmL0RPPPeEqXPth3KTZ8O1niuegdd5mgPkVgA/viewform"
     },
     {
       id: "epilepsy-seminar-2026",
