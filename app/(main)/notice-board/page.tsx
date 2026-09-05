@@ -205,7 +205,7 @@ export default function NoticeBoardPage() {
                                 onClick={(e) => e.stopPropagation()}
                                 className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline px-2 py-0.5 rounded-sm bg-blue-50"
                               >
-                                <span>Register</span>
+                                <span>Enroll Now</span>
                                 <ExternalLink className="h-3 w-3" />
                               </a>
                             )}
@@ -278,7 +278,7 @@ export default function NoticeBoardPage() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-colors shadow-sm cursor-pointer"
                     >
-                      <span>Register Online</span>
+                      <span>Enroll Now</span>
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </div>

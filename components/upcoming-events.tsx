@@ -100,7 +100,7 @@ export function UpcomingEvents() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs sm:text-sm bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-3 py-0.5 rounded-full font-bold shadow-sm transition-transform hover:scale-105 cursor-pointer"
           >
-            <span>Register Now</span>
+            <span>Enroll Now</span>
             <ExternalLink className="h-3 w-3" />
           </a>
           <span className="text-white/60">•</span>

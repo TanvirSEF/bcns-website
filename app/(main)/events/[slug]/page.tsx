@@ -137,7 +137,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
-                Register <ExternalLink className="w-4 h-4 ml-2" />
+                Enroll Now <ExternalLink className="w-4 h-4 ml-2" />
               </a>
             )}
           </div>

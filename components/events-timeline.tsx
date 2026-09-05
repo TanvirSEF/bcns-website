@@ -142,7 +142,7 @@ export function EventsTimeline() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-semibold cursor-pointer"
                           >
-                            <span>Register</span>
+                            <span>Enroll Now</span>
                             <ExternalLink className="h-3.5 w-3.5" />
                           </a>
                         )}
