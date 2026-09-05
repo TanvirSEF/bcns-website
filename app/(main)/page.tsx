@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { LogoBanner } from "@/components/logo-banner";
 import { UpcomingEvents } from "@/components/upcoming-events";
+import { UpcomingEventHighlight } from "@/components/upcoming-event-highlight";
 import { AboutIntro } from "@/components/about-intro";
 import { EventsTimeline } from "@/components/events-timeline";
 
@@ -54,6 +55,7 @@ export default function Home() {
       <UpcomingEvents />
       <Navbar />
       <Hero />
+      <UpcomingEventHighlight />
       <AboutIntro />
       <EventsTimeline />
       {/* <EventsAnnouncements /> */}
