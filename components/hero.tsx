@@ -32,31 +32,14 @@ export function Hero() {
 
   const heroSlides = [
     {
-      image: "/images/banner/newbanner1.JPG",
+      image: "/banner image.jpeg",
       title: "Bangladesh Child Neurology Society (BCNS)",
     },
     {
-      image: "/images/banner/banner-image.jpeg",
+      image: "/banner-1.jpeg",
     },
     {
-      image: "/images/banner/banner2.avif",
-      // title: "BCNS – Executive Committee Meeting & Conferences",
-    },
-    {
-      image: "/images/banner/banner3.avif",
-      // title: '(CME) on "Paediatric Movement Disorder"',
-    },
-    {
-      image: "/images/banner/banner4.avif",
-      // title: '(CME) on "Paediatric Movement Disorder"',
-    },
-    {
-      image: "/images/banner/banner5.jpeg",
-      // title: '(CME) on "Paediatric Movement Disorder"',
-    },
-    {
-      image: "/images/banner/banner6.JPG",
-      // title: "Child Neurology Training & Scientific Sessions",
+      image: "/banner-2.jpeg",
     },
   ];
 
