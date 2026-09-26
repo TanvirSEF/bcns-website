@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Calendar, Clock, MapPin, ExternalLink } from "lucide-react";
+import { Calendar, Clock, MapPin, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import type { Event } from "@/types/api";
 
@@ -116,19 +117,17 @@ export function UpcomingEventHighlight() {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                {event.registrationUrl && (
-                  <a
-                    href={event.registrationUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+              {event.slug && (
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href={`/events/${event.slug}`}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors cursor-pointer"
                   >
-                    Enroll Now
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                )}
-              </div>
+                    View Details
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
