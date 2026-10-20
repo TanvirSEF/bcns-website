@@ -13,7 +13,7 @@ import {
   CheckCircle, 
   AlertCircle, 
   ArrowLeft,
-  Sparkles,
+  Loader2,
   Lock
 } from 'lucide-react';
 import { verifyOTP, resendRegistrationOTP, api } from '@/lib/api';
@@ -340,9 +340,9 @@ function OTPVerificationContent() {
                     </p>
                   </div>
                   <div className="flex items-center justify-center gap-2 text-green-600">
-                    <Sparkles className="w-4 h-4 animate-pulse" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     <span className="text-sm">Redirecting to payment page</span>
-                    <Sparkles className="w-4 h-4 animate-pulse" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   </div>
                 </div>
               )}

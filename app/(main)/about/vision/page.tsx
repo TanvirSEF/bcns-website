@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { Sparkles, MapPinned, Landmark, Microscope, Users, HeartPulse, GraduationCap } from "lucide-react";
+import { Eye, MapPinned, Landmark, Microscope, Users, HeartPulse, GraduationCap } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Our Vision | Bangladesh Child Neurology Society (BCNS)",
@@ -25,7 +25,7 @@ export default function VisionPage() {
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 lg:py-20 text-white">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-semibold tracking-widest uppercase bg-white/10 px-3 py-1 rounded-full border border-white/20 mb-3">
-              <Sparkles className="h-3.5 w-3.5" /> Our Vision
+              <Eye className="h-3.5 w-3.5" /> Our Vision
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
               Our Vision

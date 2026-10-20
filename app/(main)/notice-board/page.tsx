@@ -2,6 +2,7 @@
 
 import { Bell, Calendar, AlertCircle, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 import { NavbarClient } from "@/components/navbarclient";
 import { Footer } from "@/components/footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +18,17 @@ import {
 export default function NoticeBoardPage() {
   // Notice board data
   const noticeData = [
+    {
+      id: "jscn-scholarship-japan-fellowship-2026",
+      title: "JSCN Scholarship Application Form (Japan Fellowship)",
+      type: "announcement",
+      priority: "high",
+      date: "2026-10-20",
+      isNew: true,
+      bannerImage: "/images/japan-fellowship-banner.png",
+      registrationUrl: "https://docs.google.com/forms/d/1oxpBjXxsP_vDmwkaVnK1ALJrKIEWYUfRdyOpHs9jm5s/viewform",
+      description: "We are pleased to announce that applications are now officially open for the Japan Fellowship / JSCN (Japanese Society of Child Neurology) Scholarship Program, facilitated in collaboration with Bangladesh Child Neurology Society (BCNS).\n\n🎓 Program: JSCN Scholarship (Japan Fellowship)\n📋 Application: Eligible child neurologists and trainees are invited to submit their credentials via the official online application form.\n\nPlease ensure all required documents and details are accurately filled out before submission.\n\nOnline Application Form: https://docs.google.com/forms/d/1oxpBjXxsP_vDmwkaVnK1ALJrKIEWYUfRdyOpHs9jm5s/viewform"
+    },
     {
       id: "cme-paediatric-neurology-2026",
       title: "CME on Paediatric Neurology Advances: Genetic Epilepsy, Neuro-immunology & Epilepsy Surgery",
@@ -203,9 +215,9 @@ export default function NoticeBoardPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline px-2 py-0.5 rounded-sm bg-blue-50"
+                                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline px-2.5 py-1 rounded-sm bg-blue-50"
                               >
-                                <span>Enroll Now</span>
+                                <span>Apply / Enroll</span>
                                 <ExternalLink className="h-3 w-3" />
                               </a>
                             )}
@@ -265,6 +277,16 @@ export default function NoticeBoardPage() {
               </DialogHeader>
               
               <div className="mt-4 space-y-4">
+                {selectedNotice.bannerImage && (
+                  <div className="relative w-full aspect-[1024/508] rounded-xl overflow-hidden border border-gray-200 bg-white">
+                    <Image
+                      src={selectedNotice.bannerImage}
+                      alt={selectedNotice.title}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                )}
                 <div className="prose prose-sm max-w-none">
                   <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                     {selectedNotice.description}
@@ -278,7 +300,7 @@ export default function NoticeBoardPage() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-colors shadow-sm cursor-pointer"
                     >
-                      <span>Enroll Now</span>
+                      <span>Apply Now</span>
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </div>
@@ -291,4 +313,3 @@ export default function NoticeBoardPage() {
     </div>
   );
 }
-

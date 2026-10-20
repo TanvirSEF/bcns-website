@@ -12,7 +12,7 @@ import {
   Calendar,
   FileText,
   Award,
-  Sparkles,
+  Code2,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -208,7 +208,7 @@ export function Footer() {
                 className="group inline-flex items-center gap-2 rounded-full px-3 py-1 bg-white/5 hover:bg-white/10 ring-1 ring-white/10 transition-all duration-200 backdrop-blur text-gray-200 shrink-0"
                 aria-label="Developed by Zephlo Tech"
               >
-                <Sparkles className="h-3.5 w-3.5 text-blue-300 group-hover:text-blue-200" />
+                <Code2 className="h-3.5 w-3.5 text-blue-300 group-hover:text-blue-200" />
                 <span className="hidden sm:inline text-gray-300">Developed by</span>
                 <span className="font-semibold bg-linear-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
                   Zephlo Tech
