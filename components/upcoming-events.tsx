@@ -1,12 +1,12 @@
 "use client";
 
-import { Heart, Users, Award, ExternalLink } from "lucide-react";
+import { Heart, Users, Award } from "lucide-react";
 import Link from "next/link";
 
 export function UpcomingEvents() {
   const marqueeContent = (
     <div className="flex items-center gap-x-3 shrink-0 whitespace-nowrap pr-8">
-      {/* Japan Fellowship Highlight */}
+      {/* Japan Fellowship Highlight (Temporarily hidden as requested by client)
       <span className="inline-flex items-center gap-1.5 bg-rose-600 text-white font-bold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full shadow-xs">
         JAPAN FELLOWSHIP
       </span>
@@ -23,6 +23,7 @@ export function UpcomingEvents() {
         <ExternalLink className="h-3 w-3" />
       </a>
       <span className="hidden sm:inline text-white/70">•</span>
+      */}
 
       {/* BCNS Welcome Info */}
       <Heart className="h-4 w-4 text-pink-300 animate-pulse shrink-0" />
@@ -65,7 +66,7 @@ export function UpcomingEvents() {
           {/* Label */}
           <div className="hidden sm:flex items-center space-x-2 bg-white/95 backdrop-blur-sm text-blue-800 px-3 py-1 rounded-full font-extrabold text-xs uppercase tracking-wide shrink-0 shadow-sm">
             <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-            <span>ANNOUNCEMENTS</span>
+            <span>WELCOME</span>
           </div>
 
           {/* Marquee Content */}

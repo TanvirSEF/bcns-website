@@ -15,9 +15,22 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
+interface NoticeItem {
+  id: string;
+  title: string;
+  type: string;
+  priority: string;
+  date: string;
+  isNew?: boolean;
+  bannerImage?: string;
+  registrationUrl?: string;
+  description: string;
+}
+
 export default function NoticeBoardPage() {
   // Notice board data
-  const noticeData = [
+  const noticeData: NoticeItem[] = [
+    /*
     {
       id: "jscn-scholarship-japan-fellowship-2026",
       title: "JSCN Scholarship Application Form (Japan Fellowship)",
@@ -29,6 +42,7 @@ export default function NoticeBoardPage() {
       registrationUrl: "https://docs.google.com/forms/d/1oxpBjXxsP_vDmwkaVnK1ALJrKIEWYUfRdyOpHs9jm5s/viewform",
       description: "We are pleased to announce that applications are now officially open for the Japan Fellowship / JSCN (Japanese Society of Child Neurology) Scholarship Program, facilitated in collaboration with Bangladesh Child Neurology Society (BCNS).\n\n🎓 Program: JSCN Scholarship (Japan Fellowship)\n📋 Application: Eligible child neurologists and trainees are invited to submit their credentials via the official online application form.\n\nPlease ensure all required documents and details are accurately filled out before submission.\n\nOnline Application Form: https://docs.google.com/forms/d/1oxpBjXxsP_vDmwkaVnK1ALJrKIEWYUfRdyOpHs9jm5s/viewform"
     },
+    */
     {
       id: "cme-paediatric-neurology-2026",
       title: "CME on Paediatric Neurology Advances: Genetic Epilepsy, Neuro-immunology & Epilepsy Surgery",
